@@ -1688,6 +1688,38 @@ const ama1aSteps = [
     'Salto de cabeça na posição sentada, seguido de deslize ventral/expiração.'
   ]}
 ];
+const ama1bSteps = [
+  {step:'Etapa 1', items:[
+    'Caminhar na água de frente e de costas;',
+    'Mergulhar e expirar;',
+    'Colocar a cara na água com os olhos abertos;',
+    'Largar a parede e tocar com o rabo no chão (olhos abertos)/expirar, voltar a agarrar a parede;',
+    'Caminhar com a cara na água, olhos abertos e expirar;',
+    'Passar por entre as pernas de um colega;',
+    'Apanhar objetos no fundo;',
+    'Apanhar dois objetos no fundo separados (+/- 1 metro);',
+    'Saltar de pé para a água com imersão e expiração (zona plataforma);',
+    'Saltos a diferentes profundidades (fora plataforma - zona 1 metro profundidade).'
+  ]},
+  {step:'Etapa 2', items:[
+    'Rolamento à frente/expiração (nariz);',
+    'Rolamento à retaguarda/expiração (nariz);',
+    'Rotação da posição dorsal para ventral;',
+    'Rotação da posição ventral para dorsal;',
+    'Deslize ventral/expiração;',
+    'Deslize dorsal/respiração;',
+    'Acção propulsiva dos membros inferiores em posição ventral/expiração;',
+    'Salto de cabeça a partir da posição de sentado, seguido de deslize ventral/expiração;',
+    'Salto de cabeça a partir da posição de sentado, seguido de acção propulsiva dos membros inferiores em posição ventral/expiração (aproximadamente 3 a 5 metros).'
+  ]},
+  {step:'Etapa 3', items:[
+    'Deslize ventral/expiração sem apoio;',
+    'Deslize dorsal/respiração sem apoio;',
+    'Acção propulsiva dos membros inferiores em posição ventral/expiração;',
+    'Acção propulsiva dos membros inferiores em posição dorsal/respiração;',
+    'Salto de cabeça na posição abaixada, seguido de acção propulsiva dos membros inferiores em posição ventral/expiração (aproximadamente 5 a 8 metros).'
+  ]}
+];
 const finalMessageOptions = [
   'Parabens! Estás pronto para o próximo desafio!',
   'Boa! Estás num bom caminho, vamos continuar a trabalhar!'
@@ -1942,6 +1974,11 @@ function evalData(id){
   if(!('semester' in state.evaluations[id])) state.evaluations[id].semester='';
   return state.evaluations[id]
 }
+function getAmaStepsForClass(className){
+  const clean=String(className||'').trim().toUpperCase();
+  if(clean==='AMA 1B') return ama1bSteps;
+  return ama1aSteps;
+}
 function isAma1A(className){return String(className||'').trim().toUpperCase()==='AMA 1A'}
 function usesAma1Evaluation(className){
   const clean=String(className||'').trim().toUpperCase();
@@ -1955,7 +1992,7 @@ function nextLevelForClass(className){
 }
 function getObjectivesForClass(className){
   if(usesAma1Evaluation(className)){
-    return ama1aSteps.map((group,gi)=>({step:group.step, items:group.items.map((text,ii)=>({key:`ama1a-${gi}-${ii}`, short:`${group.step}.${ii+1}`, label:text}))}));
+    return getAmaStepsForClass(className).map((group,gi)=>({step:group.step, items:group.items.map((text,ii)=>({key:`ama1a-${gi}-${ii}`, short:`${group.step}.${ii+1}`, label:text}))}));
   }
   return [{step:'Avaliação geral', items:paramNames.map((label,i)=>({key:`generic-${i}`, short:params[i], label}))}];
 }
@@ -2324,7 +2361,7 @@ function renderAma1AEvaluation(id,students,ev,holder,className='AMA 1A'){
   students.forEach((s,i)=>{
     const total=okCount(id,i,className); const max=flattenObjectives(className).length;
     let html=`<div class="ama-student-card" id="eval-student-${safe(id)}-${i}"><div class="ama-student-head"><div><strong>${safe(studentDisplayName(s,i))}</strong><div class="hint">Aluno ${i+1}</div></div><div class="student-header-actions"><span class="pill ${total===max?'green':'amber'}">${total}/${max} OK</span><button class="btn small secondary student-all-ok-btn" data-student-all-ok="${i}">Todos OK do aluno</button></div></div>`;
-    ama1aSteps.forEach((group,gi)=>{
+    getAmaStepsForClass(className).forEach((group,gi)=>{
       html+=`<div class="step-box"><div class="step-title-row"><div class="step-title">${safe(group.step)}</div><button class="btn small ghost step-ok-btn" data-step-ok="${i}-${gi}">Todos OK!</button></div>`;
       group.items.forEach((text,ii)=>{const objKey=`ama1a-${gi}-${ii}`; const key=`${i}-${objKey}`; html+=`<label class="objective-row"><input type="checkbox" data-check-eval="${safe(key)}" ${ev.checks[key]?'checked':''}><span>${safe(text)}</span></label>`;});
       html+='</div>';
@@ -2336,7 +2373,7 @@ function renderAma1AEvaluation(id,students,ev,holder,className='AMA 1A'){
   document.querySelectorAll('[data-final-message]').forEach(sel=>sel.addEventListener('change',()=>{if(!ev.finalMessages) ev.finalMessages={}; ev.finalMessages[sel.dataset.finalMessage]=sel.value; saveState();}));
   document.querySelectorAll('[data-step-ok]').forEach(btn=>btn.addEventListener('click',()=>{
     const [studentIndex, stepIndex] = btn.dataset.stepOk.split('-').map(Number);
-    const group = ama1aSteps[stepIndex];
+    const group = getAmaStepsForClass(className)[stepIndex];
     if(!group) return;
     group.items.forEach((_text, itemIndex)=>{
       ev.checks[`${studentIndex}-ama1a-${stepIndex}-${itemIndex}`]=true;
@@ -2346,7 +2383,7 @@ function renderAma1AEvaluation(id,students,ev,holder,className='AMA 1A'){
   }));
   document.querySelectorAll('[data-student-all-ok]').forEach(btn=>btn.addEventListener('click',()=>{
     const studentIndex=Number(btn.dataset.studentAllOk);
-    ama1aSteps.forEach((group,stepIndex)=>{
+    getAmaStepsForClass(className).forEach((group,stepIndex)=>{
       group.items.forEach((_text,itemIndex)=>{
         ev.checks[`${studentIndex}-ama1a-${stepIndex}-${itemIndex}`]=true;
       });
@@ -2438,7 +2475,7 @@ function renderDocument(){
               </div>
             </div>`;
 
-        ama1aSteps.forEach((group,gi)=>{
+        getAmaStepsForClass(c.className).forEach((group,gi)=>{
           html += `<section class="final-stage-section">
             <div class="final-stage-pretitle">Objetivos Operacionais:</div>
             <div class="final-stage-head"><div class="final-stage-title-wrap"><div class="final-stage-title">Etapa ${gi+1}</div></div></div>
@@ -2486,7 +2523,7 @@ function renderDocument(){
   });
 
   if(!hasAmaReport){
-    html += `<div class="panel"><strong>Ainda não existe um relatório final para mostrar.</strong><p class="hint">Para gerar o documento final, precisas de ter a turma <strong>AMA 1A</strong> no horário, guardar os alunos e preencher a avaliação.</p></div>`;
+    html += `<div class="panel"><strong>Ainda não existe um relatório final para mostrar.</strong><p class="hint">Para gerar o documento final, precisas de ter a turma <strong>AMA 1A</strong> ou <strong>AMA 1B</strong> no horário, guardar os alunos e preencher a avaliação.</p></div>`;
   }
 
   html += `</div>`;
