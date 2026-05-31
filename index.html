@@ -1184,6 +1184,278 @@
       }
     }
 
+    /* Single student name input */
+    .student-row.single-name{
+      grid-template-columns:1fr!important;
+    }
+    .student-row.single-name input{
+      width:100%;
+    }
+
+
+    /* Per-step Todos OK button */
+    .step-title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .step-title-row .step-title{
+      margin-bottom:0!important;
+    }
+    .step-ok-btn{
+      padding:6px 10px!important;
+      font-size:11px!important;
+      border-radius:999px!important;
+      white-space:nowrap;
+    }
+
+
+    /* Evaluation saved classes block details */
+    .eval-class-btn span{
+      line-height:1.35;
+    }
+    .eval-class-meta{
+      margin-top:8px!important;
+      padding-top:7px;
+      border-top:1px solid #eef0f3;
+      font-size:11px!important;
+      color:#6b7280!important;
+      font-weight:800!important;
+    }
+
+
+    /* Put class/day/hour in the top line of saved class buttons */
+    .eval-class-title-lines{
+      display:block;
+      font-size:13px!important;
+      line-height:1.35;
+      color:#111827!important;
+    }
+    .eval-class-title-lines br{
+      display:block;
+      content:"";
+      margin-top:4px;
+    }
+
+
+    /* Student quick navigation in Avaliação sidebar */
+    .eval-student-jump-list{
+      display:grid;
+      gap:6px;
+      margin-top:10px;
+      padding-top:9px;
+      border-top:1px solid #eef0f3;
+    }
+    .eval-student-jump{
+      appearance:none;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      color:#374151;
+      border-radius:10px;
+      padding:7px 9px;
+      font-size:12px;
+      font-weight:750;
+      line-height:1.2;
+      text-align:left;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .eval-student-jump:hover{
+      border-color:rgba(208,0,27,.32);
+      background:#fff7f8;
+      color:#b8071f;
+      transform:translateX(2px);
+    }
+    .eval-no-students{
+      font-size:12px;
+      color:#9ca3af;
+      font-weight:700;
+    }
+    .student-highlight{
+      outline:3px solid rgba(208,0,27,.25);
+      box-shadow:0 0 0 8px rgba(208,0,27,.08), 0 10px 24px rgba(15,23,42,.08)!important;
+    }
+
+
+    /* Copy student to another class */
+    .eval-student-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:6px;
+      align-items:center;
+    }
+    .eval-student-copy{
+      appearance:none;
+      border:1px solid rgba(208,0,27,.22);
+      background:#fff7f8;
+      color:#b8071f;
+      border-radius:9px;
+      padding:7px 8px;
+      font-size:10px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .eval-student-copy:hover{
+      background:#d0001b;
+      color:#fff;
+      transform:translateY(-1px);
+    }
+    .copy-student-modal{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background:rgba(17,24,39,.42);
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .copy-student-dialog{
+      width:min(520px,100%);
+      background:#fff;
+      border-radius:22px;
+      border:1px solid #e5e7eb;
+      box-shadow:0 26px 70px rgba(15,23,42,.28);
+      padding:18px;
+    }
+    .copy-student-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .copy-student-head h3{
+      margin:4px 0 0;
+      font-size:20px;
+      color:#111827;
+      letter-spacing:-.03em;
+    }
+    .copy-student-actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:14px;
+    }
+
+
+    /* Independent class block note */
+    .independent-note{
+      margin-top:8px;
+      color:#6b7280;
+      font-size:12px;
+      font-weight:700;
+    }
+
+
+    /* Remove student only from this class/block */
+    .eval-student-row{
+      grid-template-columns:minmax(0,1fr) auto auto!important;
+    }
+    .eval-student-remove{
+      appearance:none;
+      border:1px solid rgba(185,28,28,.22);
+      background:#fff;
+      color:#b91c1c;
+      border-radius:9px;
+      padding:7px 8px;
+      font-size:10px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .eval-student-remove:hover{
+      background:#b91c1c;
+      color:#fff;
+      transform:translateY(-1px);
+    }
+
+
+    /* Per-student all OK + fixed remove button layout */
+    .student-header-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .student-all-ok-btn{
+      padding:7px 10px!important;
+      border-radius:999px!important;
+      font-size:11px!important;
+      white-space:nowrap;
+    }
+    .eval-student-row{
+      grid-template-columns:minmax(0,1fr) auto auto!important;
+      gap:6px!important;
+    }
+    .eval-student-remove{
+      appearance:none;
+      border:1px solid rgba(185,28,28,.22);
+      background:#fff;
+      color:#b91c1c;
+      border-radius:9px;
+      padding:7px 8px;
+      font-size:10px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .eval-student-remove:hover{
+      background:#b91c1c;
+      color:#fff;
+      transform:translateY(-1px);
+    }
+
+
+    /* Remove student only from this class/block - fixed */
+    .eval-student-row{
+      grid-template-columns:minmax(0,1fr) auto auto!important;
+      gap:6px!important;
+    }
+    .eval-student-remove{
+      appearance:none;
+      border:1px solid rgba(185,28,28,.22);
+      background:#fff;
+      color:#b91c1c;
+      border-radius:9px;
+      padding:7px 8px;
+      font-size:10px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .eval-student-remove:hover{
+      background:#b91c1c;
+      color:#fff;
+      transform:translateY(-1px);
+    }
+
+
+    /* Remove student button fixed */
+    .eval-student-row{
+      grid-template-columns:minmax(0,1fr) auto auto!important;
+      gap:6px!important;
+    }
+    .eval-student-remove{
+      appearance:none;
+      border:1px solid rgba(185,28,28,.24);
+      background:#fff;
+      color:#b91c1c;
+      border-radius:9px;
+      padding:7px 8px;
+      font-size:10px;
+      font-weight:950;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .eval-student-remove:hover{
+      background:#b91c1c;
+      color:#fff;
+      transform:translateY(-1px);
+    }
+
 </style>
 </head>
 <body>
@@ -1245,7 +1517,29 @@
         </aside>
         <main class="eval-main" id="evalMain">
           <div class="eval-hero"><h2>Avaliação</h2><p>Seleciona uma turma para começar.</p></div>
-        </main>
+        
+  <div id="copyStudentModal" class="copy-student-modal" style="display:none">
+    <div class="copy-student-dialog">
+      <div class="copy-student-head">
+        <div>
+          <div class="section-label">Copiar aluno</div>
+          <h3 id="copyStudentTitle">Copiar aluno para outra turma</h3>
+          <p class="hint">A avaliação será mantida igual nas duas turmas.</p>
+        </div>
+        <button type="button" class="btn small ghost" id="closeCopyStudentModal">Fechar</button>
+      </div>
+      <div class="field">
+        <label>Turma de destino</label>
+        <select id="copyStudentTarget"></select>
+      </div>
+      <div class="copy-student-actions">
+        <button type="button" class="btn primary" id="confirmCopyStudentBtn">Copiar aluno</button>
+      </div>
+      <div class="message" id="copyStudentMessage"></div>
+    </div>
+  </div>
+
+</main>
       </section>
     </section>
 
@@ -1255,7 +1549,29 @@
     </section>
 
     <div class="footer-note">SLB · Preview HTML local</div>
-  </main>
+  
+  <div id="copyStudentModal" class="copy-student-modal" style="display:none">
+    <div class="copy-student-dialog">
+      <div class="copy-student-head">
+        <div>
+          <div class="section-label">Copiar aluno</div>
+          <h3 id="copyStudentTitle">Copiar aluno para outra turma</h3>
+          <p class="hint">A avaliação será mantida igual nas duas turmas.</p>
+        </div>
+        <button type="button" class="btn small ghost" id="closeCopyStudentModal">Fechar</button>
+      </div>
+      <div class="field">
+        <label>Turma de destino</label>
+        <select id="copyStudentTarget"></select>
+      </div>
+      <div class="copy-student-actions">
+        <button type="button" class="btn primary" id="confirmCopyStudentBtn">Copiar aluno</button>
+      </div>
+      <div class="message" id="copyStudentMessage"></div>
+    </div>
+  </div>
+
+</main>
 
 <script>
 const days = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
@@ -1300,6 +1616,7 @@ const reportLogoDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAAE
 const storeKey = 'avaliacoes_slb_preview_v5';
 let state = loadState();
 let activeEvalId = null;
+let pendingStudentCopy = null;
 
 function defaultState(){return {schedule:{},classes:{},evaluations:{}}}
 function loadState(){try{return JSON.parse(localStorage.getItem(storeKey)) || defaultState()}catch(e){return defaultState()}}
@@ -1309,7 +1626,8 @@ function dayHasTime(day,time){if(day==='Domingo') return false; if(day==='Sábad
 function slotKey(day,time){return `${day}|${time}`}
 function classId(name){return String(name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')}
 function studentName(s,i){const first=String(s?.firstName||'').trim();const last=String(s?.lastName||'').trim();const full=`${first} ${last}`.trim();return full||`Aluno ${i+1}`}
-function studentDisplayName(s,i){const first=String(s?.firstName||'').trim();const last=String(s?.lastName||'').trim();const full=`${first} ${last}`.trim();return full||`Aluno ${i+1}`}
+function studentDisplayName(s,i){const first=String(s?.firstName||'').trim();const last=String(s?.lastName||'').trim();const full=String(s?.fullName||'').trim() || `${first} ${last}`.trim();return full||`Aluno ${i+1}`}
+function getStudentFullName(s){return String(s?.fullName||'').trim() || `${s?.firstName||''} ${s?.lastName||''}`.trim()}
 function switchView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const view=document.getElementById(id);
@@ -1331,67 +1649,123 @@ function populateCopyMenus(){
 }
 function renderSchedule(){
   populateCopyMenus();
-  const body=document.getElementById('calendarBody'); body.innerHTML='';
+  const body=document.getElementById('calendarBody');
+  body.innerHTML='';
+
   allTimes.forEach(time=>{
     const tr=document.createElement('tr');
     tr.insertAdjacentHTML('beforeend',`<th class="time-cell">${safe(time)}</th>`);
+
     days.forEach(day=>{
       const td=document.createElement('td');
-      if(!dayHasTime(day,time)){td.innerHTML='<div class="empty-day">Sem aulas</div>'; tr.appendChild(td); return;}
-      const key=slotKey(day,time); const data=state.schedule[key] || {active:false,className:''};
-      td.innerHTML=`<div class="slot"><div class="lesson-box ${data.active?'active':''}"><label class="check-row"><input type="checkbox" data-check="${safe(key)}" ${data.active?'checked':''}><span>Aula</span></label><select data-select="${safe(key)}" style="display:${data.active?'block':'none'}"><option value="">Selecionar turma</option>${classOptions.map(c=>`<option value="${safe(c)}" ${data.className===c?'selected':''}>${safe(c)}</option>`).join('')}</select></div></div>`;
+
+      if(!dayHasTime(day,time)){
+        td.innerHTML='<div class="empty-day">Sem aulas</div>';
+        tr.appendChild(td);
+        return;
+      }
+
+      const key=slotKey(day,time);
+      const data=state.schedule[key] || {active:false,className:''};
+
+      td.innerHTML=`<div class="slot">
+        <div class="lesson-box ${data.active?'active':''}">
+          <label class="check-row">
+            <input type="checkbox" data-check="${safe(key)}" ${data.active?'checked':''}>
+            <span>Aula</span>
+          </label>
+          <select data-select="${safe(key)}" style="display:${data.active?'block':'none'}">
+            <option value="">Selecionar turma</option>
+            ${classOptions.map(c=>`<option value="${safe(c)}" ${data.className===c?'selected':''}>${safe(c)}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+
       tr.appendChild(td);
     });
+
     body.appendChild(tr);
   });
+
   document.querySelectorAll('[data-check]').forEach(cb=>cb.addEventListener('change',()=>{
-    const key=cb.dataset.check; if(!state.schedule[key]) state.schedule[key]={active:false,className:''};
-    state.schedule[key].active=cb.checked; if(!cb.checked) state.schedule[key].className='';
-    saveState(); renderSchedule();
+    const key=cb.dataset.check;
+    if(!state.schedule[key]) state.schedule[key]={active:false,className:''};
+    state.schedule[key].active=cb.checked;
+    if(!cb.checked) state.schedule[key].className='';
+    saveState();
+    renderSchedule();
   }));
+
   document.querySelectorAll('[data-select]').forEach(sel=>sel.addEventListener('change',()=>{
-    const key=sel.dataset.select; if(!state.schedule[key]) state.schedule[key]={active:false,className:''};
-    state.schedule[key].className=sel.value; state.schedule[key].active=!!sel.value || state.schedule[key].active;
-    saveState(); renderSchedule();
+    const key=sel.dataset.select;
+    if(!state.schedule[key]) state.schedule[key]={active:false,className:''};
+    state.schedule[key].className=sel.value;
+    state.schedule[key].active=!!sel.value || state.schedule[key].active;
+    saveState();
+    renderSchedule();
   }));
 }
+
 function copyDay(){
-  const from=document.getElementById('copyFrom').value, to=document.getElementById('copyTo').value;
-  if(from===to){document.getElementById('scheduleMessage').textContent='Escolhe dias diferentes para copiar.'; return;}
+  const from=document.getElementById('copyFrom').value;
+  const to=document.getElementById('copyTo').value;
+
+  if(from===to){
+    document.getElementById('scheduleMessage').textContent='Escolhe dias diferentes para copiar.';
+    return;
+  }
+
   allTimes.forEach(time=>{
-    const fromKey=slotKey(from,time), toKey=slotKey(to,time);
-    if(dayHasTime(to,time)) state.schedule[toKey]={...(state.schedule[fromKey]||{active:false,className:''})};
+    const fromKey=slotKey(from,time);
+    const toKey=slotKey(to,time);
+    if(dayHasTime(to,time)){
+      state.schedule[toKey]={...(state.schedule[fromKey]||{active:false,className:''})};
+    }
   });
-  saveState(); renderSchedule(); document.getElementById('scheduleMessage').textContent=`Horário copiado de ${from}-feira para ${to}-feira.`;
+
+  saveState();
+  renderSchedule();
+  document.getElementById('scheduleMessage').textContent=`Horário copiado de ${from}-feira para ${to}-feira.`;
 }
 document.getElementById('copyBtn').addEventListener('click',copyDay);
 document.getElementById('saveScheduleBtn').addEventListener('click',()=>{saveState(); document.getElementById('scheduleMessage').textContent='Horário guardado. Podes avançar para Turmas / Alunos.';});
 document.getElementById('goStudentsBtn').addEventListener('click',()=>switchView('studentsView'));
 
 function selectedClasses(){
-  const map={};
+  const classes=[];
   Object.entries(state.schedule).forEach(([key,val])=>{
     if(!val.active || !val.className) return;
     const [day,time]=key.split('|');
-    const isSaturday = day === 'Sábado';
-    const id = isSaturday ? `${classId(val.className)}_sabado` : classId(val.className);
-    if(!map[id]) map[id]={
+    const id = `${classId(val.className)}_${classId(day)}_${time.replace(/[^0-9]/g,'_')}`;
+    classes.push({
       id,
       className:val.className,
-      displayName:isSaturday ? `${val.className} — Sábado` : val.className,
-      isSaturday,
-      blocks:[]
-    };
-    map[id].blocks.push({day,time});
+      displayName:`${val.className} — ${day}-feira — ${time}`,
+      isSaturday:day==='Sábado',
+      blocks:[{day,time}]
+    });
   });
-  return Object.values(map).sort((a,b)=>{
-    const nameCompare=(a.className||'').localeCompare(b.className||'');
-    if(nameCompare!==0) return nameCompare;
-    return (a.isSaturday?1:0)-(b.isSaturday?1:0);
+  return classes.sort((a,b)=>{
+    const dayOrder={'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6,'Domingo':7};
+    const ab=a.blocks[0]||{}, bb=b.blocks[0]||{};
+    const d=(dayOrder[ab.day]||99)-(dayOrder[bb.day]||99);
+    if(d!==0) return d;
+    const t=String(ab.time||'').localeCompare(String(bb.time||''));
+    if(t!==0) return t;
+    return String(a.className||'').localeCompare(String(b.className||''));
   });
 }
 function syncClasses(){
-  selectedClasses().forEach(c=>{ if(!state.classes[c.id]) state.classes[c.id]={total:0,students:[]}; if(!state.evaluations[c.id]) state.evaluations[c.id]={checks:{},notes:'',studentNotes:{},updatedAt:''}; });
+  selectedClasses().forEach(c=>{
+    if(!state.classes[c.id]){
+      const legacy=state.classes[classId(c.className)];
+      state.classes[c.id]=legacy ? JSON.parse(JSON.stringify(legacy)) : {total:0,students:[]};
+    }
+    if(!state.evaluations[c.id]){
+      const legacyEv=state.evaluations[classId(c.className)];
+      state.evaluations[c.id]=legacyEv ? JSON.parse(JSON.stringify(legacyEv)) : {checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{}};
+    }
+  });
   saveState();
 }
 function renderStudents(){
@@ -1401,7 +1775,7 @@ function renderStudents(){
   selected.forEach(c=>{
     const data=state.classes[c.id] || {total:0,students:[]}; const ev=state.evaluations[c.id]||{};
     const card=document.createElement('div'); card.className='class-card';
-    card.innerHTML=`<div class="class-top"><div><div class="class-title-line"><div class="class-title">Ficha de alunos da turma — ${safe(c.displayName||c.className)}</div><button class="inline-evaluate" data-eval-open="${safe(c.id)}">📝 Avaliar</button></div><div class="class-meta">A turma aparece em ${c.blocks.length} bloco(s) no horário.</div></div><span class="pill ${ev.updatedAt?'green':'amber'}">${ev.updatedAt?'Avaliada':'Por avaliar'}</span></div><div class="field"><label>Total de alunos</label><input type="number" min="0" max="60" value="${data.total||0}" data-total="${safe(c.id)}"></div><div class="students-list" id="students-${safe(c.id)}"></div>`;
+    card.innerHTML=`<div class="class-top"><div><div class="class-title-line"><div class="class-title">Ficha de alunos da turma — ${safe(c.displayName||c.className)}</div><button class="inline-evaluate" data-eval-open="${safe(c.id)}">📝 Avaliar</button></div><div class="class-meta">Esta ficha corresponde apenas a este bloco do horário.</div></div><span class="pill ${ev.updatedAt?'green':'amber'}">${ev.updatedAt?'Avaliada':'Por avaliar'}</span></div><div class="field"><label>Total de alunos</label><input type="number" min="0" max="60" value="${data.total||0}" data-total="${safe(c.id)}"></div><div class="students-list" id="students-${safe(c.id)}"></div>`;
     grid.appendChild(card); renderStudentInputs(c.id);
   });
   document.querySelectorAll('[data-total]').forEach(inp=>inp.addEventListener('change',()=>setTotal(inp.dataset.total, parseInt(inp.value||0))));
@@ -1414,17 +1788,34 @@ function setTotal(id,total){
   data.students=data.students.slice(0,total); saveState(); renderStudentInputs(id);
 }
 function renderStudentInputs(id){
-  const box=document.getElementById(`students-${id}`); if(!box) return; const data=state.classes[id]||{students:[]}; box.innerHTML='';
-  data.students.forEach((s,i)=>box.insertAdjacentHTML('beforeend',`<div class="student-row"><input type="text" placeholder="First Name ${i+1}" value="${safe(s.firstName)}" data-first="${safe(id)}" data-index="${i}"><input type="text" placeholder="Last Name ${i+1}" value="${safe(s.lastName)}" data-last="${safe(id)}" data-index="${i}"></div>`));
-  document.querySelectorAll(`[data-first="${id}"],[data-last="${id}"]`).forEach(inp=>inp.addEventListener('input',saveStudentsFromDom));
+  const box=document.getElementById(`students-${id}`);
+  if(!box) return;
+  const data=state.classes[id]||{students:[]};
+  box.innerHTML='';
+  data.students.forEach((s,i)=>{
+    const fullName=getStudentFullName(s);
+    box.insertAdjacentHTML('beforeend',`<div class="student-row single-name"><input type="text" placeholder="Nome do aluno ${i+1}" value="${safe(fullName)}" data-full-name="${safe(id)}" data-index="${i}"></div>`);
+  });
+  document.querySelectorAll(`[data-full-name="${id}"]`).forEach(inp=>inp.addEventListener('input',saveStudentsFromDom));
 }
 function saveStudentsFromDom(){
+  document.querySelectorAll('[data-full-name]').forEach(inp=>{
+    const d=state.classes[inp.dataset.fullName];
+    const student=d?.students[inp.dataset.index];
+    if(student){
+      student.fullName=inp.value.trim();
+      student.firstName='';
+      student.lastName='';
+    }
+  });
   document.querySelectorAll('[data-first]').forEach(inp=>{const d=state.classes[inp.dataset.first]; if(d?.students[inp.dataset.index]) d.students[inp.dataset.index].firstName=inp.value.trim();});
   document.querySelectorAll('[data-last]').forEach(inp=>{const d=state.classes[inp.dataset.last]; if(d?.students[inp.dataset.index]) d.students[inp.dataset.index].lastName=inp.value.trim();});
   saveState();
 }
 document.getElementById('saveStudentsBtn').addEventListener('click',()=>{saveStudentsFromDom();document.getElementById('studentsMessage').textContent='Alunos guardados.';});
-document.getElementById('clearDataBtn').addEventListener('click',()=>{if(confirm('Limpar horário, alunos e avaliações?')){state=defaultState();saveState();renderSchedule();renderStudents();renderEvaluationPage();renderDocument();}});
+document.getElementById('clearDataBtn').addEventListener('click',()=>{if(confirm('Limpar horário, alunos e avaliações?')){state=defaultState();saveState();
+
+renderSchedule();renderStudents();renderEvaluationPage();renderDocument();}});
 
 function evalData(id){
   if(!state.evaluations[id]) state.evaluations[id]={checks:{},notes:'',studentNotes:{},updatedAt:'',semester:''};
@@ -1433,20 +1824,288 @@ function evalData(id){
   return state.evaluations[id]
 }
 function isAma1A(className){return String(className||'').trim().toUpperCase()==='AMA 1A'}
+function usesAma1Evaluation(className){
+  const clean=String(className||'').trim().toUpperCase();
+  return clean==='AMA 1A' || clean==='AMA 1B';
+}
+function nextLevelForClass(className){
+  const clean=String(className||'').trim().toUpperCase();
+  if(clean==='AMA 1A') return 'AMA 1B';
+  if(clean==='AMA 1B') return 'AMA 2A';
+  return '';
+}
 function getObjectivesForClass(className){
-  if(isAma1A(className)){
+  if(usesAma1Evaluation(className)){
     return ama1aSteps.map((group,gi)=>({step:group.step, items:group.items.map((text,ii)=>({key:`ama1a-${gi}-${ii}`, short:`${group.step}.${ii+1}`, label:text}))}));
   }
   return [{step:'Avaliação geral', items:paramNames.map((label,i)=>({key:`generic-${i}`, short:params[i], label}))}];
 }
 function flattenObjectives(className){return getObjectivesForClass(className).flatMap(g=>g.items)}
 function okCount(id,i,className){const ev=evalData(id); return flattenObjectives(className).reduce((sum,obj)=>sum+(ev.checks[`${i}-${obj.key}`]?1:0),0)}
+
+
+function makeStudentLinkId(student, fallbackIndex=0){
+  const base=(studentDisplayName(student,fallbackIndex)||`aluno_${fallbackIndex}`).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  return `linked_${base || fallbackIndex}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`;
+}
+function ensureStudentLink(classId, studentIndex){
+  const student=state.classes?.[classId]?.students?.[studentIndex];
+  if(!student) return '';
+  if(!student.linkId) student.linkId=makeStudentLinkId(student, studentIndex);
+  return student.linkId;
+}
+function linkedStudentLocations(linkId){
+  const locations=[];
+  if(!linkId) return locations;
+  Object.entries(state.classes||{}).forEach(([classId, classData])=>{
+    (classData.students||[]).forEach((student,index)=>{
+      if(student.linkId===linkId) locations.push({classId,index});
+    });
+  });
+  return locations;
+}
+function copyEvaluationBetweenStudents(sourceClassId, sourceIndex, targetClassId, targetIndex){
+  const sourceEv=evalData(sourceClassId);
+  const targetEv=evalData(targetClassId);
+  if(!targetEv.checks) targetEv.checks={};
+
+  // Remove old target keys before copying, so unchecked boxes also synchronize.
+  Object.keys(targetEv.checks||{}).forEach(key=>{
+    if(key.startsWith(`${targetIndex}-`)) delete targetEv.checks[key];
+  });
+
+  Object.keys(sourceEv.checks||{}).forEach(key=>{
+    if(key.startsWith(`${sourceIndex}-`)){
+      const newKey=key.replace(`${sourceIndex}-`, `${targetIndex}-`);
+      targetEv.checks[newKey]=sourceEv.checks[key];
+    }
+  });
+
+  if(!targetEv.finalMessages) targetEv.finalMessages={};
+  targetEv.finalMessages[targetIndex]=sourceEv.finalMessages?.[sourceIndex] || '';
+
+  if(!targetEv.studentNotes) targetEv.studentNotes={};
+  targetEv.studentNotes[targetIndex]=sourceEv.studentNotes?.[sourceIndex] || '';
+
+  targetEv.notes=sourceEv.notes || targetEv.notes || '';
+  targetEv.semester=sourceEv.semester || targetEv.semester || '';
+  targetEv.updatedAt=new Date().toLocaleString('pt-PT');
+}
+function syncLinkedStudentEvaluation(sourceClassId, sourceIndex){
+  const sourceStudent=state.classes?.[sourceClassId]?.students?.[sourceIndex];
+  if(!sourceStudent) return 0;
+  const linkId=ensureStudentLink(sourceClassId, sourceIndex);
+  let updated=0;
+  linkedStudentLocations(linkId).forEach(loc=>{
+    if(loc.classId===sourceClassId && loc.index===Number(sourceIndex)) return;
+    copyEvaluationBetweenStudents(sourceClassId, Number(sourceIndex), loc.classId, loc.index);
+    updated++;
+  });
+  return updated;
+}
+
+function cloneStudentForCopy(student){
+  return {
+    fullName: String(student?.fullName || '').trim(),
+    firstName: String(student?.firstName || '').trim(),
+    lastName: String(student?.lastName || '').trim(),
+    linkId: String(student?.linkId || '').trim()
+  };
+}
+function ensureStudentEvaluationCopied(sourceClassId, sourceIndex, targetClassId, targetIndex){
+  copyEvaluationBetweenStudents(sourceClassId, Number(sourceIndex), targetClassId, Number(targetIndex));
+}
+function openCopyStudentModal(sourceClassId, sourceIndex){
+  syncClasses();
+  const selected=selectedClasses();
+  const sourceClass=state.classes[sourceClassId];
+  const student=sourceClass?.students?.[sourceIndex];
+  if(!student) return;
+  pendingStudentCopy={sourceClassId, sourceIndex};
+  const title=document.getElementById('copyStudentTitle');
+  const targetSelect=document.getElementById('copyStudentTarget');
+  const message=document.getElementById('copyStudentMessage');
+  if(title) title.textContent=`Copiar ${studentDisplayName(student, sourceIndex)} para outra turma`;
+  if(message) message.textContent='';
+  if(targetSelect){
+    targetSelect.innerHTML='';
+    selected
+      .filter(c=>c.id!==sourceClassId)
+      .forEach(c=>{
+        const blocks=c.blocks.map(b=>`${b.day}-feira ${b.time}`).join(' | ');
+        targetSelect.insertAdjacentHTML('beforeend', `<option value="${safe(c.id)}">${safe(c.displayName||c.className)} — ${safe(blocks)}</option>`);
+      });
+    if(!targetSelect.options.length){
+      targetSelect.innerHTML='<option value="">Não existem outras turmas disponíveis</option>';
+    }
+  }
+  const modal=document.getElementById('copyStudentModal');
+  if(modal) modal.style.display='flex';
+}
+function closeCopyStudentModal(){
+  const modal=document.getElementById('copyStudentModal');
+  if(modal) modal.style.display='none';
+  pendingStudentCopy=null;
+}
+function confirmCopyStudent(){
+  if(!pendingStudentCopy) return;
+  const targetSelect=document.getElementById('copyStudentTarget');
+  const message=document.getElementById('copyStudentMessage');
+  const targetClassId=targetSelect?.value;
+  if(!targetClassId){
+    if(message) message.textContent='Escolhe uma turma de destino.';
+    return;
+  }
+
+  const sourceClass=state.classes[pendingStudentCopy.sourceClassId];
+  const targetClass=state.classes[targetClassId];
+  const sourceStudent=sourceClass?.students?.[pendingStudentCopy.sourceIndex];
+
+  if(!sourceStudent || !targetClass){
+    if(message) message.textContent='Não foi possível copiar este aluno.';
+    return;
+  }
+
+  const sharedLinkId=ensureStudentLink(pendingStudentCopy.sourceClassId, pendingStudentCopy.sourceIndex);
+  sourceStudent.linkId=sharedLinkId;
+
+  const nameToCopy=studentDisplayName(sourceStudent, pendingStudentCopy.sourceIndex).trim().toLowerCase();
+  const existingIndex=(targetClass.students||[]).findIndex((s,i)=>studentDisplayName(s,i).trim().toLowerCase()===nameToCopy);
+
+  let targetIndex;
+  if(existingIndex>=0){
+    targetIndex=existingIndex;
+    targetClass.students[targetIndex]=cloneStudentForCopy(sourceStudent);
+    targetClass.students[targetIndex].linkId=sharedLinkId;
+  }else{
+    if(!targetClass.students) targetClass.students=[];
+    targetClass.students.push(cloneStudentForCopy(sourceStudent));
+    targetIndex=targetClass.students.length-1;
+    targetClass.students[targetIndex].linkId=sharedLinkId;
+  }
+
+  targetClass.total=targetClass.students.length;
+  ensureStudentEvaluationCopied(pendingStudentCopy.sourceClassId, pendingStudentCopy.sourceIndex, targetClassId, targetIndex);
+
+  saveState();
+
+  activeEvalId=targetClassId;
+  closeCopyStudentModal();
+  renderStudents();
+  renderEvaluationPage();
+
+  setTimeout(()=>{
+    const target=document.getElementById(`eval-student-${targetClassId}-${targetIndex}`);
+    if(target){
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+      target.classList.add('student-highlight');
+      setTimeout(()=>target.classList.remove('student-highlight'),1600);
+    }
+  },120);
+}
+
+
+function reindexEvaluationAfterStudentRemoval(ev, removedIndex){
+  if(!ev) return;
+
+  const newChecks={};
+  Object.entries(ev.checks||{}).forEach(([key,value])=>{
+    const dash=key.indexOf('-');
+    if(dash===-1) return;
+    const idx=Number(key.slice(0,dash));
+    const rest=key.slice(dash+1);
+    if(Number.isNaN(idx)) return;
+
+    if(idx<removedIndex) newChecks[key]=value;
+    if(idx>removedIndex) newChecks[`${idx-1}-${rest}`]=value;
+  });
+  ev.checks=newChecks;
+
+  const reindexObject=(obj={})=>{
+    const result={};
+    Object.entries(obj||{}).forEach(([key,value])=>{
+      const idx=Number(key);
+      if(Number.isNaN(idx)) return;
+      if(idx<removedIndex) result[idx]=value;
+      if(idx>removedIndex) result[idx-1]=value;
+    });
+    return result;
+  };
+
+  ev.finalMessages=reindexObject(ev.finalMessages||{});
+  ev.studentNotes=reindexObject(ev.studentNotes||{});
+  ev.updatedAt=new Date().toLocaleString('pt-PT');
+}
+
+function removeStudentFromOnlyThisClass(classId, studentIndex){
+  const index=Number(studentIndex);
+  const cls=state.classes?.[classId];
+
+  if(!cls || !Array.isArray(cls.students) || !cls.students[index]){
+    alert('Não foi possível remover este aluno. Atualiza a página e tenta novamente.');
+    return;
+  }
+
+  const name=studentDisplayName(cls.students[index], index);
+  if(!confirm(`Remover ${name} apenas desta turma/bloco?`)) return;
+
+  cls.students.splice(index,1);
+  cls.total=cls.students.length;
+
+  reindexEvaluationAfterStudentRemoval(evalData(classId), index);
+
+  saveState();
+  activeEvalId=classId;
+  renderStudents();
+  renderEvaluationPage();
+}
+
 function renderEvaluationPage(){
   syncClasses(); const selected=selectedClasses(); const list=document.getElementById('evalClassList'); list.innerHTML='';
   if(selected.length && (!activeEvalId || !selected.find(c=>c.id===activeEvalId))) activeEvalId=selected[0].id;
   if(!selected.length){activeEvalId=null; list.innerHTML='<div class="hint">Sem turmas guardadas.</div>'; document.getElementById('evalMain').innerHTML='<div class="eval-hero"><h2>Avaliação</h2><p>Vai primeiro ao Horário e guarda as turmas.</p></div>'; return;}
   selected.forEach(c=>{
-    const data=state.classes[c.id]||{students:[]}; const ev=evalData(c.id); const btn=document.createElement('button'); btn.className='eval-class-btn '+(c.id===activeEvalId?'active':''); btn.innerHTML=`<strong>${safe(c.displayName||c.className)}</strong><span>${data.students.length} aluno(s) · ${c.blocks.length} bloco(s) · ${ev.updatedAt?'guardado':'por guardar'}</span>`; btn.onclick=()=>{activeEvalId=c.id; renderEvaluationPage();}; list.appendChild(btn);
+    const data=state.classes[c.id]||{students:[]}; const ev=evalData(c.id); const btn=document.createElement('button'); btn.className='eval-class-btn '+(c.id===activeEvalId?'active':''); const blockLines = c.blocks
+      .map(b=>`${safe(c.className)} - ${safe(b.day)}-feira - ${safe(b.time)}`)
+      .join('<br>');
+    const studentLinks = (data.students||[])
+      .map((s,i)=>`<div class="eval-student-row">
+        <button type="button" class="eval-student-jump" data-jump-class="${safe(c.id)}" data-jump-index="${i}">${safe(studentDisplayName(s,i))}</button>
+        <button type="button" class="eval-student-copy" data-copy-class="${safe(c.id)}" data-copy-index="${i}">COPY</button>
+        <button type="button" class="eval-student-remove" data-remove-class="${safe(c.id)}" data-remove-index="${i}">REMOVE</button>
+      </div>`)
+      .join('');
+    btn.innerHTML=`<strong class="eval-class-title-lines">${blockLines}</strong><div class="eval-student-jump-list">${studentLinks || '<span class="eval-no-students">Sem alunos definidos</span>'}</div><span class="eval-class-meta">${data.students.length} aluno(s) · ${c.blocks.length} bloco(s) · ${ev.updatedAt?'guardado':'por guardar'}</span>`; btn.onclick=(event)=>{
+      if(event.target.closest('[data-jump-class]') || event.target.closest('[data-copy-class]') || event.target.closest('[data-remove-class]')) return;
+      activeEvalId=c.id;
+      renderEvaluationPage();
+    };
+    list.appendChild(btn);
+  });
+  document.querySelectorAll('[data-jump-class]').forEach(jumpBtn=>{
+    jumpBtn.addEventListener('click',(event)=>{
+      event.stopPropagation();
+      const classId=jumpBtn.dataset.jumpClass;
+      const studentIndex=jumpBtn.dataset.jumpIndex;
+      activeEvalId=classId;
+      renderEvaluationPage();
+      setTimeout(()=>{
+        const target=document.getElementById(`eval-student-${classId}-${studentIndex}`);
+        if(target){
+          target.scrollIntoView({behavior:'smooth', block:'start'});
+          target.classList.add('student-highlight');
+          setTimeout(()=>target.classList.remove('student-highlight'),1600);
+        }
+      },80);
+    });
+  });
+  document.querySelectorAll('[data-copy-class]').forEach(copyBtn=>{
+    copyBtn.addEventListener('click',(event)=>{
+      event.stopPropagation();
+      const classId=copyBtn.dataset.copyClass;
+      const studentIndex=Number(copyBtn.dataset.copyIndex);
+      openCopyStudentModal(classId, studentIndex);
+    });
   });
   renderActiveEvaluation();
 }
@@ -1454,10 +2113,10 @@ function renderActiveEvaluation(){
   const c=selectedClasses().find(x=>x.id===activeEvalId); const main=document.getElementById('evalMain'); if(!c) return;
   const data=state.classes[c.id]||{students:[]}; const ev=evalData(c.id); const objectives=flattenObjectives(c.className);
   const totalPossible=data.students.length*objectives.length; const ok=data.students.reduce((sum,s,i)=>sum+okCount(c.id,i,c.className),0); const pct=totalPossible?Math.round(ok/totalPossible*100):0;
-  const isAma=isAma1A(c.className);
-  main.innerHTML=`<div class="eval-hero"><h2>Avaliação — ${safe(c.displayName||c.className)}</h2><p>${isAma?'Objetivos específicos AMA 1A, divididos em 3 steps.':'Checklist por aluno. Marca o que cada aluno já realiza.'}</p><div class="block-chips">${c.blocks.map(b=>`<span class="block-chip">${safe(b.day)} · ${safe(b.time)}</span>`).join('')}</div></div><div class="stats-grid"><div class="stat-card"><div class="stat-label">Alunos</div><div class="stat-value">${data.students.length}</div></div><div class="stat-card"><div class="stat-label">Objetivos</div><div class="stat-value">${objectives.length}</div></div><div class="stat-card"><div class="stat-label">OK total</div><div class="stat-value">${pct}%</div></div><div class="stat-card"><div class="stat-label">Último save</div><div class="stat-value" style="font-size:16px">${safe(ev.updatedAt||'—')}</div></div></div><div class="toolbar" style="margin-bottom:12px">
+  const isAma=usesAma1Evaluation(c.className);
+  main.innerHTML=`<div class="eval-hero"><h2>Avaliação — ${safe(c.displayName||c.className)}</h2><p>${isAma?'Objetivos específicos AMA 1A / AMA 1B, divididos em 3 steps.':'Checklist por aluno. Marca o que cada aluno já realiza.'}</p><div class="block-chips">${c.blocks.map(b=>`<span class="block-chip">${safe(b.day)} · ${safe(b.time)}</span>`).join('')}</div></div><div class="stats-grid"><div class="stat-card"><div class="stat-label">Alunos</div><div class="stat-value">${data.students.length}</div></div><div class="stat-card"><div class="stat-label">Objetivos</div><div class="stat-value">${objectives.length}</div></div><div class="stat-card"><div class="stat-label">OK total</div><div class="stat-value">${pct}%</div></div><div class="stat-card"><div class="stat-label">Último save</div><div class="stat-value" style="font-size:16px">${safe(ev.updatedAt||'—')}</div></div></div><div class="toolbar" style="margin-bottom:12px">
     <div class="toolbar-actions">
-      <button class="btn small secondary" id="allOkBtn">Todos OK</button>
+      <button class="btn small secondary" id="allOkBtn">Todos OK da turma</button>
       <button class="btn small ghost" id="clearChecksBtn">Limpar checks</button>
       <div class="semester-toolbar">
         <label for="semesterSelect">Semestre</label>
@@ -1490,7 +2149,7 @@ function renderActiveEvaluation(){
 function renderEvaluationContent(c,students,ev){
   const holder=document.getElementById('evaluationContent');
   if(!students.length){holder.innerHTML='<div class="matrix-wrap"><div style="padding:18px;color:#6b7280;font-weight:750">Esta turma ainda não tem alunos. Volta a Turmas / Alunos e define o total de alunos.</div></div>';return;}
-  if(isAma1A(c.className)){ renderAma1AEvaluation(c.id,students,ev,holder); return; }
+  if(usesAma1Evaluation(c.className)){ renderAma1AEvaluation(c.id,students,ev,holder,c.className); return; }
   holder.innerHTML='<div class="matrix-wrap"><div class="matrix" id="matrix"></div></div>';
   const objectives=flattenObjectives(c.className);
   const matrix=document.getElementById('matrix'); matrix.innerHTML=`<div class="matrix-head"><div>Aluno</div>${objectives.map(obj=>`<div title="${safe(obj.label)}">${safe(obj.short)}</div>`).join('')}<div>Total</div></div>`;
@@ -1501,14 +2160,14 @@ function renderEvaluationContent(c,students,ev){
   });
   document.querySelectorAll('[data-check-eval]').forEach(cb=>cb.addEventListener('change',()=>{ev.checks[cb.dataset.checkEval]=cb.checked; saveState(); renderActiveEvaluation();}));
 }
-function renderAma1AEvaluation(id,students,ev,holder){
+function renderAma1AEvaluation(id,students,ev,holder,className='AMA 1A'){
   holder.innerHTML='<div class="ama-eval-list" id="amaEvalList"></div>';
   const list=document.getElementById('amaEvalList');
   students.forEach((s,i)=>{
-    const total=okCount(id,i,'AMA 1A'); const max=flattenObjectives('AMA 1A').length;
-    let html=`<div class="ama-student-card"><div class="ama-student-head"><div><strong>${safe(studentDisplayName(s,i))}</strong><div class="hint">Aluno ${i+1}</div></div><span class="pill ${total===max?'green':'amber'}">${total}/${max} OK</span></div>`;
+    const total=okCount(id,i,className); const max=flattenObjectives(className).length;
+    let html=`<div class="ama-student-card" id="eval-student-${safe(id)}-${i}"><div class="ama-student-head"><div><strong>${safe(studentDisplayName(s,i))}</strong><div class="hint">Aluno ${i+1}</div></div><div class="student-header-actions"><span class="pill ${total===max?'green':'amber'}">${total}/${max} OK</span><button class="btn small secondary student-all-ok-btn" data-student-all-ok="${i}">Todos OK do aluno</button></div></div>`;
     ama1aSteps.forEach((group,gi)=>{
-      html+=`<div class="step-box"><div class="step-title">${safe(group.step)}</div>`;
+      html+=`<div class="step-box"><div class="step-title-row"><div class="step-title">${safe(group.step)}</div><button class="btn small ghost step-ok-btn" data-step-ok="${i}-${gi}">Todos OK!</button></div>`;
       group.items.forEach((text,ii)=>{const objKey=`ama1a-${gi}-${ii}`; const key=`${i}-${objKey}`; html+=`<label class="objective-row"><input type="checkbox" data-check-eval="${safe(key)}" ${ev.checks[key]?'checked':''}><span>${safe(text)}</span></label>`;});
       html+='</div>';
     });
@@ -1517,14 +2176,35 @@ function renderAma1AEvaluation(id,students,ev,holder){
   });
   document.querySelectorAll('[data-check-eval]').forEach(cb=>cb.addEventListener('change',()=>{ev.checks[cb.dataset.checkEval]=cb.checked; saveState(); renderActiveEvaluation();}));
   document.querySelectorAll('[data-final-message]').forEach(sel=>sel.addEventListener('change',()=>{if(!ev.finalMessages) ev.finalMessages={}; ev.finalMessages[sel.dataset.finalMessage]=sel.value; saveState();}));
+  document.querySelectorAll('[data-step-ok]').forEach(btn=>btn.addEventListener('click',()=>{
+    const [studentIndex, stepIndex] = btn.dataset.stepOk.split('-').map(Number);
+    const group = ama1aSteps[stepIndex];
+    if(!group) return;
+    group.items.forEach((_text, itemIndex)=>{
+      ev.checks[`${studentIndex}-ama1a-${stepIndex}-${itemIndex}`]=true;
+    });
+    saveState();
+    renderActiveEvaluation();
+  }));
+  document.querySelectorAll('[data-student-all-ok]').forEach(btn=>btn.addEventListener('click',()=>{
+    const studentIndex=Number(btn.dataset.studentAllOk);
+    ama1aSteps.forEach((group,stepIndex)=>{
+      group.items.forEach((_text,itemIndex)=>{
+        ev.checks[`${studentIndex}-ama1a-${stepIndex}-${itemIndex}`]=true;
+      });
+    });
+    saveState();
+    renderActiveEvaluation();
+  }));
   document.querySelectorAll('[data-save-student-eval]').forEach(btn=>btn.addEventListener('click',()=>{
     if(!ev.finalMessages) ev.finalMessages={};
     const semesterSelect=document.getElementById('semesterSelect');
     if(semesterSelect) ev.semester=semesterSelect.value;
     ev.updatedAt=new Date().toLocaleString('pt-PT');
+    const synced=syncLinkedStudentEvaluation(id, Number(btn.dataset.saveStudentEval));
     saveState();
     const oldText=btn.textContent;
-    btn.textContent='Guardado ✓';
+    btn.textContent=synced>0 ? `Guardado ✓ + ${synced} turma(s)` : 'Guardado ✓';
     btn.classList.add('saved');
     setTimeout(()=>{btn.textContent=oldText; btn.classList.remove('saved');},1400);
   }));
@@ -1537,6 +2217,8 @@ function saveCurrentEvaluation(){
   if(notes) ev.notes=notes.value;
   if(semesterSelect) ev.semester=semesterSelect.value;
   ev.updatedAt=new Date().toLocaleString('pt-PT');
+  const cls=state.classes?.[activeEvalId];
+  (cls?.students||[]).forEach((_s,i)=>syncLinkedStudentEvaluation(activeEvalId,i));
   saveState();
   renderEvaluationPage();
 }
@@ -1563,7 +2245,7 @@ function renderDocument(){
     const data=state.classes[c.id]||{students:[]};
     const ev=evalData(c.id);
 
-    if(isAma1A(c.className) && data.students.length){
+    if(usesAma1Evaluation(c.className) && data.students.length){
       hasAmaReport=true;
       data.students.forEach((s,i)=>{
         const name=studentDisplayName(s,i);
@@ -1574,7 +2256,7 @@ function renderDocument(){
             <div>
               <div class="final-doc-kicker">Relatório Evolução Época</div>
               <h2>Classe ${safe(c.displayName||c.className)}</h2>
-              
+
             </div>
             <div class="final-doc-logo"><img src="${reportLogoDataUrl}" alt="Complexo de Piscinas" class="final-doc-logo-img"></div>
           </div>
@@ -1622,7 +2304,7 @@ function renderDocument(){
             <div class="reference-bottom-cell reference-check">✓</div>
             <div class="reference-bottom-cell">Estás preparado(a) para novos desafios no próximo nível.</div>
             <div class="reference-bottom-cell reference-label">NÍVEL SEGUINTE</div>
-            <div class="reference-bottom-cell reference-next-level">AMA 1B</div>
+            <div class="reference-bottom-cell reference-next-level">${safe(nextLevelForClass(c.className))}</div>
           </div>` : ''}
           ${fi===2 ? `
           <div class="reference-bottom-row reference-bottom-row-simple">
@@ -1665,6 +2347,42 @@ if(printPdfBtn){
 
 const showReportFromEvalBtn=document.getElementById('showReportFromEvalBtn');
 if(showReportFromEvalBtn){showReportFromEvalBtn.addEventListener('click',()=>{saveCurrentEvaluation(); switchView('documentView');});}
+
+
+
+
+function copyStudentGlobalHandler(event){
+  const closeBtn=event.target.closest('#closeCopyStudentModal');
+  if(closeBtn){
+    event.preventDefault();
+    closeCopyStudentModal();
+    return;
+  }
+
+  const confirmBtn=event.target.closest('#confirmCopyStudentBtn');
+  if(confirmBtn){
+    event.preventDefault();
+    confirmCopyStudent();
+    return;
+  }
+
+  if(event.target && event.target.id==='copyStudentModal'){
+    closeCopyStudentModal();
+  }
+}
+
+function removeStudentGlobalHandler(event){
+  const removeBtn=event.target.closest('[data-remove-class]');
+  if(!removeBtn) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  removeStudentFromOnlyThisClass(removeBtn.dataset.removeClass, Number(removeBtn.dataset.removeIndex));
+}
+
+document.addEventListener('click',copyStudentGlobalHandler);
+document.addEventListener('click',removeStudentGlobalHandler);
 
 renderSchedule();
 </script>
