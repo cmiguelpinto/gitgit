@@ -1456,6 +1456,62 @@
       transform:translateY(-1px);
     }
 
+
+    /* Turmas / Alunos day filters */
+    .students-day-filter{
+      margin-top:16px;
+      padding-top:14px;
+      border-top:1px solid #eef0f3;
+      display:grid;
+      gap:10px;
+    }
+    .students-day-filter-buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .day-filter-btn{
+      appearance:none;
+      border:1px solid #d1d5db;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .day-filter-btn.active{
+      background:linear-gradient(135deg,var(--slb-red),#9f0015);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 8px 16px rgba(208,0,27,.16);
+    }
+    .day-filter-btn:hover{
+      transform:translateY(-1px);
+    }
+
+
+    /* Avaliação day filters */
+    .evaluation-day-filter{
+      margin:12px 0 14px;
+      padding:12px 0 10px;
+      border-top:1px solid #eef0f3;
+      border-bottom:1px solid #eef0f3;
+      display:grid;
+      gap:9px;
+    }
+    .evaluation-day-filter-buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .evaluation-day-filter .day-filter-btn{
+      padding:7px 10px;
+      font-size:11px;
+    }
+
 </style>
 </head>
 <body>
@@ -1496,9 +1552,23 @@
     </section>
 
     <section id="studentsView" class="view">
-      <div class="panel toolbar">
-        <div><div class="section-label">Fichas de alunos por turma</div><div class="hint">Define o total de alunos e preenche First Name / Last Name.</div></div>
-        <div class="toolbar-actions"><button class="btn primary" id="saveStudentsBtn">Guardar alunos</button><button class="btn ghost" data-view-btn="evaluationView">Ir para avaliação</button><button class="btn danger" id="clearDataBtn">Limpar dados</button></div>
+      <div class="panel">
+        <div class="toolbar">
+          <div><div class="section-label">Fichas de alunos por turma</div><div class="hint">Define o total de alunos e preenche o nome completo.</div></div>
+          <div class="toolbar-actions"><button class="btn primary" id="saveStudentsBtn">Guardar alunos</button><button class="btn ghost" data-view-btn="evaluationView">Ir para avaliação</button><button class="btn danger" id="clearDataBtn">Limpar dados</button></div>
+        </div>
+        <div class="students-day-filter">
+          <div class="section-label">Filtrar por dia</div>
+          <div class="students-day-filter-buttons">
+            <button type="button" class="day-filter-btn active" data-student-day-filter="Segunda">Segunda-Feira</button>
+            <button type="button" class="day-filter-btn active" data-student-day-filter="Terça">Terça-Feira</button>
+            <button type="button" class="day-filter-btn active" data-student-day-filter="Quarta">Quarta-Feira</button>
+            <button type="button" class="day-filter-btn active" data-student-day-filter="Quinta">Quinta-Feira</button>
+            <button type="button" class="day-filter-btn active" data-student-day-filter="Sexta">Sexta-Feira</button>
+            <button type="button" class="day-filter-btn active" data-student-day-filter="Sábado">Sábado</button>
+          </div>
+          <div class="hint">Desativa os dias que não queres ver nesta página.</div>
+        </div>
       </div>
       <div class="message" id="studentsMessage"></div>
       <div id="classesGrid" class="classes-grid"></div>
@@ -1513,6 +1583,17 @@
         <aside class="eval-sidebar">
           <div class="section-label">Turmas guardadas</div>
           <div class="hint">Só aparecem turmas depois de guardares o horário.</div>
+          <div class="evaluation-day-filter">
+            <div class="section-label">Filtrar por dia</div>
+            <div class="evaluation-day-filter-buttons">
+              <button type="button" class="day-filter-btn active" data-eval-day-filter="Segunda">Segunda</button>
+              <button type="button" class="day-filter-btn active" data-eval-day-filter="Terça">Terça</button>
+              <button type="button" class="day-filter-btn active" data-eval-day-filter="Quarta">Quarta</button>
+              <button type="button" class="day-filter-btn active" data-eval-day-filter="Quinta">Quinta</button>
+              <button type="button" class="day-filter-btn active" data-eval-day-filter="Sexta">Sexta</button>
+              <button type="button" class="day-filter-btn active" data-eval-day-filter="Sábado">Sábado</button>
+            </div>
+          </div>
           <div id="evalClassList" class="eval-class-list"></div>
         </aside>
         <main class="eval-main" id="evalMain">
@@ -1616,6 +1697,8 @@ const reportLogoDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAAE
 const storeKey = 'avaliacoes_slb_preview_clean_v1';
 let state = loadState();
 let activeEvalId = null;
+let studentDayFilters = new Set(['Segunda','Terça','Quarta','Quinta','Sexta','Sábado']);
+let evaluationDayFilters = new Set(['Segunda','Terça','Quarta','Quinta','Sexta','Sábado']);
 let pendingStudentCopy = null;
 
 function defaultState(){return {schedule:{},classes:{},evaluations:{}}}
@@ -1633,8 +1716,8 @@ function switchView(id){
   const view=document.getElementById(id);
   if(view) view.classList.add('active');
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===id));
-  if(id==='studentsView') renderStudents();
-  if(id==='evaluationView') renderEvaluationPage();
+  if(id==='studentsView'){ setupStudentDayFilters(); renderStudents(); }
+  if(id==='evaluationView'){ setupEvaluationDayFilters(); renderEvaluationPage(); }
   if(id==='documentView') renderDocument();
 }
 document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>switchView(btn.dataset.view)));
@@ -1693,7 +1776,9 @@ function renderSchedule(){
     state.schedule[key].active=cb.checked;
     if(!cb.checked) state.schedule[key].className='';
     saveState();
-    renderSchedule();
+    setupEvaluationDayFilters();
+setupStudentDayFilters();
+renderSchedule();
   }));
 
   document.querySelectorAll('[data-select]').forEach(sel=>sel.addEventListener('change',()=>{
@@ -1768,14 +1853,48 @@ function syncClasses(){
   });
   saveState();
 }
+
+function setupStudentDayFilters(){
+  document.querySelectorAll('[data-student-day-filter]').forEach(btn=>{
+    const day=btn.dataset.studentDayFilter;
+    btn.classList.toggle('active', studentDayFilters.has(day));
+    btn.onclick=()=>{
+      if(studentDayFilters.has(day)) studentDayFilters.delete(day);
+      else studentDayFilters.add(day);
+
+      if(studentDayFilters.size===0){
+        studentDayFilters.add(day);
+      }
+
+      document.querySelectorAll('[data-student-day-filter]').forEach(b=>{
+        b.classList.toggle('active', studentDayFilters.has(b.dataset.studentDayFilter));
+      });
+      renderStudents();
+    };
+  });
+}
+
 function renderStudents(){
-  syncClasses(); const grid=document.getElementById('classesGrid'); const selected=selectedClasses();
-  if(!selected.length){grid.innerHTML='<div class="panel"><strong>Ainda não existem turmas.</strong><p class="hint">Vai ao Horário, ativa aulas, escolhe turmas e guarda o horário.</p></div>';return}
+  syncClasses();
+  const grid=document.getElementById('classesGrid');
+  const allSelected=selectedClasses();
+  const selected=allSelected.filter(c=>{
+    const day=(c.blocks?.[0]?.day)||'';
+    return studentDayFilters.has(day);
+  });
+
+  if(!selected.length){
+    grid.innerHTML = allSelected.length
+      ? '<div class="panel"><strong>Nenhuma turma visível.</strong><p class="hint">Ativa mais dias nos filtros para veres as turmas.</p></div>'
+      : '<div class="panel"><strong>Ainda não existem turmas.</strong><p class="hint">Vai ao Horário, ativa aulas, escolhe turmas e guarda o horário.</p></div>';
+    return;
+  }
+
   grid.innerHTML='';
   selected.forEach(c=>{
     const data=state.classes[c.id] || {total:0,students:[]}; const ev=state.evaluations[c.id]||{};
     const card=document.createElement('div'); card.className='class-card';
-    card.innerHTML=`<div class="class-top"><div><div class="class-title-line"><div class="class-title">Ficha de alunos da turma — ${safe(c.displayName||c.className)}</div><button class="inline-evaluate" data-eval-open="${safe(c.id)}">📝 Avaliar</button></div><div class="class-meta">Esta ficha corresponde apenas a este bloco do horário.</div></div><span class="pill ${ev.updatedAt?'green':'amber'}">${ev.updatedAt?'Avaliada':'Por avaliar'}</span></div><div class="field"><label>Total de alunos</label><input type="number" min="0" max="60" value="${data.total||0}" data-total="${safe(c.id)}"></div><div class="students-list" id="students-${safe(c.id)}"></div>`;
+    card.innerHTML=`<div class="class-top"><div><div class="class-title-line"><div class="class-title">${safe(c.displayName||c.className)}</div><button class="inline-evaluate" data-eval-open="${safe(c.id)}">📝 Avaliar</button></div><div class="class-meta">Esta ficha corresponde apenas a este bloco do horário.</div></div><span class="pill ${ev.updatedAt?'green':'amber'}">${ev.updatedAt?'Avaliada':'Por avaliar'}</span></div><div class="field"><label>Total de alunos</label><input type="number" min="0" max="60" value="${data.total||0}" data-total="${safe(c.id)}"></div><div class="students-list" id="students-${safe(c.id)}"></div>`;
     grid.appendChild(card); renderStudentInputs(c.id);
   });
   document.querySelectorAll('[data-total]').forEach(inp=>inp.addEventListener('change',()=>setTotal(inp.dataset.total, parseInt(inp.value||0))));
@@ -2060,10 +2179,49 @@ function removeStudentFromOnlyThisClass(classId, studentIndex){
   renderEvaluationPage();
 }
 
+
+function setupEvaluationDayFilters(){
+  document.querySelectorAll('[data-eval-day-filter]').forEach(btn=>{
+    const day=btn.dataset.evalDayFilter;
+    btn.classList.toggle('active', evaluationDayFilters.has(day));
+    btn.onclick=()=>{
+      if(evaluationDayFilters.has(day)) evaluationDayFilters.delete(day);
+      else evaluationDayFilters.add(day);
+
+      if(evaluationDayFilters.size===0){
+        evaluationDayFilters.add(day);
+      }
+
+      document.querySelectorAll('[data-eval-day-filter]').forEach(b=>{
+        b.classList.toggle('active', evaluationDayFilters.has(b.dataset.evalDayFilter));
+      });
+      renderEvaluationPage();
+    };
+  });
+}
+
 function renderEvaluationPage(){
-  syncClasses(); const selected=selectedClasses(); const list=document.getElementById('evalClassList'); list.innerHTML='';
+  syncClasses();
+  const allSelected=selectedClasses();
+  const selected=allSelected.filter(c=>{
+    const day=(c.blocks?.[0]?.day)||'';
+    return evaluationDayFilters.has(day);
+  });
+  const list=document.getElementById('evalClassList');
+  list.innerHTML='';
+
   if(selected.length && (!activeEvalId || !selected.find(c=>c.id===activeEvalId))) activeEvalId=selected[0].id;
-  if(!selected.length){activeEvalId=null; list.innerHTML='<div class="hint">Sem turmas guardadas.</div>'; document.getElementById('evalMain').innerHTML='<div class="eval-hero"><h2>Avaliação</h2><p>Vai primeiro ao Horário e guarda as turmas.</p></div>'; return;}
+
+  if(!selected.length){
+    activeEvalId=null;
+    list.innerHTML = allSelected.length
+      ? '<div class="hint">Nenhuma turma visível com os filtros ativos.</div>'
+      : '<div class="hint">Sem turmas guardadas.</div>';
+    document.getElementById('evalMain').innerHTML = allSelected.length
+      ? '<div class="eval-hero"><h2>Avaliação</h2><p>Ativa mais dias nos filtros para veres as turmas.</p></div>'
+      : '<div class="eval-hero"><h2>Avaliação</h2><p>Vai primeiro ao Horário e guarda as turmas.</p></div>';
+    return;
+  }
   selected.forEach(c=>{
     const data=state.classes[c.id]||{students:[]}; const ev=evalData(c.id); const btn=document.createElement('button'); btn.className='eval-class-btn '+(c.id===activeEvalId?'active':''); const blockLines = c.blocks
       .map(b=>`${safe(c.className)} - ${safe(b.day)}-feira - ${safe(b.time)}`)
