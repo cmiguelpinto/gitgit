@@ -1797,6 +1797,59 @@
       }
     }
 
+
+    /* Documento Interno A4 sizing + readable headers */
+    .internal-doc-preview{
+      justify-items:center;
+    }
+    .internal-doc-page{
+      width:210mm;
+      min-height:297mm;
+      max-width:100%;
+      box-sizing:border-box;
+      margin:0 auto;
+      background:#fff!important;
+    }
+    .internal-eval-table th{
+      color:#111827!important;
+      background:#f3f4f6!important;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+    .internal-eval-table thead th{
+      color:#000!important;
+      font-weight:900!important;
+    }
+    @media print{
+      @page{
+        size:A4 portrait!important;
+        margin:8mm!important;
+      }
+      body.print-internal #internalDocumentPreview{
+        width:194mm!important;
+        margin:0 auto!important;
+      }
+      body.print-internal .internal-doc-page{
+        width:194mm!important;
+        min-height:281mm!important;
+        max-width:194mm!important;
+        box-sizing:border-box!important;
+        margin:0 auto!important;
+        padding:0!important;
+        background:#fff!important;
+      }
+      body.print-internal .internal-eval-table th{
+        color:#000!important;
+        background:#f3f4f6!important;
+        -webkit-print-color-adjust:exact!important;
+        print-color-adjust:exact!important;
+      }
+      body.print-internal .internal-eval-table thead th{
+        color:#000!important;
+        font-weight:900!important;
+      }
+    }
+
 </style>
 </head>
 <body>
