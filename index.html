@@ -2887,6 +2887,40 @@
       gap:7px;
     }
 
+
+    /* Attendance season report */
+    .attendance-annual-note{
+      margin-bottom:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      color:#374151;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .attendance-table.annual{
+      min-width:920px;
+    }
+    .attendance-table.annual th,
+    .attendance-table.annual td{
+      white-space:nowrap;
+    }
+    .attendance-year-total{
+      font-weight:950;
+      color:#111827;
+      background:#fafafa;
+    }
+    .attendance-year-low{
+      color:#991b1b;
+      font-weight:950;
+    }
+    .attendance-year-good{
+      color:#166534;
+      font-weight:950;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3620,6 +3654,7 @@ function studentName(s,i){const first=String(s?.firstName||'').trim();const last
 function studentDisplayName(s,i){const first=String(s?.firstName||'').trim();const last=String(s?.lastName||'').trim();const full=String(s?.fullName||'').trim() || `${first} ${last}`.trim();return full||`Aluno ${i+1}`}
 function getStudentFullName(s){return String(s?.fullName||'').trim() || `${s?.firstName||''} ${s?.lastName||''}`.trim()}
 
+let attendanceViewMode = 'month';
 let activeAttendanceClassId = null;
 let activeAttendanceDay = 'Segunda';
 let activeAttendanceMonthIndex = 8;
@@ -3863,6 +3898,118 @@ function renderAttendancePage(){
     saveState();
     renderAttendancePage();
   }));
+}
+
+async 
+function monthShortName(monthIndex){
+  return new Date(2026, monthIndex, 1).toLocaleDateString('pt-PT',{month:'short'}).replace('.', '');
+}
+
+function seasonAttendanceForStudent(classInfo, studentIndex, seasonStartYear){
+  const months=[];
+  let totalPresent=0;
+  let totalClasses=0;
+
+  seasonMonths().forEach(({monthIndex})=>{
+    const year=calendarYearForSeasonMonth(seasonStartYear, monthIndex);
+    const dates=classDatesForMonth(classInfo, year, monthIndex);
+    const monthData=(state.attendance||{})[attendanceKey(classInfo.id, year, monthIndex+1)] || {};
+    const present=dates.filter(dt=>!!monthData[`${studentIndex}|${dt.iso}`]).length;
+    const total=dates.length;
+
+    totalPresent+=present;
+    totalClasses+=total;
+
+    months.push({
+      monthIndex,
+      year,
+      present,
+      total,
+      percent: total ? Math.round((present/total)*100) : 0
+    });
+  });
+
+  return {
+    months,
+    totalPresent,
+    totalClasses,
+    percent: totalClasses ? Math.round((totalPresent/totalClasses)*100) : 0
+  };
+}
+
+function renderAnnualAttendanceReport(){
+  attendanceViewMode='year';
+  setupAttendanceControls();
+
+  const classes=populateAttendanceClasses();
+  const summary=document.getElementById('attendanceSummary');
+  const wrap=document.getElementById('attendanceTableWrap');
+  const annualBtn=document.getElementById('annualAttendanceBtn');
+  const monthlyBtn=document.getElementById('monthlyAttendanceBtn');
+
+  if(annualBtn) annualBtn.style.display='none';
+  if(monthlyBtn) monthlyBtn.style.display='inline-flex';
+
+  if(!summary || !wrap) return;
+
+  if(!classes.length){
+    summary.innerHTML='';
+    wrap.innerHTML='<div class="teacher-empty">Ainda não existem turmas. Vai primeiro ao Horário.</div>';
+    return;
+  }
+
+  const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
+  const data=state.classes[classInfo.id] || {students:[]};
+  const students=data.students || [];
+  const seasonStartYear=fixedAttendanceSeasonStartYear;
+  const blockText=(classInfo.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+
+  let classTotalPresent=0;
+  let classTotalPossible=0;
+
+  const studentRows=students.map((student,si)=>{
+    const stats=seasonAttendanceForStudent(classInfo, si, seasonStartYear);
+    classTotalPresent+=stats.totalPresent;
+    classTotalPossible+=stats.totalClasses;
+    return {student,si,stats};
+  });
+
+  const classPercent=classTotalPossible ? Math.round((classTotalPresent/classTotalPossible)*100) : 0;
+
+  summary.innerHTML=`
+    <span class="attendance-pill">${safe(classInfo.className)}</span>
+    <span class="attendance-pill">${safe(blockText)}</span>
+    <span class="attendance-pill">Época ${safe(seasonLabel(seasonStartYear))}</span>
+    <span class="attendance-pill">${students.length} aluno(s)</span>
+    <span class="attendance-pill">${classPercent}% presença época</span>
+  `;
+
+  if(!students.length){
+    wrap.innerHTML='<div class="teacher-empty">Esta turma ainda não tem alunos definidos.</div>';
+    return;
+  }
+
+  let html=`<div class="attendance-annual-note">
+    Relatório de época de presenças da turma selecionada. A época vai de <strong>1 de setembro de 2025 a 31 de julho de 2026</strong>. Cada célula mostra <strong>presenças/aulas</strong> nesse mês.
+  </div>`;
+
+  html+=`<table class="attendance-table annual"><thead><tr><th>Aluno</th>`;
+  seasonMonths().forEach(({monthIndex})=>{
+    html+=`<th>${safe(monthShortName(monthIndex))}</th>`;
+  });
+  html+=`<th>Total</th><th>%</th></tr></thead><tbody>`;
+
+  studentRows.forEach(({student,si,stats})=>{
+    html+=`<tr><td>${safe(studentDisplayName(student,si))}</td>`;
+    stats.months.forEach(month=>{
+      html+=`<td>${month.total ? `${month.present}/${month.total}` : '-'}</td>`;
+    });
+    const cls=stats.percent>=75?'attendance-year-good':'attendance-year-low';
+    html+=`<td class="attendance-year-total">${stats.totalPresent}/${stats.totalClasses}</td><td class="${cls}">${stats.percent}%</td></tr>`;
+  });
+
+  html+=`</tbody></table>`;
+  wrap.innerHTML=html;
 }
 
 async function saveAttendance(){
