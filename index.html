@@ -2823,6 +2823,70 @@
       box-shadow:0 10px 20px rgba(208,0,27,.16);
     }
 
+
+    /* Attendance two-step picker */
+    .attendance-day-filters{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+    .attendance-day-btn{
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:11px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+      white-space:nowrap;
+    }
+    .attendance-day-btn.active{
+      background:#111827;
+      color:#fff;
+      border-color:#111827;
+      box-shadow:0 10px 20px rgba(15,23,42,.14);
+    }
+    .attendance-class-picker.compact{
+      display:grid;
+      gap:7px;
+      max-height:280px;
+      overflow:auto;
+      padding-right:3px;
+    }
+    .attendance-class-card.compact{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 11px;
+    }
+    .attendance-class-card-time{
+      font-size:11px;
+      font-weight:950;
+      color:#9f0015;
+      white-space:nowrap;
+    }
+
+
+    /* Attendance top month filters */
+    .attendance-top-panel{
+      display:grid;
+      gap:14px;
+    }
+    .attendance-top-months{
+      display:grid;
+      gap:8px;
+      padding-top:12px;
+      border-top:1px solid #edf0f3;
+    }
+    .attendance-top-months .attendance-month-filters{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -2923,38 +2987,43 @@
 
 
     <section id="attendanceView" class="view">
-      <div class="panel toolbar">
-        <div>
-          <div class="section-label">Presenças</div>
-          <div class="hint">Escolhe a turma, o mês e marca apenas as presenças com checkboxes.</div>
+      <div class="panel attendance-top-panel">
+        <div class="toolbar">
+          <div>
+            <div class="section-label">Presenças</div>
+            <div class="hint">Escolhe a turma, o mês e marca apenas as presenças com checkboxes.</div>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
+            <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
+            <button class="btn secondary" id="annualAttendanceBtn">Relatório época</button>
+            <button class="btn ghost" id="monthlyAttendanceBtn" style="display:none">Voltar ao mês</button>
+          </div>
         </div>
-        <div class="toolbar-actions">
-          <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
-          <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
-          <button class="btn secondary" id="annualAttendanceBtn">Relatório época</button>
-          <button class="btn ghost" id="monthlyAttendanceBtn" style="display:none">Voltar ao mês</button>
+        <div class="attendance-top-months">
+          <div class="section-label">Mês</div>
+          <div id="attendanceMonthFilters" class="attendance-month-filters"></div>
         </div>
       </div>
 
       <section class="attendance-shell">
         <aside class="attendance-sidebar">
           <div class="field">
-            <label>Pesquisar turma</label>
-            <input id="attendanceClassSearch" type="search" placeholder="Ex: AMA 1A, Segunda, 16:45">
+            <label>Dia</label>
+            <div id="attendanceDayFilters" class="attendance-day-filters"></div>
           </div>
-          <div id="attendanceClassPicker" class="attendance-class-picker"></div>
+
+          <div class="field">
+            <label>Turmas desse dia</label>
+            <div id="attendanceClassPicker" class="attendance-class-picker compact"></div>
+          </div>
 
           <div class="field">
             <label>Época</label>
             <div class="attendance-season-static" id="attendanceSeasonStatic">2025/26</div>
           </div>
 
-          <div class="field">
-            <label>Mês</label>
-            <div id="attendanceMonthFilters" class="attendance-month-filters"></div>
-          </div>
-
-          <div class="hint">A época vai de 1 de setembro de 2025 a 31 de julho de 2026. Escolhe a turma e o mês de trabalho.</div>
+          <div class="hint">Escolhe primeiro o dia e depois a turma desse dia.</div>
         </aside>
 
         <main class="attendance-main">
@@ -3552,6 +3621,7 @@ function studentDisplayName(s,i){const first=String(s?.firstName||'').trim();con
 function getStudentFullName(s){return String(s?.fullName||'').trim() || `${s?.firstName||''} ${s?.lastName||''}`.trim()}
 
 let activeAttendanceClassId = null;
+let activeAttendanceDay = 'Segunda';
 let activeAttendanceMonthIndex = 8;
 const fixedAttendanceSeasonStartYear = 2025;
 
@@ -3598,9 +3668,17 @@ function seasonLabel(seasonStartYear){
 }
 
 function setupAttendanceControls(){
+  const dayFilters=document.getElementById('attendanceDayFilters');
   const monthFilters=document.getElementById('attendanceMonthFilters');
   const seasonStatic=document.getElementById('attendanceSeasonStatic');
   if(seasonStatic) seasonStatic.textContent='2025/26';
+
+  if(dayFilters && !dayFilters.dataset.ready){
+    dayFilters.dataset.ready='true';
+    ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'].forEach(day=>{
+      dayFilters.insertAdjacentHTML('beforeend',`<button type="button" class="attendance-day-btn" data-attendance-day="${safe(day)}">${safe(day)}</button>`);
+    });
+  }
 
   if(monthFilters && !monthFilters.dataset.ready){
     monthFilters.dataset.ready='true';
@@ -3608,6 +3686,17 @@ function setupAttendanceControls(){
       monthFilters.insertAdjacentHTML('beforeend',`<button type="button" class="attendance-month-btn" data-attendance-month="${monthIndex}">${safe(attendanceMonthName(monthIndex))}</button>`);
     });
   }
+
+  document.querySelectorAll('[data-attendance-day]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.attendanceDay===activeAttendanceDay);
+    btn.onclick=()=>{
+      activeAttendanceDay=btn.dataset.attendanceDay;
+      const classesForDay=selectedClasses().filter(c=>(c.blocks?.[0]?.day)===activeAttendanceDay);
+      activeAttendanceClassId=classesForDay[0]?.id || null;
+      attendanceViewMode='month';
+      renderAttendancePage();
+    };
+  });
 
   const currentMonth=String(activeAttendanceMonthIndex ?? 8);
   document.querySelectorAll('[data-attendance-month]').forEach(btn=>{
@@ -3651,19 +3740,23 @@ function ensureAttendanceMonth(classId, year, monthIndex){
 function populateAttendanceClasses(){
   syncClasses();
   const picker=document.getElementById('attendanceClassPicker');
-  const search=document.getElementById('attendanceClassSearch');
   const classes=selectedClasses();
 
   if(!picker) return classes;
 
-  const query=String(search?.value || '').trim().toLowerCase();
-  const filtered=classes.filter(c=>{
-    const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} ${b.time}`).join(' ');
-    return `${c.className} ${block}`.toLowerCase().includes(query);
-  });
+  const availableDays=[...new Set(classes.map(c=>c.blocks?.[0]?.day).filter(Boolean))];
+  if(!availableDays.includes(activeAttendanceDay)){
+    activeAttendanceDay=availableDays[0] || 'Segunda';
+  }
+
+  const filtered=classes.filter(c=>(c.blocks?.[0]?.day)===activeAttendanceDay);
 
   if(classes.length && (!activeAttendanceClassId || !classes.find(c=>c.id===activeAttendanceClassId))){
-    activeAttendanceClassId=classes[0].id;
+    activeAttendanceClassId=filtered[0]?.id || classes[0].id;
+  }
+
+  if(filtered.length && !filtered.find(c=>c.id===activeAttendanceClassId)){
+    activeAttendanceClassId=filtered[0].id;
   }
 
   if(!classes.length){
@@ -3673,16 +3766,20 @@ function populateAttendanceClasses(){
   }
 
   if(!filtered.length){
-    picker.innerHTML='<div class="teacher-empty">Nenhuma turma encontrada.</div>';
+    activeAttendanceClassId=null;
+    picker.innerHTML='<div class="teacher-empty">Não existem turmas neste dia.</div>';
     return classes;
   }
 
   picker.innerHTML=filtered.map(c=>{
     const data=state.classes[c.id]||{students:[]};
-    const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
-    return `<button type="button" class="attendance-class-card ${c.id===activeAttendanceClassId?'active':''}" data-attendance-class="${safe(c.id)}">
-      <div class="attendance-class-card-title">${safe(c.className)}</div>
-      <div class="attendance-class-card-meta">${safe(block)} · ${(data.students||[]).length} aluno(s)</div>
+    const block=c.blocks?.[0] || {};
+    return `<button type="button" class="attendance-class-card compact ${c.id===activeAttendanceClassId?'active':''}" data-attendance-class="${safe(c.id)}">
+      <div>
+        <div class="attendance-class-card-title">${safe(c.className)}</div>
+        <div class="attendance-class-card-meta">${(data.students||[]).length} aluno(s)</div>
+      </div>
+      <div class="attendance-class-card-time">${safe(block.time||'')}</div>
     </button>`;
   }).join('');
 
@@ -3690,11 +3787,6 @@ function populateAttendanceClasses(){
     activeAttendanceClassId=btn.dataset.attendanceClass;
     renderAttendancePage();
   }));
-
-  if(search && !search.dataset.ready){
-    search.dataset.ready='true';
-    search.addEventListener('input',renderAttendancePage);
-  }
 
   return classes;
 }
