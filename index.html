@@ -2975,15 +2975,15 @@
   <main class="page">
     <header class="header">
       <div><h1>Avaliações SLB</h1><p>Horário, turmas, alunos, avaliação e documento final — ficheiro vazio</p></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="logout-btn teacher-profile-btn" id="currentUserBadge" type="button" data-view-btn="teacherDashboardView">Professor</button><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="logout-btn teacher-profile-btn" id="currentUserBadge" type="button" data-view-btn="teacherDashboardView" onclick="switchView('teacherDashboardView')">Professor</button><button class="logout-btn" id="cloudLoadBtn" type="button" onclick="loadFromCloud(false)">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button" onclick="localStorage.removeItem(loginSessionKey); setCurrentUser(null); setLoginVisible(true);">Sair</button></div>
     </header>
 
     <nav class="tabs">
-      <button class="tab active" data-view="scheduleView">1. Horário</button>
-      <button class="tab" data-view="studentsView">2. Turmas / Alunos</button>
-      <button class="tab" data-view="attendanceView">3. Presenças</button>
-      <button class="tab" data-view="evaluationView">4. Avaliação</button>
-      <button class="tab" data-view="documentView">5. Documento</button><button class="tab" data-view="internalDocumentView">6. Documento Interno</button><button class="tab" data-view="teacherDashboardView">7. Área do Professor</button>
+      <button class="tab active" data-view="scheduleView" onclick="switchView('scheduleView')">1. Horário</button>
+      <button class="tab" data-view="studentsView" onclick="switchView('studentsView')">2. Turmas / Alunos</button>
+      <button class="tab" data-view="attendanceView" onclick="switchView('attendanceView')">3. Presenças</button>
+      <button class="tab" data-view="evaluationView" onclick="switchView('evaluationView')">4. Avaliação</button>
+      <button class="tab" data-view="documentView" onclick="documentClassFilterId=null; switchView('documentView')">5. Documento</button><button class="tab" data-view="internalDocumentView" onclick="switchView('internalDocumentView')">6. Documento Interno</button><button class="tab" data-view="teacherDashboardView" onclick="switchView('teacherDashboardView')">7. Área do Professor</button>
     </nav>
 
     <section id="scheduleView" class="view active">
@@ -2994,15 +2994,15 @@
             <div class="hint">Escolhe o dia de origem e cola no dia onde dás exatamente as mesmas aulas. Cada horário pode ter uma ou duas turmas.</div>
           </div>
           <div class="toolbar-actions">
-            <button class="btn primary" id="saveScheduleBtn">Guardar horário</button>
-            <button class="btn ghost" id="goStudentsBtn">Ir para turmas</button>
+            <button class="btn primary" id="saveScheduleBtn" onclick="event.preventDefault(); (async()=>{saveState(); const m=document.getElementById('scheduleMessage'); if(m)m.textContent='Horário guardado. A guardar também na cloud...'; await saveToCloud(); if(m)m.textContent='Horário guardado localmente e na cloud. Podes avançar para Turmas / Alunos.';})()">Guardar horário</button>
+            <button class="btn ghost" id="goStudentsBtn" onclick="switchView('studentsView')">Ir para turmas</button>
           </div>
         </div>
         <div class="copy-grid" style="margin-top:14px">
           <div class="field"><label>Copiar de</label><select id="copyFrom"></select></div>
           <div class="arrow">→</div>
           <div class="field"><label>Colar em</label><select id="copyTo"></select></div>
-          <button class="btn secondary" id="copyBtn">Copiar horário</button>
+          <button class="btn secondary" id="copyBtn" onclick="copyDay()">Copiar horário</button>
         </div>
         <div class="message" id="scheduleMessage">Depois de escolheres as turmas, carrega em “Guardar horário”.</div>
       </div>
@@ -3013,7 +3013,7 @@
       <div class="panel">
         <div class="toolbar">
           <div><div class="section-label">Fichas de alunos por turma</div><div class="hint">Define o total de alunos e preenche o nome completo.</div></div>
-          <div class="toolbar-actions"><button class="btn primary" id="saveStudentsBtn">Guardar alunos</button><button class="btn ghost" data-view-btn="evaluationView">Ir para avaliação</button><button class="btn danger" id="clearDataBtn">Limpar dados</button></div>
+          <div class="toolbar-actions"><button class="btn primary" id="saveStudentsBtn" onclick="event.preventDefault(); (async()=>{saveStudentsFromDom(); saveState(); const m=document.getElementById('studentsMessage'); if(m)m.textContent='Alunos guardados. A guardar também na cloud...'; await saveToCloud(); if(m)m.textContent='Alunos guardados localmente e na cloud.';})()">Guardar alunos</button><button class="btn ghost" data-view-btn="evaluationView">Ir para avaliação</button><button class="btn danger" id="clearDataBtn" onclick="if(confirm('Limpar horário, alunos e avaliações?')){state=defaultState();saveState();renderSchedule();renderStudents();renderEvaluationPage();renderDocument();}">Limpar dados</button></div>
         </div>
         <div class="students-day-filter">
           <div class="section-label">Filtrar por dia</div>
@@ -3041,10 +3041,10 @@
             <div class="hint">Escolhe a turma, o mês e marca apenas as presenças com checkboxes.</div>
           </div>
           <div class="toolbar-actions">
-            <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
-            <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
-            <button class="btn secondary" id="annualAttendanceBtn">Relatório época</button>
-            <button class="btn ghost" id="monthlyAttendanceBtn" style="display:none">Voltar ao mês</button>
+            <button class="btn primary" id="saveAttendanceBtn" onclick="saveAttendance()">Guardar presenças</button>
+            <button class="btn ghost" id="refreshAttendanceBtn" onclick="renderAttendancePage()">Atualizar</button>
+            <button class="btn secondary" id="annualAttendanceBtn" onclick="attendanceViewMode='year'; renderAnnualAttendanceReport();">Relatório época</button>
+            <button class="btn ghost" id="monthlyAttendanceBtn" style="display:none" onclick="attendanceViewMode='month'; renderAttendancePage();">Voltar ao mês</button>
           </div>
         </div>
         <div class="attendance-top-months">
@@ -3083,7 +3083,7 @@
     <section id="evaluationView" class="view">
       <div class="panel toolbar">
         <div><div class="section-label">Página de avaliação</div><div class="hint">Esta página está sempre disponível. Escolhe uma turma à esquerda e preenche a grelha de avaliação.</div></div>
-        <div class="toolbar-actions"><button class="btn primary" id="saveEvaluationPageBtn">Guardar avaliação</button><button class="btn ghost" id="showReportFromEvalBtn">Ver Relatório Evolução Época</button><button class="btn secondary" id="showInternalDocFromEvalBtn">Ver Documento Interno</button><button class="btn ghost" data-view-btn="documentView">Ver documento</button></div>
+        <div class="toolbar-actions"><button class="btn primary" id="saveEvaluationPageBtn" onclick="saveCurrentEvaluation()">Guardar avaliação</button><button class="btn ghost" id="showReportFromEvalBtn" onclick="saveCurrentEvaluation(); documentClassFilterId=activeEvalId; switchView('documentView');">Ver Relatório Evolução Época</button><button class="btn secondary" id="showInternalDocFromEvalBtn" onclick="saveCurrentEvaluation(); internalDocumentClassId=activeEvalId; switchView('internalDocumentView');">Ver Documento Interno</button><button class="btn ghost" data-view-btn="documentView" onclick="documentClassFilterId=null; switchView('documentView')">Ver documento</button></div>
       </div>
       <section class="eval-card evaluation-shell">
         <aside class="eval-sidebar">
@@ -3140,7 +3140,7 @@
           <div class="hint">Pesquisa alunos, consulta turmas, avaliação e presenças do mês atual.</div>
         </div>
         <div class="toolbar-actions">
-          <button class="btn ghost" id="refreshTeacherDashboardBtn">Atualizar dashboard</button>
+          <button class="btn ghost" id="refreshTeacherDashboardBtn" onclick="renderTeacherDashboard()">Atualizar dashboard</button>
         </div>
       </div>
 
@@ -3196,15 +3196,15 @@
           <div class="hint">Documento de trabalho para avaliação interna da turma selecionada.</div>
         </div>
         <div class="toolbar-actions">
-          <button class="btn primary" id="printInternalDocBtn">Imprimir / Guardar PDF</button>
-          <button class="btn ghost" id="refreshInternalDocBtn">Atualizar documento</button>
+          <button class="btn primary" id="printInternalDocBtn" onclick="renderInternalDocument(); switchView('internalDocumentView'); printWithMode('print-internal');">Imprimir / Guardar PDF</button>
+          <button class="btn ghost" id="refreshInternalDocBtn" onclick="renderInternalDocument()">Atualizar documento</button>
         </div>
       </div>
       <div id="internalDocumentPreview" class="internal-doc-preview"></div>
     </section>
 
     <section id="documentView" class="view">
-      <div class="panel toolbar"><div><div class="section-label">Documento / prévia rudimentar</div><div class="hint">Ainda é uma versão simples para validarmos a lógica antes de desenhar o documento final.</div></div><div class="toolbar-actions"><button class="btn primary" id="printPdfBtn">Imprimir / Guardar PDF</button><button class="btn ghost" id="refreshDocBtn">Atualizar prévia</button><button class="btn ghost" id="showAllReportsBtn">Mostrar todas as turmas</button><span class="hint">Na janela de impressão, escolhe “Guardar como PDF” em A4 vertical.</span></div></div>
+      <div class="panel toolbar"><div><div class="section-label">Documento / prévia rudimentar</div><div class="hint">Ainda é uma versão simples para validarmos a lógica antes de desenhar o documento final.</div></div><div class="toolbar-actions"><button class="btn primary" id="printPdfBtn" onclick="renderDocument(); switchView('documentView'); printWithMode('print-final');">Imprimir / Guardar PDF</button><button class="btn ghost" id="refreshDocBtn" onclick="renderDocument()">Atualizar prévia</button><button class="btn ghost" id="showAllReportsBtn" onclick="documentClassFilterId=null; renderDocument();">Mostrar todas as turmas</button><span class="hint">Na janela de impressão, escolhe “Guardar como PDF” em A4 vertical.</span></div></div>
       <article class="doc-card" id="documentPreview"></article>
     </section>
 
@@ -3365,6 +3365,7 @@ function setLoginVisible(isVisible){
     loginScreen.style.display=isVisible?'flex':'none';
     loginScreen.style.pointerEvents=isVisible?'auto':'none';
     loginScreen.classList.toggle('is-hidden', !isVisible);
+    if(!isVisible){ setTimeout(()=>{ if(!document.body.classList.contains('login-locked')) loginScreen.style.display='none'; },0); }
     loginScreen.setAttribute('aria-hidden', isVisible?'false':'true');
   }
   document.body.classList.toggle('login-locked', isVisible);
@@ -6075,6 +6076,7 @@ if(!window.__avaliacoesGlobalClickReady){
   document.addEventListener('click',globalAppClickHandler,true);
 }
 
+window.forceUnlockApp=function(){setLoginVisible(false); document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById('scheduleView')?.classList.add('active');};
 function startAppSafely(){
   try{ setupLogin(); }catch(err){ console.error('Login setup failed', err); }
   try{ setupCloudButtons(); }catch(err){ console.error('Cloud setup failed', err); }
