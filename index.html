@@ -2843,6 +2843,13 @@ function jsonpCloud(action, username){
   });
 }
 
+
+async function saveLocalAndCloud(message){
+  saveState();
+  await saveToCloud();
+  if(message) showCloudStatus(message, 'ok');
+}
+
 async function saveToCloud(){
   const user=getCurrentCloudUser();
   if(!user?.username){
@@ -2858,7 +2865,7 @@ async function saveToCloud(){
     };
 
     await postFormToCloud(user.username, payload);
-    showCloudStatus(`Pedido de gravação enviado: ${user.username}.json`, 'ok');
+    showCloudStatus(`Guardado na cloud: ${user.username}.json`, 'ok');
   }catch(err){
     showCloudStatus(`Erro cloud: ${err.message || err}`, 'err');
   }
@@ -3153,7 +3160,12 @@ function copyDay(){
 }
 
 document.getElementById('copyBtn').addEventListener('click',copyDay);
-document.getElementById('saveScheduleBtn').addEventListener('click',()=>{saveState(); document.getElementById('scheduleMessage').textContent='Horário guardado. Podes avançar para Turmas / Alunos.';});
+document.getElementById('saveScheduleBtn').addEventListener('click',async()=>{
+  saveState();
+  document.getElementById('scheduleMessage').textContent='Horário guardado. A guardar também na cloud...';
+  await saveToCloud();
+  document.getElementById('scheduleMessage').textContent='Horário guardado localmente e na cloud. Podes avançar para Turmas / Alunos.';
+});
 document.getElementById('goStudentsBtn').addEventListener('click',()=>switchView('studentsView'));
 
 function selectedClasses(){
@@ -3278,7 +3290,13 @@ function saveStudentsFromDom(){
   document.querySelectorAll('[data-last]').forEach(inp=>{const d=state.classes[inp.dataset.last]; if(d?.students[inp.dataset.index]) d.students[inp.dataset.index].lastName=inp.value.trim();});
   saveState();
 }
-document.getElementById('saveStudentsBtn').addEventListener('click',()=>{saveStudentsFromDom();document.getElementById('studentsMessage').textContent='Alunos guardados.';});
+document.getElementById('saveStudentsBtn').addEventListener('click',async()=>{
+  saveStudentsFromDom();
+  saveState();
+  document.getElementById('studentsMessage').textContent='Alunos guardados. A guardar também na cloud...';
+  await saveToCloud();
+  document.getElementById('studentsMessage').textContent='Alunos guardados localmente e na cloud.';
+});
 document.getElementById('clearDataBtn').addEventListener('click',()=>{if(confirm('Limpar horário, alunos e avaliações?')){state=defaultState();saveState();
 
 renderSchedule();renderStudents();renderEvaluationPage();renderDocument();}});
@@ -4022,13 +4040,14 @@ function renderAma1AEvaluation(id,students,ev,holder,className='AMA 1A'){
     ev.updatedAt=new Date().toLocaleString('pt-PT');
     const synced=syncLinkedStudentEvaluation(id, Number(btn.dataset.saveStudentEval));
     saveState();
+    saveToCloud();
     const oldText=btn.textContent;
     btn.textContent=synced>0 ? `Guardado ✓ + ${synced} turma(s)` : 'Guardado ✓';
     btn.classList.add('saved');
     setTimeout(()=>{btn.textContent=oldText; btn.classList.remove('saved');},1400);
   }));
 }
-function saveCurrentEvaluation(){
+async function saveCurrentEvaluation(){
   if(!activeEvalId)return;
   const ev=evalData(activeEvalId);
   const notes=document.getElementById('classNotes');
@@ -4040,6 +4059,8 @@ function saveCurrentEvaluation(){
   (cls?.students||[]).forEach((_s,i)=>syncLinkedStudentEvaluation(activeEvalId,i));
   saveState();
   renderEvaluationPage();
+  await saveToCloud();
+  showCloudStatus('Avaliação guardada localmente e na cloud.', 'ok');
 }
 document.getElementById('saveEvaluationPageBtn').addEventListener('click',saveCurrentEvaluation);
 
