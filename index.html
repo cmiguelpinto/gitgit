@@ -2949,7 +2949,7 @@
             <input id="loginPass" type="password" autocomplete="current-password" placeholder="Password">
           </div>
           <div class="login-error" id="loginError"></div>
-          <button class="login-submit" type="submit">Entrar</button>
+          <button class="login-submit" id="loginSubmitBtn" type="submit" onclick="event.preventDefault(); attemptLogin(); return false;">Entrar</button>
         </form>
         <div class="login-demo">
           Utilizadores disponíveis: <strong>CarlaP</strong> / <strong>carla26</strong> · <strong>CarlosP</strong> / <strong>carlos26</strong><br>
@@ -3368,21 +3368,26 @@ function checkLoginSession(){
 
 function attemptLogin(){
   const error=document.getElementById('loginError');
-  const userValue=document.getElementById('loginUser')?.value.trim() || '';
-  const passValue=document.getElementById('loginPass')?.value || '';
+  try{
+    const userValue=document.getElementById('loginUser')?.value.trim() || '';
+    const passValue=document.getElementById('loginPass')?.value || '';
 
-  const found=LOGIN_USERS.find(user=>user.username===userValue && user.password===passValue);
+    const found=LOGIN_USERS.find(user=>user.username===userValue && user.password===passValue);
 
-  if(found){
-    localStorage.setItem(loginSessionKey,'true');
-    setCurrentUser(found);
-    if(error) error.textContent='';
-    setLoginVisible(false);
-    switchView('scheduleView');
-    setupCloudButtons();
-    loadFromCloud(true);
-  }else{
-    if(error) error.textContent='Credenciais incorretas.';
+    if(found){
+      localStorage.setItem(loginSessionKey,'true');
+      setCurrentUser(found);
+      if(error) error.textContent='';
+      setLoginVisible(false);
+      try{ switchView('scheduleView'); }catch(err){ console.error('Switch view failed', err); }
+      try{ setupCloudButtons(); }catch(err){ console.error('Cloud setup failed', err); }
+      try{ loadFromCloud(true); }catch(err){ console.error('Cloud load failed', err); }
+    }else{
+      if(error) error.textContent='Credenciais incorretas.';
+    }
+  }catch(err){
+    if(error) error.textContent='Erro ao iniciar sessão: '+(err.message || err);
+    console.error(err);
   }
 }
 
@@ -3390,7 +3395,9 @@ function setupLogin(){
   const form=document.getElementById('loginForm');
   const error=document.getElementById('loginError');
   const logout=document.getElementById('logoutBtn');
-  const loginSubmitBtn=document.querySelector('.login-submit');
+  const loginSubmitBtn=document.getElementById('loginSubmitBtn') || document.querySelector('.login-submit');
+  const loginUserInput=document.getElementById('loginUser');
+  const loginPassInput=document.getElementById('loginPass');
 
   if(form && !form.dataset.loginReady){
     form.dataset.loginReady='true';
@@ -3406,6 +3413,16 @@ function setupLogin(){
       event.preventDefault();
       attemptLogin();
     });
+  }
+
+  if(loginUserInput && !loginUserInput.dataset.loginReady){
+    loginUserInput.dataset.loginReady='true';
+    loginUserInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault(); attemptLogin();}});
+  }
+
+  if(loginPassInput && !loginPassInput.dataset.loginReady){
+    loginPassInput.dataset.loginReady='true';
+    loginPassInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault(); attemptLogin();}});
   }
 
   if(logout && !logout.dataset.loginReady){
@@ -5936,9 +5953,17 @@ if(refreshAttendanceBtn){
   refreshAttendanceBtn.addEventListener('click',renderAttendancePage);
 }
 
-setupCloudButtons();
-setupLogin();
-renderSchedule();
+function startAppSafely(){
+  try{ setupLogin(); }catch(err){ console.error('Login setup failed', err); }
+  try{ setupCloudButtons(); }catch(err){ console.error('Cloud setup failed', err); }
+  try{ renderSchedule(); }catch(err){ console.error('Initial render failed', err); }
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',startAppSafely);
+}else{
+  startAppSafely();
+}
 </script>
 </body>
 </html>
