@@ -2713,43 +2713,9 @@
     }
 
 
-    /* Annual attendance report */
-    .attendance-annual-note{
-      margin-bottom:12px;
-      padding:12px 14px;
-      border-radius:16px;
-      background:#f9fafb;
-      border:1px solid #edf0f3;
-      color:#374151;
-      font-size:12px;
-      font-weight:800;
-      line-height:1.45;
-    }
-    .attendance-table.annual{
-      min-width:920px;
-    }
-    .attendance-table.annual th,
-    .attendance-table.annual td{
-      white-space:nowrap;
-    }
-    .attendance-year-total{
-      font-weight:950;
-      color:#111827;
-      background:#fafafa;
-    }
-    .attendance-year-low{
-      color:#991b1b;
-      font-weight:950;
-    }
-    .attendance-year-good{
-      color:#166534;
-      font-weight:950;
-    }
-
-
-    /* Stable login unlock */
-    body:not(.login-locked) .login-screen,
-    .login-screen.is-hidden{
+    /* Login unlock fix */
+    body:not(.login-locked) #loginScreen,
+    #loginScreen.is-hidden{
       display:none!important;
       pointer-events:none!important;
       visibility:hidden!important;
@@ -2863,8 +2829,6 @@
         <div class="toolbar-actions">
           <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
           <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
-          <button class="btn secondary" id="annualAttendanceBtn">Relatório época</button>
-          <button class="btn ghost" id="monthlyAttendanceBtn" style="display:none">Voltar ao mês</button>
         </div>
       </div>
 
@@ -2880,11 +2844,11 @@
               <select id="attendanceMonthSelect"></select>
             </div>
             <div class="field">
-              <label>Época</label>
+              <label>Ano</label>
               <select id="attendanceYearSelect"></select>
             </div>
           </div>
-          <div class="hint">São mostrados automaticamente os dias desse mês dentro da época desportiva, de 1 de setembro a 31 de julho.</div>
+          <div class="hint">São mostrados automaticamente os dias desse mês em que a turma tem aula.</div>
         </aside>
 
         <main class="attendance-main">
@@ -3212,8 +3176,7 @@ function attemptLogin(){
       setLoginVisible(false);
       switchView('scheduleView');
       setupCloudButtons();
-      // Auto cloud load disabled to protect existing local evaluations.
-      // Use "Carregar cloud" manually when needed.
+      try{ loadFromCloud(true); }catch(err){ console.error('Cloud load failed', err); }
     }else{
       if(error) error.textContent='Credenciais incorretas.';
     }
@@ -3513,64 +3476,29 @@ function attendanceMonthName(monthIndex){
   return new Date(2026, monthIndex, 1).toLocaleDateString('pt-PT',{month:'long'});
 }
 
-
-function seasonMonths(){
-  return [
-    {monthIndex:8, seasonYearOffset:0},
-    {monthIndex:9, seasonYearOffset:0},
-    {monthIndex:10, seasonYearOffset:0},
-    {monthIndex:11, seasonYearOffset:0},
-    {monthIndex:0, seasonYearOffset:1},
-    {monthIndex:1, seasonYearOffset:1},
-    {monthIndex:2, seasonYearOffset:1},
-    {monthIndex:3, seasonYearOffset:1},
-    {monthIndex:4, seasonYearOffset:1},
-    {monthIndex:5, seasonYearOffset:1},
-    {monthIndex:6, seasonYearOffset:1}
-  ];
-}
-
-function seasonStartYearForDate(date){
-  return date.getMonth()>=8 ? date.getFullYear() : date.getFullYear()-1;
-}
-
-function seasonMonthForDate(date){
-  const month=date.getMonth();
-  return month===7 ? 8 : month;
-}
-
-function calendarYearForSeasonMonth(seasonStartYear, monthIndex){
-  return monthIndex>=8 ? seasonStartYear : seasonStartYear+1;
-}
-
-function seasonLabel(seasonStartYear){
-  return `${seasonStartYear}/${String(seasonStartYear+1).slice(-2)}`;
-}
-
 function setupAttendanceControls(){
   const monthSelect=document.getElementById('attendanceMonthSelect');
   const yearSelect=document.getElementById('attendanceYearSelect');
   if(!monthSelect || !yearSelect) return;
 
   if(!monthSelect.options.length){
-    seasonMonths().forEach(({monthIndex, seasonYearOffset})=>{
-      const label=`${attendanceMonthName(monthIndex)}${seasonYearOffset===1?' (ano seguinte)':''}`;
-      monthSelect.insertAdjacentHTML('beforeend',`<option value="${monthIndex}">${label}</option>`);
-    });
-  }
-
-  if(!yearSelect.options.length){
-    const currentSeason=seasonStartYearForDate(new Date());
-    for(let y=currentSeason-1;y<=currentSeason+2;y++){
-      yearSelect.insertAdjacentHTML('beforeend',`<option value="${y}">${seasonLabel(y)}</option>`);
+    for(let m=0;m<12;m++){
+      monthSelect.insertAdjacentHTML('beforeend',`<option value="${m}">${attendanceMonthName(m)}</option>`);
     }
   }
 
-  if(monthSelect.value==='') monthSelect.value=String(seasonMonthForDate(new Date()));
-  if(yearSelect.value==='') yearSelect.value=String(seasonStartYearForDate(new Date()));
+  if(!yearSelect.options.length){
+    const currentYear=new Date().getFullYear();
+    for(let y=currentYear-1;y<=currentYear+2;y++){
+      yearSelect.insertAdjacentHTML('beforeend',`<option value="${y}">${y}</option>`);
+    }
+  }
 
-  monthSelect.onchange=()=> attendanceViewMode==='year' ? renderAnnualAttendanceReport() : renderAttendancePage();
-  yearSelect.onchange=()=> attendanceViewMode==='year' ? renderAnnualAttendanceReport() : renderAttendancePage();
+  if(monthSelect.value==='') monthSelect.value=String(new Date().getMonth());
+  if(yearSelect.value==='') yearSelect.value=String(new Date().getFullYear());
+
+  monthSelect.onchange=renderAttendancePage;
+  yearSelect.onchange=renderAttendancePage;
 }
 
 function weekdayIndexPt(day){
@@ -3630,116 +3558,7 @@ function populateAttendanceClasses(){
   return classes;
 }
 
-
-let attendanceViewMode = 'month';
-
-function monthShortName(monthIndex){
-  return new Date(2026, monthIndex, 1).toLocaleDateString('pt-PT',{month:'short'}).replace('.', '');
-}
-
-function annualAttendanceForStudent(classInfo, studentIndex, seasonStartYear){
-  const months=[];
-  let totalPresent=0;
-  let totalClasses=0;
-
-  seasonMonths().forEach(({monthIndex})=>{
-    const year=calendarYearForSeasonMonth(seasonStartYear, monthIndex);
-    const dates=classDatesForMonth(classInfo, year, monthIndex);
-    const monthData=(state.attendance||{})[attendanceKey(classInfo.id, year, monthIndex+1)] || {};
-    const present=dates.filter(dt=>!!monthData[`${studentIndex}|${dt.iso}`]).length;
-    const total=dates.length;
-    totalPresent+=present;
-    totalClasses+=total;
-    months.push({monthIndex,year,present,total,percent:total?Math.round((present/total)*100):0});
-  });
-
-  return {
-    months,
-    totalPresent,
-    totalClasses,
-    percent: totalClasses ? Math.round((totalPresent/totalClasses)*100) : 0
-  };
-}
-
-function renderAnnualAttendanceReport(){
-  setupAttendanceControls();
-  const classes=populateAttendanceClasses();
-  const summary=document.getElementById('attendanceSummary');
-  const wrap=document.getElementById('attendanceTableWrap');
-  const yearSelect=document.getElementById('attendanceYearSelect');
-  const annualBtn=document.getElementById('annualAttendanceBtn');
-  const monthlyBtn=document.getElementById('monthlyAttendanceBtn');
-
-  if(annualBtn) annualBtn.style.display='none';
-  if(monthlyBtn) monthlyBtn.style.display='inline-flex';
-
-  if(!summary || !wrap || !yearSelect) return;
-
-  if(!classes.length){
-    summary.innerHTML='';
-    wrap.innerHTML='<div class="teacher-empty">Ainda não existem turmas. Vai primeiro ao Horário.</div>';
-    return;
-  }
-
-  const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
-  const data=state.classes[classInfo.id] || {students:[]};
-  const students=data.students || [];
-  const seasonStartYear=Number(yearSelect.value);
-  const blockText=(classInfo.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
-
-  let classTotalPresent=0;
-  let classTotalPossible=0;
-  const studentRows=students.map((student,si)=>{
-    const stats=annualAttendanceForStudent(classInfo, si, seasonStartYear);
-    classTotalPresent+=stats.totalPresent;
-    classTotalPossible+=stats.totalClasses;
-    return {student,si,stats};
-  });
-
-  const classPercent=classTotalPossible ? Math.round((classTotalPresent/classTotalPossible)*100) : 0;
-
-  summary.innerHTML=`
-    <span class="attendance-pill">${safe(classInfo.className)}</span>
-    <span class="attendance-pill">${safe(blockText)}</span>
-    <span class="attendance-pill">Época ${safe(seasonLabel(seasonStartYear))}</span>
-    <span class="attendance-pill">${students.length} aluno(s)</span>
-    <span class="attendance-pill">${classPercent}% presença anual</span>
-  `;
-
-  if(!students.length){
-    wrap.innerHTML='<div class="teacher-empty">Esta turma ainda não tem alunos definidos.</div>';
-    return;
-  }
-
-  let html=`<div class="attendance-annual-note">
-    Relatório de época de presenças da turma selecionada. A época vai de <strong>1 de setembro a 31 de julho</strong>. Cada célula mostra <strong>presenças/aulas</strong> nesse mês.
-  </div>`;
-
-  html+=`<table class="attendance-table annual"><thead><tr><th>Aluno</th>`;
-  seasonMonths().forEach(({monthIndex})=>{
-    html+=`<th>${safe(monthShortName(monthIndex))}</th>`;
-  });
-  html+=`<th>Total</th><th>%</th></tr></thead><tbody>`;
-
-  studentRows.forEach(({student,si,stats})=>{
-    html+=`<tr><td>${safe(studentDisplayName(student,si))}</td>`;
-    stats.months.forEach(month=>{
-      html+=`<td>${month.total ? `${month.present}/${month.total}` : '-'}</td>`;
-    });
-    const cls=stats.percent>=75?'attendance-year-good':'attendance-year-low';
-    html+=`<td class="attendance-year-total">${stats.totalPresent}/${stats.totalClasses}</td><td class="${cls}">${stats.percent}%</td></tr>`;
-  });
-
-  html+=`</tbody></table>`;
-  wrap.innerHTML=html;
-}
-
 function renderAttendancePage(){
-  attendanceViewMode = 'month';
-  const annualBtn=document.getElementById('annualAttendanceBtn');
-  const monthlyBtn=document.getElementById('monthlyAttendanceBtn');
-  if(annualBtn) annualBtn.style.display='inline-flex';
-  if(monthlyBtn) monthlyBtn.style.display='none';
   setupAttendanceControls();
   const classes=populateAttendanceClasses();
   const summary=document.getElementById('attendanceSummary');
@@ -3758,8 +3577,7 @@ function renderAttendancePage(){
   const data=state.classes[classInfo.id] || {students:[]};
   const students=data.students || [];
   const monthIndex=Number(monthSelect.value);
-  const seasonStartYear=Number(yearSelect.value);
-  const year=calendarYearForSeasonMonth(seasonStartYear, monthIndex);
+  const year=Number(yearSelect.value);
   const dates=classDatesForMonth(classInfo, year, monthIndex);
   const attendance=ensureAttendanceMonth(classInfo.id, year, monthIndex);
 
@@ -3769,7 +3587,7 @@ function renderAttendancePage(){
 
   summary.innerHTML=`
     <span class="attendance-pill">${safe(classInfo.className)}</span>
-    <span class="attendance-pill">${safe(attendanceMonthName(monthIndex))} ${year}</span><span class="attendance-pill">Época ${safe(seasonLabel(seasonStartYear))}</span>
+    <span class="attendance-pill">${safe(attendanceMonthName(monthIndex))} ${year}</span>
     <span class="attendance-pill">${students.length} aluno(s)</span>
     <span class="attendance-pill">${dates.length} aula(s)</span>
     <span class="attendance-pill">${percent}% presenças</span>
@@ -3810,7 +3628,7 @@ function renderAttendancePage(){
   }));
 }
 
-async async function saveAttendance(){
+async function saveAttendance(){
   saveState();
   showCloudStatus('Presenças guardadas. A guardar também na cloud...', 'ok');
   await saveToCloud();
@@ -5708,22 +5526,6 @@ if(refreshTeacherDashboardBtn){
   refreshTeacherDashboardBtn.addEventListener('click',renderTeacherDashboard);
 }
 
-
-
-const annualAttendanceBtn=document.getElementById('annualAttendanceBtn');
-if(annualAttendanceBtn){
-  annualAttendanceBtn.addEventListener('click',()=>{
-    attendanceViewMode='year';
-    renderAnnualAttendanceReport();
-  });
-}
-const monthlyAttendanceBtn=document.getElementById('monthlyAttendanceBtn');
-if(monthlyAttendanceBtn){
-  monthlyAttendanceBtn.addEventListener('click',()=>{
-    attendanceViewMode='month';
-    renderAttendancePage();
-  });
-}
 
 const saveAttendanceBtn=document.getElementById('saveAttendanceBtn');
 if(saveAttendanceBtn){
