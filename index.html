@@ -2083,13 +2083,261 @@
       display:none!important;
     }
 
+
+    /* Landing / Login page */
+    body.login-locked{
+      min-height:100vh;
+      overflow:hidden;
+    }
+    body.login-locked .page{
+      display:none!important;
+    }
+    .login-screen{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(208,0,27,.22), transparent 32%),
+        radial-gradient(circle at 80% 80%, rgba(17,24,39,.18), transparent 34%),
+        linear-gradient(135deg,#f8fafc 0%,#ffffff 45%,#fff1f2 100%);
+    }
+    .login-shell{
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(255,255,255,.65);
+      border-radius:32px;
+      overflow:hidden;
+      box-shadow:0 30px 90px rgba(15,23,42,.22);
+      backdrop-filter:blur(18px);
+    }
+    .login-brand{
+      position:relative;
+      padding:44px;
+      min-height:520px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      color:#fff;
+      background:linear-gradient(145deg,#8f0013 0%,#d0001b 54%,#111827 100%);
+      overflow:hidden;
+    }
+    .login-brand:before{
+      content:'';
+      position:absolute;
+      width:360px;
+      height:360px;
+      border-radius:999px;
+      right:-160px;
+      top:-120px;
+      background:rgba(255,255,255,.13);
+    }
+    .login-brand:after{
+      content:'';
+      position:absolute;
+      width:220px;
+      height:220px;
+      border-radius:999px;
+      left:-90px;
+      bottom:-70px;
+      background:rgba(255,255,255,.10);
+    }
+    .login-brand > *{
+      position:relative;
+      z-index:1;
+    }
+    .login-logo{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:68px;
+      height:68px;
+      border-radius:22px;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.22);
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:.08em;
+      margin-bottom:22px;
+    }
+    .login-brand h1{
+      margin:0;
+      font-size:44px;
+      line-height:.96;
+      letter-spacing:-.05em;
+    }
+    .login-brand p{
+      margin:18px 0 0;
+      max-width:430px;
+      font-size:15px;
+      line-height:1.55;
+      opacity:.9;
+      font-weight:650;
+    }
+    .login-badges{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .login-badge{
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:11px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .login-card{
+      padding:44px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:18px;
+    }
+    .login-card h2{
+      margin:0;
+      font-size:28px;
+      letter-spacing:-.03em;
+      color:#111827;
+    }
+    .login-card .hint{
+      margin-top:-8px;
+    }
+    .login-form{
+      display:grid;
+      gap:14px;
+      margin-top:10px;
+    }
+    .login-field{
+      display:grid;
+      gap:7px;
+    }
+    .login-field label{
+      font-size:12px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:#374151;
+    }
+    .login-field input{
+      height:48px;
+      border-radius:15px;
+      font-size:14px;
+      font-weight:750;
+    }
+    .login-error{
+      min-height:20px;
+      color:#b91c1c;
+      font-size:13px;
+      font-weight:850;
+    }
+    .login-submit{
+      height:48px;
+      border-radius:15px;
+      border:0;
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:white;
+      font-size:14px;
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 14px 28px rgba(208,0,27,.22);
+    }
+    .login-submit:hover{
+      transform:translateY(-1px);
+    }
+    .login-demo{
+      border:1px dashed rgba(208,0,27,.34);
+      background:#fff7f8;
+      color:#7f1d1d;
+      border-radius:16px;
+      padding:12px;
+      font-size:12px;
+      line-height:1.45;
+      font-weight:750;
+    }
+    .logout-btn{
+      border:1px solid rgba(208,0,27,.22);
+      background:#fff;
+      color:#9f0015;
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .logout-btn:hover{
+      background:#fff5f6;
+    }
+    @media(max-width:850px){
+      .login-shell{
+        grid-template-columns:1fr;
+      }
+      .login-brand{
+        min-height:300px;
+        padding:32px;
+      }
+      .login-brand h1{
+        font-size:34px;
+      }
+      .login-card{
+        padding:32px;
+      }
+    }
+
 </style>
 </head>
-<body>
+<body class="login-locked">
+
+  <section id="loginScreen" class="login-screen">
+    <div class="login-shell">
+      <div class="login-brand">
+        <div>
+          <div class="login-logo">SLB</div>
+          <h1>Portal de Avaliações</h1>
+          <p>Gestão de horários, turmas, alunos, avaliação técnica, relatório de evolução e documento interno de trabalho.</p>
+        </div>
+        <div class="login-badges">
+          <span class="login-badge">Horário</span>
+          <span class="login-badge">Avaliação</span>
+          <span class="login-badge">PDF A4</span>
+        </div>
+      </div>
+      <div class="login-card">
+        <div>
+          <h2>Entrar na plataforma</h2>
+          <p class="hint">Insere as credenciais para aceder à aplicação.</p>
+        </div>
+        <form id="loginForm" class="login-form">
+          <div class="login-field">
+            <label for="loginUser">Utilizador</label>
+            <input id="loginUser" type="text" autocomplete="username" placeholder="Utilizador">
+          </div>
+          <div class="login-field">
+            <label for="loginPass">Password</label>
+            <input id="loginPass" type="password" autocomplete="current-password" placeholder="Password">
+          </div>
+          <div class="login-error" id="loginError"></div>
+          <button class="login-submit" type="submit">Entrar</button>
+        </form>
+        <div class="login-demo">
+          Credenciais de teste: <strong>admin</strong> / <strong>slb2026</strong><br>
+          Para segurança real online, isto deve ser ligado a autenticação com servidor/base de dados.
+        </div>
+      </div>
+    </div>
+  </section>
+
   <main class="page">
     <header class="header">
       <div><h1>Avaliações SLB</h1><p>Horário, turmas, alunos, avaliação e documento final — ficheiro vazio</p></div>
-      <div class="badge">Dados guardados no browser</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="badge">Dados guardados no browser</div><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
     </header>
 
     <nav class="tabs">
@@ -2329,6 +2577,78 @@ let internalDocumentClassId = null;
 let studentDayFilters = new Set(['Segunda','Terça','Quarta','Quinta','Sexta','Sábado']);
 let evaluationDayFilters = new Set(['Segunda','Terça','Quarta','Quinta','Sexta','Sábado']);
 let pendingStudentCopy = null;
+
+
+const LOGIN_USER = 'admin';
+const LOGIN_PASS = 'slb2026';
+const loginSessionKey = `${storeKey}_logged_in`;
+
+function setLoginVisible(isVisible){
+  const loginScreen=document.getElementById('loginScreen');
+  if(loginScreen) loginScreen.style.display=isVisible?'flex':'none';
+  document.body.classList.toggle('login-locked', isVisible);
+}
+
+function checkLoginSession(){
+  setLoginVisible(localStorage.getItem(loginSessionKey)!=='true');
+}
+
+
+function attemptLogin(){
+  const error=document.getElementById('loginError');
+  const user=document.getElementById('loginUser')?.value.trim() || '';
+  const pass=document.getElementById('loginPass')?.value || '';
+  if(user===LOGIN_USER && pass===LOGIN_PASS){
+    localStorage.setItem(loginSessionKey,'true');
+    if(error) error.textContent='';
+    setLoginVisible(false);
+    switchView('scheduleView');
+  }else{
+    if(error) error.textContent='Credenciais incorretas.';
+  }
+}
+
+function setupLogin(){
+  const form=document.getElementById('loginForm');
+  const error=document.getElementById('loginError');
+  const logout=document.getElementById('logoutBtn');
+  const loginSubmitBtn=document.querySelector('.login-submit');
+
+  if(form){
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      const user=document.getElementById('loginUser')?.value.trim() || '';
+      const pass=document.getElementById('loginPass')?.value || '';
+
+      if(user===LOGIN_USER && pass===LOGIN_PASS){
+        localStorage.setItem(loginSessionKey,'true');
+        if(error) error.textContent='';
+        setLoginVisible(false);
+        const firstTab=document.querySelector('[data-view="scheduleView"]');
+        if(firstTab) switchView('scheduleView');
+      }else{
+        if(error) error.textContent='Credenciais incorretas.';
+      }
+    });
+  }
+
+  if(loginSubmitBtn){
+    loginSubmitBtn.addEventListener('click',event=>{
+      event.preventDefault();
+      attemptLogin();
+    });
+  }
+
+  if(logout){
+    logout.addEventListener('click',()=>{
+      localStorage.removeItem(loginSessionKey);
+      setLoginVisible(true);
+    });
+  }
+
+  checkLoginSession();
+}
+
 
 function defaultState(){return {schedule:{},classes:{},evaluations:{}}}
 function loadState(){try{return JSON.parse(localStorage.getItem(storeKey)) || defaultState()}catch(e){return defaultState()}}
@@ -3904,6 +4224,7 @@ function clearChecksGlobalHandler(event){
 }
 document.addEventListener('click',clearChecksGlobalHandler);
 
+setupLogin();
 renderSchedule();
 </script>
 </body>
