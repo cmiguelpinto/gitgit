@@ -2326,6 +2326,39 @@
     .cloud-status.ok{background:#166534;}
     .cloud-status.err{background:#991b1b;}
 
+
+    /* Collapsible class list in Avaliação */
+    .eval-class-collapse{
+      text-align:left;
+    }
+    .eval-class-headline{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:8px;
+      width:100%;
+    }
+    .eval-collapse-indicator{
+      flex:0 0 auto;
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(208,0,27,.10);
+      color:#9f0015;
+      font-weight:950;
+      font-size:16px;
+      line-height:1;
+    }
+    .eval-class-collapse.collapsed .eval-class-title-lines{
+      opacity:.9;
+    }
+    .eval-class-collapse.open .eval-student-jump-list{
+      margin-top:10px;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3810,9 +3843,16 @@ function renderEvaluationPage(){
     return;
   }
   selected.forEach(c=>{
-    const data=state.classes[c.id]||{students:[]}; const ev=evalData(c.id); const btn=document.createElement('button'); btn.className='eval-class-btn '+(c.id===activeEvalId?'active':''); const blockLines = c.blocks
-      .map(b=>`${safe(c.className)} - ${safe(b.day)}-feira - ${safe(b.time)}`)
+    const data=state.classes[c.id]||{students:[]};
+    const ev=evalData(c.id);
+    const isOpen=c.id===activeEvalId;
+    const btn=document.createElement('button');
+    btn.className='eval-class-btn eval-class-collapse '+(isOpen?'active open':'collapsed');
+
+    const blockLines = c.blocks
+      .map(b=>`${safe(c.className)} - ${safe(formatDayForClassBlock(b.day))} - ${safe(b.time)}`)
       .join('<br>');
+
     const studentLinks = (data.students||[])
       .map((s,i)=>`<div class="eval-student-row">
         <button type="button" class="eval-student-jump" data-jump-class="${safe(c.id)}" data-jump-index="${i}">${safe(studentDisplayName(s,i))}</button>
@@ -3820,7 +3860,16 @@ function renderEvaluationPage(){
         <button type="button" class="eval-student-remove" data-remove-class="${safe(c.id)}" data-remove-index="${i}">REMOVE</button>
       </div>`)
       .join('');
-    btn.innerHTML=`<strong class="eval-class-title-lines">${blockLines}</strong><div class="eval-student-jump-list">${studentLinks || '<span class="eval-no-students">Sem alunos definidos</span>'}</div><span class="eval-class-meta">${data.students.length} aluno(s) · ${c.blocks.length} bloco(s) · ${ev.updatedAt?'guardado':'por guardar'}</span>`; btn.onclick=(event)=>{
+
+    btn.innerHTML=`
+      <div class="eval-class-headline">
+        <strong class="eval-class-title-lines">${blockLines}</strong>
+        <span class="eval-collapse-indicator">${isOpen?'−':'+'}</span>
+      </div>
+      ${isOpen ? `<div class="eval-student-jump-list">${studentLinks || '<span class="eval-no-students">Sem alunos definidos</span>'}</div>` : ''}
+      <span class="eval-class-meta">${data.students.length} aluno(s) · ${c.blocks.length} bloco(s) · ${ev.updatedAt?'guardado':'por guardar'} · ${isOpen?'aberto':'clicar para abrir'}</span>`;
+
+    btn.onclick=(event)=>{
       if(event.target.closest('[data-jump-class]') || event.target.closest('[data-copy-class]') || event.target.closest('[data-remove-class]')) return;
       activeEvalId=c.id;
       renderEvaluationPage();
