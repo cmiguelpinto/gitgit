@@ -2374,6 +2374,238 @@
       transform:translateX(0);
     }
 
+
+    /* Teacher dashboard */
+    .teacher-profile-btn{
+      cursor:pointer;
+      border:0;
+      font-family:inherit;
+    }
+    .teacher-profile-btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 20px rgba(15,23,42,.08);
+    }
+    .teacher-dashboard{
+      display:grid;
+      gap:16px;
+    }
+    .teacher-search-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:1fr minmax(260px,420px);
+      gap:16px;
+      align-items:end;
+    }
+    .teacher-search-input{
+      width:100%;
+      height:46px;
+      border-radius:15px;
+      font-size:14px;
+      font-weight:750;
+    }
+    .teacher-metrics-grid{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:12px;
+    }
+    .teacher-metric-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 10px 26px rgba(15,23,42,.06);
+      min-height:92px;
+    }
+    .teacher-metric-label{
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--muted);
+      line-height:1.25;
+    }
+    .teacher-metric-value{
+      margin-top:8px;
+      font-size:28px;
+      font-weight:950;
+      color:#111827;
+      letter-spacing:-.04em;
+    }
+    .teacher-metric-sub{
+      margin-top:4px;
+      font-size:11px;
+      font-weight:750;
+      color:var(--muted);
+    }
+    .teacher-dashboard-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .teacher-panel{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .teacher-panel-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:12px;
+    }
+    .teacher-search-results,
+    .teacher-class-list,
+    .teacher-objective-insights{
+      display:grid;
+      gap:10px;
+    }
+    .teacher-empty{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:750;
+      padding:12px;
+      border:1px dashed var(--line);
+      border-radius:16px;
+      background:#fafafa;
+    }
+    .teacher-result-card,
+    .teacher-class-card,
+    .teacher-objective-card{
+      border:1px solid #edf0f3;
+      border-radius:18px;
+      padding:12px;
+      background:#fff;
+    }
+    .teacher-result-top,
+    .teacher-class-top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .teacher-result-name,
+    .teacher-class-title{
+      font-size:14px;
+      font-weight:950;
+      color:#111827;
+      line-height:1.25;
+    }
+    .teacher-result-meta,
+    .teacher-class-meta,
+    .teacher-objective-meta{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:800;
+      margin-top:3px;
+      line-height:1.35;
+    }
+    .teacher-status-pill{
+      flex:0 0 auto;
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      background:#f3f4f6;
+      color:#374151;
+      white-space:nowrap;
+    }
+    .teacher-status-pill.ok{
+      background:#dcfce7;
+      color:#166534;
+    }
+    .teacher-status-pill.warn{
+      background:#fef3c7;
+      color:#92400e;
+    }
+    .teacher-status-pill.none{
+      background:#fee2e2;
+      color:#991b1b;
+    }
+    .teacher-progress{
+      margin-top:10px;
+      height:9px;
+      border-radius:999px;
+      background:#f3f4f6;
+      overflow:hidden;
+    }
+    .teacher-progress-fill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--slb-red),#111827);
+    }
+    .teacher-stage-line{
+      margin-top:8px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .teacher-stage-badge{
+      border-radius:999px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      padding:5px 8px;
+      font-size:10px;
+      font-weight:900;
+      color:#374151;
+    }
+    .teacher-class-card{
+      cursor:pointer;
+      text-align:left;
+      width:100%;
+    }
+    .teacher-class-students{
+      display:grid;
+      gap:7px;
+      margin-top:10px;
+      padding-top:10px;
+      border-top:1px solid #edf0f3;
+    }
+    .teacher-class-student-row{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      font-size:12px;
+      font-weight:850;
+      color:#111827;
+      background:#fafafa;
+      border-radius:12px;
+      padding:8px;
+    }
+    .teacher-mini-status{
+      font-size:10px;
+      font-weight:950;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .teacher-objective-card{
+      display:grid;
+      gap:5px;
+    }
+    .teacher-objective-title{
+      font-size:12px;
+      font-weight:900;
+      color:#111827;
+      line-height:1.35;
+    }
+    @media(max-width:1100px){
+      .teacher-metrics-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+      .teacher-dashboard-grid{grid-template-columns:1fr;}
+      .teacher-search-card{grid-template-columns:1fr;}
+    }
+    @media(max-width:720px){
+      .teacher-metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -2415,14 +2647,14 @@
   <main class="page">
     <header class="header">
       <div><h1>Avaliações SLB</h1><p>Horário, turmas, alunos, avaliação e documento final — ficheiro vazio</p></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="badge">Dados guardados no browser</div><div class="badge" id="currentUserBadge">Professor</div><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="badge">Dados guardados no browser</div><button class="badge teacher-profile-btn" id="currentUserBadge" type="button" data-view-btn="teacherDashboardView">Professor</button><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
     </header>
 
     <nav class="tabs">
       <button class="tab active" data-view="scheduleView">1. Horário</button>
       <button class="tab" data-view="studentsView">2. Turmas / Alunos</button>
       <button class="tab" data-view="evaluationView">3. Avaliação</button>
-      <button class="tab" data-view="documentView">4. Documento</button><button class="tab" data-view="internalDocumentView">5. Documento Interno</button>
+      <button class="tab" data-view="documentView">4. Documento</button><button class="tab" data-view="internalDocumentView">5. Documento Interno</button><button class="tab" data-view="teacherDashboardView">6. Área do Professor</button>
     </nav>
 
     <section id="scheduleView" class="view active">
@@ -2522,6 +2754,63 @@
       </section>
     </section>
 
+
+
+    <section id="teacherDashboardView" class="view">
+      <div class="panel toolbar">
+        <div>
+          <div class="section-label">Área do Professor</div>
+          <div class="hint">Pesquisa alunos, consulta as tuas turmas e acompanha métricas de avaliação.</div>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn ghost" id="refreshTeacherDashboardBtn">Atualizar dashboard</button>
+        </div>
+      </div>
+
+      <section class="teacher-dashboard">
+        <div class="teacher-search-card">
+          <div>
+            <div class="section-label">Pesquisar aluno</div>
+            <div class="hint">Procura pelo nome completo ou parte do nome.</div>
+          </div>
+          <input id="teacherStudentSearch" class="teacher-search-input" type="search" placeholder="Escrever nome do aluno...">
+        </div>
+
+        <div id="teacherMetricsGrid" class="teacher-metrics-grid"></div>
+
+        <div class="teacher-dashboard-grid">
+          <section class="teacher-panel">
+            <div class="teacher-panel-head">
+              <div>
+                <div class="section-label">Resultados da pesquisa</div>
+                <div class="hint">Mostra o estado de avaliação do aluno nas turmas onde aparece.</div>
+              </div>
+            </div>
+            <div id="teacherSearchResults" class="teacher-search-results"></div>
+          </section>
+
+          <section class="teacher-panel">
+            <div class="teacher-panel-head">
+              <div>
+                <div class="section-label">Turmas do professor</div>
+                <div class="hint">Clica numa turma para abrir/fechar a lista de alunos.</div>
+              </div>
+            </div>
+            <div id="teacherClassList" class="teacher-class-list"></div>
+          </section>
+        </div>
+
+        <section class="teacher-panel">
+          <div class="teacher-panel-head">
+            <div>
+              <div class="section-label">Métricas por objetivo</div>
+              <div class="hint">Objetivos com mais alunos em “A melhorar”.</div>
+            </div>
+          </div>
+          <div id="teacherObjectiveInsights" class="teacher-objective-insights"></div>
+        </section>
+      </section>
+    </section>
 
     <section id="internalDocumentView" class="view">
       <div class="panel toolbar">
@@ -3009,6 +3298,7 @@ function switchView(id){
   if(id==='evaluationView'){ setupEvaluationDayFilters(); renderEvaluationPage(); }
   if(id==='documentView') renderDocument();
   if(id==='internalDocumentView') renderInternalDocument();
+  if(id==='teacherDashboardView') renderTeacherDashboard();
 }
 document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
   if(btn.dataset.view==='documentView') documentClassFilterId=null;
@@ -4245,6 +4535,227 @@ function getInternalGoalsForClass(className){
   };
 }
 
+
+let teacherOpenClassId = null;
+
+function allTeacherClassSummaries(){
+  syncClasses();
+  return selectedClasses().map(c=>{
+    const data=state.classes[c.id]||{students:[]};
+    const ev=evalData(c.id);
+    const students=data.students||[];
+    const objectives=flattenObjectives(c.className);
+    const totalObjectives=objectives.length;
+    const rows=students.map((s,i)=>studentEvaluationSummary(c, ev, s, i, totalObjectives));
+    const evaluated=rows.filter(r=>r.hasEvaluation).length;
+    const transits=rows.filter(r=>r.status==='transita').length;
+    const stays=rows.filter(r=>r.status==='fica').length;
+    return {classInfo:c,data,ev,students,rows,totalObjectives,evaluated,transits,stays};
+  });
+}
+
+function studentEvaluationSummary(c, ev, student, index, totalObjectives){
+  const done=flattenObjectives(c.className).filter(obj=>!!ev.checks?.[`${index}-${obj.key}`]).length;
+  const hasEvaluation=studentHasEvaluation ? studentHasEvaluation(ev,index,c.className) : (done>0 || !!ev.finalMessages?.[index]);
+  const decision=studentFinalDecision ? studentFinalDecision(ev,index) : '';
+  const target=studentTargetLevel ? studentTargetLevel(ev,index,c.className) : '';
+  const percent=totalObjectives ? Math.round((done/totalObjectives)*100) : 0;
+  let status='none';
+  let statusText='Sem avaliação';
+  if(decision==='transita'){status='transita';statusText=`Transita${target?' para '+target:''}`;}
+  else if(decision==='fica'){status='fica';statusText='Continua no mesmo nível';}
+  else if(hasEvaluation){status='progress';statusText='Em avaliação';}
+  const stages=getAmaStepsForClass(c.className).map((group,gi)=>{
+    const total=group.items.length;
+    const ok=group.items.filter((_item,ii)=>!!ev.checks?.[`${index}-ama1a-${gi}-${ii}`]).length;
+    return {label:`Etapa ${gi+1}`,ok,total};
+  });
+  return {
+    index,
+    student,
+    name:studentDisplayName(student,index),
+    done,
+    total:totalObjectives,
+    percent,
+    hasEvaluation,
+    decision,
+    target,
+    status,
+    statusText,
+    stages,
+    blocks:getStudentScheduleText ? getStudentScheduleText(c,student,index) : (c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} ${b.time}`).join(' | ')
+  };
+}
+
+function teacherDashboardMetrics(summaries){
+  const classes=summaries.length;
+  const students=summaries.reduce((acc,s)=>acc+s.rows.length,0);
+  const evaluated=summaries.reduce((acc,s)=>acc+s.evaluated,0);
+  const notEvaluated=Math.max(0,students-evaluated);
+  const transits=summaries.reduce((acc,s)=>acc+s.transits,0);
+  const stays=summaries.reduce((acc,s)=>acc+s.stays,0);
+  const completion=students ? Math.round((evaluated/students)*100) : 0;
+  return {classes,students,evaluated,notEvaluated,transits,stays,completion};
+}
+
+function statusPillClass(status){
+  if(status==='transita') return 'ok';
+  if(status==='fica' || status==='progress') return 'warn';
+  return 'none';
+}
+
+function renderTeacherDashboard(){
+  const metricsGrid=document.getElementById('teacherMetricsGrid');
+  const searchResults=document.getElementById('teacherSearchResults');
+  const classList=document.getElementById('teacherClassList');
+  const insights=document.getElementById('teacherObjectiveInsights');
+  if(!metricsGrid || !searchResults || !classList || !insights) return;
+
+  const summaries=allTeacherClassSummaries();
+  const metrics=teacherDashboardMetrics(summaries);
+
+  metricsGrid.innerHTML=[
+    ['Turmas',metrics.classes,'ativas no horário'],
+    ['Alunos',metrics.students,'total nas tuas turmas'],
+    ['Avaliados',metrics.evaluated,`${metrics.completion}% concluído`],
+    ['Sem avaliação',metrics.notEvaluated,'por preencher'],
+    ['Transitam',metrics.transits,'prontos para novo nível'],
+    ['Continuam',metrics.stays,'mesmo nível']
+  ].map(([label,value,sub])=>`<div class="teacher-metric-card"><div class="teacher-metric-label">${safe(label)}</div><div class="teacher-metric-value">${safe(value)}</div><div class="teacher-metric-sub">${safe(sub)}</div></div>`).join('');
+
+  renderTeacherSearchResults();
+  renderTeacherClassList(summaries);
+  renderTeacherObjectiveInsights(summaries);
+}
+
+function renderTeacherSearchResults(){
+  const box=document.getElementById('teacherSearchResults');
+  const input=document.getElementById('teacherStudentSearch');
+  if(!box || !input) return;
+
+  const query=String(input.value||'').trim().toLowerCase();
+  const summaries=allTeacherClassSummaries();
+  const matches=[];
+
+  summaries.forEach(summary=>{
+    summary.rows.forEach(row=>{
+      if(!query || row.name.toLowerCase().includes(query)){
+        matches.push({summary,row});
+      }
+    });
+  });
+
+  if(!query){
+    box.innerHTML='<div class="teacher-empty">Escreve o nome de um aluno para pesquisar.</div>';
+    return;
+  }
+
+  if(!matches.length){
+    box.innerHTML='<div class="teacher-empty">Nenhum aluno encontrado.</div>';
+    return;
+  }
+
+  box.innerHTML=matches.map(({summary,row})=>`
+    <article class="teacher-result-card">
+      <div class="teacher-result-top">
+        <div>
+          <div class="teacher-result-name">${safe(row.name)}</div>
+          <div class="teacher-result-meta">${safe(summary.classInfo.className)} · ${safe(row.blocks)}</div>
+        </div>
+        <span class="teacher-status-pill ${statusPillClass(row.status)}">${safe(row.statusText)}</span>
+      </div>
+      <div class="teacher-progress"><div class="teacher-progress-fill" style="width:${row.percent}%"></div></div>
+      <div class="teacher-result-meta">${row.done}/${row.total} objetivos realizados · ${row.percent}%</div>
+      <div class="teacher-stage-line">
+        ${row.stages.map(st=>`<span class="teacher-stage-badge">${safe(st.label)}: ${st.ok}/${st.total}</span>`).join('')}
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderTeacherClassList(summaries){
+  const box=document.getElementById('teacherClassList');
+  if(!box) return;
+
+  if(!summaries.length){
+    box.innerHTML='<div class="teacher-empty">Sem turmas guardadas no horário.</div>';
+    return;
+  }
+
+  if(!teacherOpenClassId || !summaries.find(s=>s.classInfo.id===teacherOpenClassId)){
+    teacherOpenClassId=summaries[0]?.classInfo.id || null;
+  }
+
+  box.innerHTML=summaries.map(summary=>{
+    const c=summary.classInfo;
+    const isOpen=c.id===teacherOpenClassId;
+    const percent=summary.rows.length ? Math.round((summary.evaluated/summary.rows.length)*100) : 0;
+    const blockText=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+    return `<button type="button" class="teacher-class-card" data-teacher-class="${safe(c.id)}">
+      <div class="teacher-class-top">
+        <div>
+          <div class="teacher-class-title">${safe(c.className)} - ${safe(blockText)}</div>
+          <div class="teacher-class-meta">${summary.rows.length} aluno(s) · ${summary.evaluated} avaliados · ${summary.transits} transitam · ${percent}%</div>
+        </div>
+        <span class="eval-collapse-indicator">${isOpen?'−':'+'}</span>
+      </div>
+      ${isOpen ? `<div class="teacher-class-students">
+        ${summary.rows.length ? summary.rows.map(row=>`<div class="teacher-class-student-row"><span>${safe(row.name)}</span><span class="teacher-mini-status">${safe(row.statusText)} · ${row.percent}%</span></div>`).join('') : '<div class="teacher-empty">Sem alunos definidos.</div>'}
+      </div>` : ''}
+    </button>`;
+  }).join('');
+
+  document.querySelectorAll('[data-teacher-class]').forEach(btn=>btn.addEventListener('click',()=>{
+    teacherOpenClassId=btn.dataset.teacherClass;
+    renderTeacherDashboard();
+  }));
+}
+
+function renderTeacherObjectiveInsights(summaries){
+  const box=document.getElementById('teacherObjectiveInsights');
+  if(!box) return;
+
+  const objectiveMap=new Map();
+
+  summaries.forEach(summary=>{
+    const c=summary.classInfo;
+    const groups=getAmaStepsForClass(c.className);
+    groups.forEach((group,gi)=>{
+      group.items.forEach((item,ii)=>{
+        const key=`${c.className}|${gi}|${ii}|${item}`;
+        if(!objectiveMap.has(key)){
+          objectiveMap.set(key,{className:c.className,stage:`Etapa ${gi+1}`,item,done:0,total:0});
+        }
+        const entry=objectiveMap.get(key);
+        summary.rows.forEach(row=>{
+          if(!row.hasEvaluation) return;
+          entry.total++;
+          if(summary.ev.checks?.[`${row.index}-ama1a-${gi}-${ii}`]) entry.done++;
+        });
+      });
+    });
+  });
+
+  const insights=[...objectiveMap.values()]
+    .filter(o=>o.total>0)
+    .map(o=>({...o,missing:o.total-o.done,missingPct:o.total?Math.round(((o.total-o.done)/o.total)*100):0}))
+    .sort((a,b)=>b.missingPct-a.missingPct || b.missing-a.missing)
+    .slice(0,8);
+
+  if(!insights.length){
+    box.innerHTML='<div class="teacher-empty">Ainda não há dados suficientes para métricas por objetivo.</div>';
+    return;
+  }
+
+  box.innerHTML=insights.map(o=>`
+    <article class="teacher-objective-card">
+      <div class="teacher-objective-title">${safe(o.className)} · ${safe(o.stage)} — ${safe(o.item)}</div>
+      <div class="teacher-objective-meta">A melhorar: ${o.missing}/${o.total} aluno(s) · ${o.missingPct}%</div>
+      <div class="teacher-progress"><div class="teacher-progress-fill" style="width:${100-o.missingPct}%"></div></div>
+    </article>
+  `).join('');
+}
+
 function renderInternalDocument(){
   saveStudentsFromDom();
 
@@ -4625,6 +5136,16 @@ function clearChecksGlobalHandler(event){
   clearCurrentEvaluationChecks();
 }
 document.addEventListener('click',clearChecksGlobalHandler);
+
+
+const teacherStudentSearchInput=document.getElementById('teacherStudentSearch');
+if(teacherStudentSearchInput){
+  teacherStudentSearchInput.addEventListener('input',renderTeacherSearchResults);
+}
+const refreshTeacherDashboardBtn=document.getElementById('refreshTeacherDashboardBtn');
+if(refreshTeacherDashboardBtn){
+  refreshTeacherDashboardBtn.addEventListener('click',renderTeacherDashboard);
+}
 
 setupCloudButtons();
 setupLogin();
