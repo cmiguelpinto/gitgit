@@ -2502,7 +2502,7 @@
         <div>
           <div class="section-label">Copiar aluno</div>
           <h3 id="copyStudentTitle">Copiar aluno para outra turma</h3>
-          <p class="hint">A avaliação será mantida igual nas duas turmas.</p>
+          <p class="hint">A avaliação será mantida igual, mas só é possível copiar para turmas do mesmo nível.</p>
         </div>
         <button type="button" class="btn small ghost" id="closeCopyStudentModal">Fechar</button>
       </div>
@@ -2550,7 +2550,7 @@
         <div>
           <div class="section-label">Copiar aluno</div>
           <h3 id="copyStudentTitle">Copiar aluno para outra turma</h3>
-          <p class="hint">A avaliação será mantida igual nas duas turmas.</p>
+          <p class="hint">A avaliação será mantida igual, mas só é possível copiar para turmas do mesmo nível.</p>
         </div>
         <button type="button" class="btn small ghost" id="closeCopyStudentModal">Fechar</button>
       </div>
@@ -3668,28 +3668,36 @@ function cloneStudentForCopy(student){
 function ensureStudentEvaluationCopied(sourceClassId, sourceIndex, targetClassId, targetIndex){
   copyEvaluationBetweenStudents(sourceClassId, Number(sourceIndex), targetClassId, Number(targetIndex));
 }
+
+function sameClassLevel(sourceClassName, targetClassName){
+  return String(sourceClassName || '').trim().toUpperCase() === String(targetClassName || '').trim().toUpperCase();
+}
+
 function openCopyStudentModal(sourceClassId, sourceIndex){
   syncClasses();
   const selected=selectedClasses();
+  const sourceMeta=selected.find(c=>c.id===sourceClassId);
   const sourceClass=state.classes[sourceClassId];
   const student=sourceClass?.students?.[sourceIndex];
-  if(!student) return;
+  if(!student || !sourceMeta) return;
   pendingStudentCopy={sourceClassId, sourceIndex};
   const title=document.getElementById('copyStudentTitle');
   const targetSelect=document.getElementById('copyStudentTarget');
   const message=document.getElementById('copyStudentMessage');
   if(title) title.textContent=`Copiar ${studentDisplayName(student, sourceIndex)} para outra turma`;
-  if(message) message.textContent='';
+  if(message) message.textContent='Só podes copiar este aluno para turmas do mesmo nível.';
   if(targetSelect){
     targetSelect.innerHTML='';
     selected
       .filter(c=>c.id!==sourceClassId)
+      .filter(c=>sameClassLevel(sourceMeta.className, c.className))
       .forEach(c=>{
-        const blocks=c.blocks.map(b=>`${b.day}-feira ${b.time}`).join(' | ');
-        targetSelect.insertAdjacentHTML('beforeend', `<option value="${safe(c.id)}">${safe(c.displayName||c.className)} — ${safe(blocks)}</option>`);
+        const blocks=c.blocks.map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+        targetSelect.insertAdjacentHTML('beforeend', `<option value="${safe(c.id)}">${safe(c.className)} - ${safe(blocks)}</option>`);
       });
     if(!targetSelect.options.length){
-      targetSelect.innerHTML='<option value="">Não existem outras turmas disponíveis</option>';
+      targetSelect.innerHTML='<option value="">Sem turmas compatíveis</option>';
+      if(message) message.textContent='Não existem outras turmas do mesmo nível para copiar este aluno.';
     }
   }
   const modal=document.getElementById('copyStudentModal');
@@ -3707,6 +3715,15 @@ function confirmCopyStudent(){
   const targetClassId=targetSelect?.value;
   if(!targetClassId){
     if(message) message.textContent='Escolhe uma turma de destino.';
+    return;
+  }
+
+  const selected=selectedClasses();
+  const sourceMeta=selected.find(c=>c.id===pendingStudentCopy.sourceClassId);
+  const targetMeta=selected.find(c=>c.id===targetClassId);
+
+  if(!sourceMeta || !targetMeta || !sameClassLevel(sourceMeta.className, targetMeta.className)){
+    if(message) message.textContent='Não é possível copiar: o aluno só pode ser copiado para uma turma do mesmo nível.';
     return;
   }
 
