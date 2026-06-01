@@ -3806,6 +3806,11 @@ document.getElementById('saveEvaluationPageBtn').addEventListener('click',saveCu
 
 
 
+
+function formatDayForClassBlock(day){
+  return day === 'Sábado' ? 'Sábado' : `${day}-feira`;
+}
+
 function getInternalClassById(){
   const all=selectedClasses();
   if(internalDocumentClassId){
@@ -3915,7 +3920,7 @@ function renderInternalDocument(){
   const ev=evalData(c.id);
   const students=data.students || [];
   const steps=getAmaStepsForClass(c.className);
-  const blocks=(c.blocks||[]).map(b=>`${b.day}-feira ${b.time}`).join(' | ');
+  const blocks=(c.blocks||[]).map(b=>`${formatDayForClassBlock(b.day)} ${b.time}`).join(' | ');
   const semesterText=ev.semester ? `${ev.semester}º semestre` : '';
   const nextLevel=nextLevelForClass(c.className);
   const internalGoals=getInternalGoalsForClass(c.className);
@@ -4043,6 +4048,15 @@ function getStudentScheduleText(currentClass, student, studentIndex){
   return (currentClass.blocks||[]).map(b=>`${shortDayName(b.day)}${b.time ? ` — ${b.time}` : ''}`).join(' | ');
 }
 
+
+function studentHasEvaluation(ev, studentIndex, className){
+  const hasChecks = flattenObjectives(className).some(obj=>!!ev.checks?.[`${studentIndex}-${obj.key}`]);
+  const hasFinalMessage = !!String(ev.finalMessages?.[studentIndex] || '').trim();
+  const hasLevelOverride = !!ev.levelOverrides?.[studentIndex]?.enabled;
+  const hasStudentNote = !!String(ev.studentNotes?.[studentIndex] || '').trim();
+  return hasChecks || hasFinalMessage || hasLevelOverride || hasStudentNote;
+}
+
 function renderDocument(){
   saveStudentsFromDom();
   const allDocumentClasses=selectedClasses();
@@ -4067,8 +4081,9 @@ function renderDocument(){
     const ev=evalData(c.id);
 
     if(usesAma1Evaluation(c.className) && data.students.length){
-      hasAmaReport=true;
       data.students.forEach((s,i)=>{
+        if(!studentHasEvaluation(ev, i, c.className)) return;
+        hasAmaReport=true;
         const name=studentDisplayName(s,i);
         const blocks=getStudentScheduleText(c, s, i);
         const fi=finalChoiceIndex(ev.finalMessages?.[i]);
