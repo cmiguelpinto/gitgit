@@ -2921,6 +2921,19 @@
       font-weight:950;
     }
 
+
+    /* Login overlay must never block the app after login */
+    .login-screen.is-hidden{
+      display:none!important;
+      pointer-events:none!important;
+      visibility:hidden!important;
+    }
+    body:not(.login-locked) .login-screen{
+      display:none!important;
+      pointer-events:none!important;
+      visibility:hidden!important;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3348,7 +3361,12 @@ function updateCurrentUserBadge(){
 
 function setLoginVisible(isVisible){
   const loginScreen=document.getElementById('loginScreen');
-  if(loginScreen) loginScreen.style.display=isVisible?'flex':'none';
+  if(loginScreen){
+    loginScreen.style.display=isVisible?'flex':'none';
+    loginScreen.style.pointerEvents=isVisible?'auto':'none';
+    loginScreen.classList.toggle('is-hidden', !isVisible);
+    loginScreen.setAttribute('aria-hidden', isVisible?'false':'true');
+  }
   document.body.classList.toggle('login-locked', isVisible);
   updateCurrentUserBadge();
 }
@@ -5953,10 +5971,115 @@ if(refreshAttendanceBtn){
   refreshAttendanceBtn.addEventListener('click',renderAttendancePage);
 }
 
+
+function globalAppClickHandler(event){
+  const target = event.target instanceof Element ? event.target : null;
+  if(!target) return;
+
+  const viewTab = target.closest('[data-view]');
+  if(viewTab){
+    event.preventDefault();
+    if(viewTab.dataset.view==='documentView') documentClassFilterId=null;
+    switchView(viewTab.dataset.view);
+    return;
+  }
+
+  const viewBtn = target.closest('[data-view-btn]');
+  if(viewBtn){
+    event.preventDefault();
+    if(viewBtn.dataset.viewBtn==='documentView') documentClassFilterId=null;
+    switchView(viewBtn.dataset.viewBtn);
+    return;
+  }
+
+  const idBtn = target.closest('button, label');
+  if(!idBtn) return;
+
+  switch(idBtn.id){
+    case 'saveScheduleBtn':
+      event.preventDefault();
+      (async()=>{
+        saveState();
+        const msg=document.getElementById('scheduleMessage');
+        if(msg) msg.textContent='Horário guardado. A guardar também na cloud...';
+        await saveToCloud();
+        if(msg) msg.textContent='Horário guardado localmente e na cloud. Podes avançar para Turmas / Alunos.';
+      })();
+      return;
+
+    case 'goStudentsBtn':
+      event.preventDefault();
+      switchView('studentsView');
+      return;
+
+    case 'copyBtn':
+      event.preventDefault();
+      copyDay();
+      return;
+
+    case 'saveStudentsBtn':
+      event.preventDefault();
+      (async()=>{
+        saveStudentsFromDom();
+        saveState();
+        const msg=document.getElementById('studentsMessage');
+        if(msg) msg.textContent='Alunos guardados. A guardar também na cloud...';
+        await saveToCloud();
+        if(msg) msg.textContent='Alunos guardados localmente e na cloud.';
+      })();
+      return;
+
+    case 'saveEvaluationPageBtn':
+      event.preventDefault();
+      saveCurrentEvaluation();
+      return;
+
+    case 'saveAttendanceBtn':
+      event.preventDefault();
+      saveAttendance();
+      return;
+
+    case 'refreshAttendanceBtn':
+      event.preventDefault();
+      renderAttendancePage();
+      return;
+
+    case 'annualAttendanceBtn':
+      event.preventDefault();
+      attendanceViewMode='year';
+      renderAnnualAttendanceReport();
+      return;
+
+    case 'monthlyAttendanceBtn':
+      event.preventDefault();
+      attendanceViewMode='month';
+      renderAttendancePage();
+      return;
+
+    case 'cloudLoadBtn':
+      event.preventDefault();
+      loadFromCloud(false);
+      return;
+
+    case 'logoutBtn':
+      event.preventDefault();
+      localStorage.removeItem(loginSessionKey);
+      setCurrentUser(null);
+      setLoginVisible(true);
+      return;
+  }
+}
+
+if(!window.__avaliacoesGlobalClickReady){
+  window.__avaliacoesGlobalClickReady=true;
+  document.addEventListener('click',globalAppClickHandler,true);
+}
+
 function startAppSafely(){
   try{ setupLogin(); }catch(err){ console.error('Login setup failed', err); }
   try{ setupCloudButtons(); }catch(err){ console.error('Cloud setup failed', err); }
   try{ renderSchedule(); }catch(err){ console.error('Initial render failed', err); }
+  if(localStorage.getItem(loginSessionKey)==='true'){ setLoginVisible(false); }
 }
 
 if(document.readyState==='loading'){
