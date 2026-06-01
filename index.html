@@ -2409,7 +2409,7 @@
     }
     .teacher-metrics-grid{
       display:grid;
-      grid-template-columns:repeat(6,minmax(0,1fr));
+      grid-template-columns:repeat(7,minmax(0,1fr));
       gap:12px;
     }
     .teacher-metric-card{
@@ -2606,6 +2606,112 @@
       .teacher-metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
     }
 
+
+    .teacher-profile-btn.logout-btn{
+      font-family:inherit;
+      white-space:nowrap;
+    }
+
+
+    /* Attendance page */
+    .attendance-shell{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    .attendance-sidebar,
+    .attendance-main{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .attendance-sidebar{
+      display:grid;
+      gap:14px;
+      position:sticky;
+      top:16px;
+    }
+    .attendance-date-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .attendance-summary{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .attendance-pill{
+      border-radius:999px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:900;
+      color:#374151;
+    }
+    .attendance-table-wrap{
+      overflow:auto;
+      border:1px solid #edf0f3;
+      border-radius:18px;
+    }
+    .attendance-table{
+      width:100%;
+      min-width:680px;
+      border-collapse:collapse;
+      background:#fff;
+    }
+    .attendance-table th,
+    .attendance-table td{
+      border-bottom:1px solid #edf0f3;
+      border-right:1px solid #edf0f3;
+      padding:9px 8px;
+      text-align:center;
+      vertical-align:middle;
+      font-size:12px;
+    }
+    .attendance-table th{
+      background:#f9fafb;
+      font-weight:950;
+      color:#111827;
+      position:sticky;
+      top:0;
+      z-index:2;
+    }
+    .attendance-table th:first-child,
+    .attendance-table td:first-child{
+      text-align:left;
+      min-width:180px;
+      position:sticky;
+      left:0;
+      background:#fff;
+      z-index:1;
+      font-weight:900;
+    }
+    .attendance-table th:first-child{
+      background:#f9fafb;
+      z-index:3;
+    }
+    .attendance-checkbox{
+      width:18px!important;
+      height:18px!important;
+      accent-color:var(--slb-red);
+      cursor:pointer;
+    }
+    .attendance-total{
+      font-weight:950;
+      color:#111827;
+      white-space:nowrap;
+    }
+    @media(max-width:980px){
+      .attendance-shell{grid-template-columns:1fr;}
+      .attendance-sidebar{position:static;}
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -2647,14 +2753,15 @@
   <main class="page">
     <header class="header">
       <div><h1>Avaliações SLB</h1><p>Horário, turmas, alunos, avaliação e documento final — ficheiro vazio</p></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="badge">Dados guardados no browser</div><button class="badge teacher-profile-btn" id="currentUserBadge" type="button" data-view-btn="teacherDashboardView">Professor</button><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="logout-btn teacher-profile-btn" id="currentUserBadge" type="button" data-view-btn="teacherDashboardView">Professor</button><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
     </header>
 
     <nav class="tabs">
       <button class="tab active" data-view="scheduleView">1. Horário</button>
       <button class="tab" data-view="studentsView">2. Turmas / Alunos</button>
-      <button class="tab" data-view="evaluationView">3. Avaliação</button>
-      <button class="tab" data-view="documentView">4. Documento</button><button class="tab" data-view="internalDocumentView">5. Documento Interno</button><button class="tab" data-view="teacherDashboardView">6. Área do Professor</button>
+      <button class="tab" data-view="attendanceView">3. Presenças</button>
+      <button class="tab" data-view="evaluationView">4. Avaliação</button>
+      <button class="tab" data-view="documentView">5. Documento</button><button class="tab" data-view="internalDocumentView">6. Documento Interno</button><button class="tab" data-view="teacherDashboardView">7. Área do Professor</button>
     </nav>
 
     <section id="scheduleView" class="view active">
@@ -2701,6 +2808,45 @@
       </div>
       <div class="message" id="studentsMessage"></div>
       <div id="classesGrid" class="classes-grid"></div>
+    </section>
+
+
+    <section id="attendanceView" class="view">
+      <div class="panel toolbar">
+        <div>
+          <div class="section-label">Presenças</div>
+          <div class="hint">Escolhe a turma, o mês e marca apenas as presenças com checkboxes.</div>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
+          <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
+        </div>
+      </div>
+
+      <section class="attendance-shell">
+        <aside class="attendance-sidebar">
+          <div class="field">
+            <label>Turma</label>
+            <select id="attendanceClassSelect"></select>
+          </div>
+          <div class="attendance-date-grid">
+            <div class="field">
+              <label>Mês</label>
+              <select id="attendanceMonthSelect"></select>
+            </div>
+            <div class="field">
+              <label>Ano</label>
+              <select id="attendanceYearSelect"></select>
+            </div>
+          </div>
+          <div class="hint">São mostrados automaticamente os dias desse mês em que a turma tem aula.</div>
+        </aside>
+
+        <main class="attendance-main">
+          <div id="attendanceSummary" class="attendance-summary"></div>
+          <div id="attendanceTableWrap" class="attendance-table-wrap"></div>
+        </main>
+      </section>
     </section>
 
     <section id="evaluationView" class="view">
@@ -2760,7 +2906,7 @@
       <div class="panel toolbar">
         <div>
           <div class="section-label">Área do Professor</div>
-          <div class="hint">Pesquisa alunos, consulta as tuas turmas e acompanha métricas de avaliação.</div>
+          <div class="hint">Pesquisa alunos, consulta turmas, avaliação e presenças do mês atual.</div>
         </div>
         <div class="toolbar-actions">
           <button class="btn ghost" id="refreshTeacherDashboardBtn">Atualizar dashboard</button>
@@ -3279,7 +3425,7 @@ function setupCloudButtons(){
   }
 }
 
-function defaultState(){return {schedule:{},classes:{},evaluations:{}}}
+function defaultState(){return {schedule:{},classes:{},evaluations:{},attendance:{}}}
 function loadState(){try{return JSON.parse(localStorage.getItem(storeKey)) || defaultState()}catch(e){return defaultState()}}
 function saveState(){localStorage.setItem(storeKey, JSON.stringify(state))}
 function safe(s){return String(s ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -3289,12 +3435,183 @@ function classId(name){return String(name).toLowerCase().normalize('NFD').replac
 function studentName(s,i){const first=String(s?.firstName||'').trim();const last=String(s?.lastName||'').trim();const full=`${first} ${last}`.trim();return full||`Aluno ${i+1}`}
 function studentDisplayName(s,i){const first=String(s?.firstName||'').trim();const last=String(s?.lastName||'').trim();const full=String(s?.fullName||'').trim() || `${first} ${last}`.trim();return full||`Aluno ${i+1}`}
 function getStudentFullName(s){return String(s?.fullName||'').trim() || `${s?.firstName||''} ${s?.lastName||''}`.trim()}
+
+let activeAttendanceClassId = null;
+
+function attendanceKey(classId, year, month){
+  return `${classId}|${year}|${String(month).padStart(2,'0')}`;
+}
+
+function attendanceMonthName(monthIndex){
+  return new Date(2026, monthIndex, 1).toLocaleDateString('pt-PT',{month:'long'});
+}
+
+function setupAttendanceControls(){
+  const monthSelect=document.getElementById('attendanceMonthSelect');
+  const yearSelect=document.getElementById('attendanceYearSelect');
+  if(!monthSelect || !yearSelect) return;
+
+  if(!monthSelect.options.length){
+    for(let m=0;m<12;m++){
+      monthSelect.insertAdjacentHTML('beforeend',`<option value="${m}">${attendanceMonthName(m)}</option>`);
+    }
+  }
+
+  if(!yearSelect.options.length){
+    const currentYear=new Date().getFullYear();
+    for(let y=currentYear-1;y<=currentYear+2;y++){
+      yearSelect.insertAdjacentHTML('beforeend',`<option value="${y}">${y}</option>`);
+    }
+  }
+
+  if(monthSelect.value==='') monthSelect.value=String(new Date().getMonth());
+  if(yearSelect.value==='') yearSelect.value=String(new Date().getFullYear());
+
+  monthSelect.onchange=renderAttendancePage;
+  yearSelect.onchange=renderAttendancePage;
+}
+
+function weekdayIndexPt(day){
+  const map={'Domingo':0,'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6};
+  return map[day];
+}
+
+function classDatesForMonth(classInfo, year, monthIndex){
+  const wantedDays=[...new Set((classInfo.blocks||[]).map(b=>weekdayIndexPt(b.day)).filter(v=>v!==undefined))];
+  const dates=[];
+  const last=new Date(year, monthIndex+1, 0).getDate();
+  for(let d=1; d<=last; d++){
+    const date=new Date(year, monthIndex, d);
+    if(wantedDays.includes(date.getDay())){
+      dates.push({
+        day:d,
+        iso:`${year}-${String(monthIndex+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+        label:String(d).padStart(2,'0')
+      });
+    }
+  }
+  return dates;
+}
+
+function ensureAttendanceMonth(classId, year, monthIndex){
+  if(!state.attendance) state.attendance={};
+  const key=attendanceKey(classId, year, monthIndex+1);
+  if(!state.attendance[key]) state.attendance[key]={};
+  return state.attendance[key];
+}
+
+function populateAttendanceClasses(){
+  syncClasses();
+  const select=document.getElementById('attendanceClassSelect');
+  if(!select) return [];
+  const classes=selectedClasses();
+  const current=select.value || activeAttendanceClassId;
+
+  select.innerHTML='';
+  classes.forEach(c=>{
+    const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+    select.insertAdjacentHTML('beforeend',`<option value="${safe(c.id)}">${safe(c.className)} - ${safe(block)}</option>`);
+  });
+
+  if(classes.length){
+    activeAttendanceClassId = classes.find(c=>c.id===current)?.id || classes[0].id;
+    select.value=activeAttendanceClassId;
+  }else{
+    activeAttendanceClassId=null;
+  }
+
+  select.onchange=()=>{
+    activeAttendanceClassId=select.value;
+    renderAttendancePage();
+  };
+
+  return classes;
+}
+
+function renderAttendancePage(){
+  setupAttendanceControls();
+  const classes=populateAttendanceClasses();
+  const summary=document.getElementById('attendanceSummary');
+  const wrap=document.getElementById('attendanceTableWrap');
+  const monthSelect=document.getElementById('attendanceMonthSelect');
+  const yearSelect=document.getElementById('attendanceYearSelect');
+  if(!summary || !wrap || !monthSelect || !yearSelect) return;
+
+  if(!classes.length){
+    summary.innerHTML='';
+    wrap.innerHTML='<div class="teacher-empty">Ainda não existem turmas. Vai primeiro ao Horário.</div>';
+    return;
+  }
+
+  const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
+  const data=state.classes[classInfo.id] || {students:[]};
+  const students=data.students || [];
+  const monthIndex=Number(monthSelect.value);
+  const year=Number(yearSelect.value);
+  const dates=classDatesForMonth(classInfo, year, monthIndex);
+  const attendance=ensureAttendanceMonth(classInfo.id, year, monthIndex);
+
+  const totalPossible=students.length * dates.length;
+  const presentCount=students.reduce((acc,_s,si)=>acc+dates.filter(dt=>!!attendance[`${si}|${dt.iso}`]).length,0);
+  const percent=totalPossible ? Math.round((presentCount/totalPossible)*100) : 0;
+
+  summary.innerHTML=`
+    <span class="attendance-pill">${safe(classInfo.className)}</span>
+    <span class="attendance-pill">${safe(attendanceMonthName(monthIndex))} ${year}</span>
+    <span class="attendance-pill">${students.length} aluno(s)</span>
+    <span class="attendance-pill">${dates.length} aula(s)</span>
+    <span class="attendance-pill">${percent}% presenças</span>
+  `;
+
+  if(!students.length){
+    wrap.innerHTML='<div class="teacher-empty">Esta turma ainda não tem alunos definidos.</div>';
+    return;
+  }
+
+  if(!dates.length){
+    wrap.innerHTML='<div class="teacher-empty">Não há dias de aula desta turma no mês selecionado.</div>';
+    return;
+  }
+
+  let html=`<table class="attendance-table"><thead><tr><th>Aluno</th>`;
+  dates.forEach(dt=>{html+=`<th>${dt.label}</th>`;});
+  html+=`<th>Total</th></tr></thead><tbody>`;
+
+  students.forEach((student,si)=>{
+    const checkedCount=dates.filter(dt=>!!attendance[`${si}|${dt.iso}`]).length;
+    html+=`<tr><td>${safe(studentDisplayName(student,si))}</td>`;
+    dates.forEach(dt=>{
+      const key=`${si}|${dt.iso}`;
+      html+=`<td><input class="attendance-checkbox" type="checkbox" data-attendance-key="${safe(key)}" ${attendance[key]?'checked':''}></td>`;
+    });
+    html+=`<td class="attendance-total">${checkedCount}/${dates.length}</td></tr>`;
+  });
+
+  html+=`</tbody></table>`;
+  wrap.innerHTML=html;
+
+  document.querySelectorAll('[data-attendance-key]').forEach(cb=>cb.addEventListener('change',()=>{
+    const att=ensureAttendanceMonth(classInfo.id, year, monthIndex);
+    att[cb.dataset.attendanceKey]=cb.checked;
+    saveState();
+    renderAttendancePage();
+  }));
+}
+
+async function saveAttendance(){
+  saveState();
+  showCloudStatus('Presenças guardadas. A guardar também na cloud...', 'ok');
+  await saveToCloud();
+  showCloudStatus('Presenças guardadas localmente e na cloud.', 'ok');
+}
+
 function switchView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const view=document.getElementById(id);
   if(view) view.classList.add('active');
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===id));
   if(id==='studentsView'){ setupStudentDayFilters(); renderStudents(); }
+  if(id==='attendanceView'){ renderAttendancePage(); }
   if(id==='evaluationView'){ setupEvaluationDayFilters(); renderEvaluationPage(); }
   if(id==='documentView') renderDocument();
   if(id==='internalDocumentView') renderInternalDocument();
@@ -4538,6 +4855,29 @@ function getInternalGoalsForClass(className){
 
 let teacherOpenClassId = null;
 
+
+function currentAttendancePeriod(){
+  return {year:new Date().getFullYear(), monthIndex:new Date().getMonth()};
+}
+
+function classAttendanceStats(classInfo, students, year, monthIndex){
+  const dates=classDatesForMonth(classInfo, year, monthIndex);
+  const monthData=(state.attendance||{})[attendanceKey(classInfo.id, year, monthIndex+1)] || {};
+  const totalPossible=students.length * dates.length;
+  const present=students.reduce((acc,_s,si)=>acc+dates.filter(dt=>!!monthData[`${si}|${dt.iso}`]).length,0);
+  const percent=totalPossible ? Math.round((present/totalPossible)*100) : 0;
+  return {dates, present, totalPossible, percent};
+}
+
+function studentAttendanceStats(classInfo, studentIndex, year, monthIndex){
+  const dates=classDatesForMonth(classInfo, year, monthIndex);
+  const monthData=(state.attendance||{})[attendanceKey(classInfo.id, year, monthIndex+1)] || {};
+  const present=dates.filter(dt=>!!monthData[`${studentIndex}|${dt.iso}`]).length;
+  const total=dates.length;
+  const percent=total ? Math.round((present/total)*100) : 0;
+  return {present,total,percent};
+}
+
 function allTeacherClassSummaries(){
   syncClasses();
   return selectedClasses().map(c=>{
@@ -4550,7 +4890,9 @@ function allTeacherClassSummaries(){
     const evaluated=rows.filter(r=>r.hasEvaluation).length;
     const transits=rows.filter(r=>r.status==='transita').length;
     const stays=rows.filter(r=>r.status==='fica').length;
-    return {classInfo:c,data,ev,students,rows,totalObjectives,evaluated,transits,stays};
+    const period=currentAttendancePeriod();
+    const attendanceStats=classAttendanceStats(c, students, period.year, period.monthIndex);
+    return {classInfo:c,data,ev,students,rows,totalObjectives,evaluated,transits,stays,attendanceStats};
   });
 }
 
@@ -4570,6 +4912,8 @@ function studentEvaluationSummary(c, ev, student, index, totalObjectives){
     const ok=group.items.filter((_item,ii)=>!!ev.checks?.[`${index}-ama1a-${gi}-${ii}`]).length;
     return {label:`Etapa ${gi+1}`,ok,total};
   });
+  const period=currentAttendancePeriod();
+  const attendance=studentAttendanceStats(c, index, period.year, period.monthIndex);
   return {
     index,
     student,
@@ -4583,6 +4927,7 @@ function studentEvaluationSummary(c, ev, student, index, totalObjectives){
     status,
     statusText,
     stages,
+    attendance,
     blocks:getStudentScheduleText ? getStudentScheduleText(c,student,index) : (c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} ${b.time}`).join(' | ')
   };
 }
@@ -4595,7 +4940,10 @@ function teacherDashboardMetrics(summaries){
   const transits=summaries.reduce((acc,s)=>acc+s.transits,0);
   const stays=summaries.reduce((acc,s)=>acc+s.stays,0);
   const completion=students ? Math.round((evaluated/students)*100) : 0;
-  return {classes,students,evaluated,notEvaluated,transits,stays,completion};
+  const attendancePossible=summaries.reduce((acc,s)=>acc+(s.attendanceStats?.totalPossible||0),0);
+  const attendancePresent=summaries.reduce((acc,s)=>acc+(s.attendanceStats?.present||0),0);
+  const attendancePercent=attendancePossible ? Math.round((attendancePresent/attendancePossible)*100) : 0;
+  return {classes,students,evaluated,notEvaluated,transits,stays,completion,attendancePresent,attendancePossible,attendancePercent};
 }
 
 function statusPillClass(status){
@@ -4620,7 +4968,8 @@ function renderTeacherDashboard(){
     ['Avaliados',metrics.evaluated,`${metrics.completion}% concluído`],
     ['Sem avaliação',metrics.notEvaluated,'por preencher'],
     ['Transitam',metrics.transits,'prontos para novo nível'],
-    ['Continuam',metrics.stays,'mesmo nível']
+    ['Continuam',metrics.stays,'mesmo nível'],
+    ['Presenças',`${metrics.attendancePercent}%`,`${metrics.attendancePresent}/${metrics.attendancePossible} este mês`]
   ].map(([label,value,sub])=>`<div class="teacher-metric-card"><div class="teacher-metric-label">${safe(label)}</div><div class="teacher-metric-value">${safe(value)}</div><div class="teacher-metric-sub">${safe(sub)}</div></div>`).join('');
 
   renderTeacherSearchResults();
@@ -4665,7 +5014,7 @@ function renderTeacherSearchResults(){
         <span class="teacher-status-pill ${statusPillClass(row.status)}">${safe(row.statusText)}</span>
       </div>
       <div class="teacher-progress"><div class="teacher-progress-fill" style="width:${row.percent}%"></div></div>
-      <div class="teacher-result-meta">${row.done}/${row.total} objetivos realizados · ${row.percent}%</div>
+      <div class="teacher-result-meta">${row.done}/${row.total} objetivos realizados · ${row.percent}% · Presenças: ${row.attendance.present}/${row.attendance.total} (${row.attendance.percent}%)</div>
       <div class="teacher-stage-line">
         ${row.stages.map(st=>`<span class="teacher-stage-badge">${safe(st.label)}: ${st.ok}/${st.total}</span>`).join('')}
       </div>
@@ -4695,12 +5044,12 @@ function renderTeacherClassList(summaries){
       <div class="teacher-class-top">
         <div>
           <div class="teacher-class-title">${safe(c.className)} - ${safe(blockText)}</div>
-          <div class="teacher-class-meta">${summary.rows.length} aluno(s) · ${summary.evaluated} avaliados · ${summary.transits} transitam · ${percent}%</div>
+          <div class="teacher-class-meta">${summary.rows.length} aluno(s) · ${summary.evaluated} avaliados · ${summary.transits} transitam · ${percent}% avaliação · ${summary.attendanceStats.percent}% presenças este mês</div>
         </div>
         <span class="eval-collapse-indicator">${isOpen?'−':'+'}</span>
       </div>
       ${isOpen ? `<div class="teacher-class-students">
-        ${summary.rows.length ? summary.rows.map(row=>`<div class="teacher-class-student-row"><span>${safe(row.name)}</span><span class="teacher-mini-status">${safe(row.statusText)} · ${row.percent}%</span></div>`).join('') : '<div class="teacher-empty">Sem alunos definidos.</div>'}
+        ${summary.rows.length ? summary.rows.map(row=>`<div class="teacher-class-student-row"><span>${safe(row.name)}</span><span class="teacher-mini-status">${safe(row.statusText)} · Aval. ${row.percent}% · Pres. ${row.attendance.present}/${row.attendance.total}</span></div>`).join('') : '<div class="teacher-empty">Sem alunos definidos.</div>'}
       </div>` : ''}
     </button>`;
   }).join('');
@@ -5145,6 +5494,16 @@ if(teacherStudentSearchInput){
 const refreshTeacherDashboardBtn=document.getElementById('refreshTeacherDashboardBtn');
 if(refreshTeacherDashboardBtn){
   refreshTeacherDashboardBtn.addEventListener('click',renderTeacherDashboard);
+}
+
+
+const saveAttendanceBtn=document.getElementById('saveAttendanceBtn');
+if(saveAttendanceBtn){
+  saveAttendanceBtn.addEventListener('click',saveAttendance);
+}
+const refreshAttendanceBtn=document.getElementById('refreshAttendanceBtn');
+if(refreshAttendanceBtn){
+  refreshAttendanceBtn.addEventListener('click',renderAttendancePage);
 }
 
 setupCloudButtons();
