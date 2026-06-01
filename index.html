@@ -2306,6 +2306,26 @@
       display:block;
     }
 
+
+    .cloud-status{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:9000;
+      max-width:min(420px, calc(100vw - 36px));
+      padding:12px 14px;
+      border-radius:16px;
+      background:#111827;
+      color:#fff;
+      font-size:13px;
+      font-weight:850;
+      box-shadow:0 18px 40px rgba(15,23,42,.26);
+      display:none;
+    }
+    .cloud-status.show{display:block;}
+    .cloud-status.ok{background:#166534;}
+    .cloud-status.err{background:#991b1b;}
+
 </style>
 </head>
 <body class="login-locked">
@@ -2347,7 +2367,7 @@
   <main class="page">
     <header class="header">
       <div><h1>Avaliações SLB</h1><p>Horário, turmas, alunos, avaliação e documento final — ficheiro vazio</p></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="badge">Dados guardados no browser</div><div class="badge" id="currentUserBadge">Professor</div><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="badge">Dados guardados no browser</div><div class="badge" id="currentUserBadge">Professor</div><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="cloudSaveBtn" type="button">Guardar cloud</button><button class="logout-btn" id="exportJsonBtn" type="button">Exportar JSON</button><label class="logout-btn" for="importJsonInput" style="cursor:pointer">Importar JSON</label><input id="importJsonInput" type="file" accept="application/json,.json" style="display:none"><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
     </header>
 
     <nav class="tabs">
@@ -2450,6 +2470,7 @@
   </div>
 
 </main>
+  <div id="cloudStatus" class="cloud-status"></div>
       </section>
     </section>
 
@@ -2657,6 +2678,8 @@ function attemptLogin(){
     if(error) error.textContent='';
     setLoginVisible(false);
     switchView('scheduleView');
+    setupCloudButtons();
+    loadFromCloud(true);
   }else{
     if(error) error.textContent='Credenciais incorretas.';
   }
@@ -2694,6 +2717,152 @@ function setupLogin(){
   }
 
   checkLoginSession();
+}
+
+
+const CLOUD_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmpEm_PhCAL6omtYq3vznnm5WxWpFDvqXtyN_lwZfLA1fItiXA4NIA-gLT55M1toF2/exec';
+
+function showCloudStatus(message, type='ok'){
+  const box=document.getElementById('cloudStatus');
+  if(!box) return;
+  box.textContent=message;
+  box.className=`cloud-status show ${type}`;
+  clearTimeout(showCloudStatus._timer);
+  showCloudStatus._timer=setTimeout(()=>{box.className='cloud-status';},3200);
+}
+
+function getCurrentCloudUser(){
+  return currentLoggedUser?.() || null;
+}
+
+function exportStateObject(){
+  const user=getCurrentCloudUser();
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    username: user?.username || '',
+    professorName: professorName,
+    appData: state
+  };
+}
+
+function importStateObject(payload){
+  const appData=payload?.appData || payload;
+  if(!appData || typeof appData !== 'object') throw new Error('Ficheiro inválido.');
+  state=appData;
+  saveState();
+  syncClasses();
+  renderSchedule();
+  renderStudents();
+  renderEvaluationPage();
+  renderDocument();
+}
+
+function exportJsonFile(){
+  const user=getCurrentCloudUser();
+  const filename=`${user?.username || 'avaliacoes'}.json`;
+  const blob=new Blob([JSON.stringify(exportStateObject(), null, 2)], {type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function saveToCloud(){
+  const user=getCurrentCloudUser();
+  if(!user?.username){
+    showCloudStatus('Faz login antes de guardar na cloud.', 'err');
+    return;
+  }
+  try{
+    showCloudStatus('A guardar na cloud...', 'ok');
+    const payload={
+      professorName: professorName,
+      appData: state
+    };
+    const response=await fetch(`${CLOUD_WEB_APP_URL}?action=save&username=${encodeURIComponent(user.username)}`, {
+      method:'POST',
+      body: JSON.stringify(payload)
+    });
+    const result=await response.json();
+    if(!result.ok) throw new Error(result.error || 'Erro ao guardar.');
+    showCloudStatus(`Guardado na cloud: ${user.username}.json`, 'ok');
+  }catch(err){
+    showCloudStatus(`Erro cloud: ${err.message || err}`, 'err');
+  }
+}
+
+async function loadFromCloud(silent=false){
+  const user=getCurrentCloudUser();
+  if(!user?.username){
+    if(!silent) showCloudStatus('Faz login antes de carregar da cloud.', 'err');
+    return;
+  }
+  try{
+    if(!silent) showCloudStatus('A carregar da cloud...', 'ok');
+    const response=await fetch(`${CLOUD_WEB_APP_URL}?action=load&username=${encodeURIComponent(user.username)}`);
+    const result=await response.json();
+    if(!result.ok) throw new Error(result.error || 'Erro ao carregar.');
+    if(!result.exists){
+      if(!silent) showCloudStatus(`Ainda não existe ficheiro cloud para ${user.username}.`, 'err');
+      return;
+    }
+    const payload=result.data;
+    if(payload?.appData){
+      state=payload.appData;
+      saveState();
+      syncClasses();
+      renderSchedule();
+      renderStudents();
+      renderEvaluationPage();
+      renderDocument();
+      if(!silent) showCloudStatus(`Dados carregados: ${user.username}.json`, 'ok');
+    }else{
+      throw new Error('Ficheiro cloud sem dados válidos.');
+    }
+  }catch(err){
+    if(!silent) showCloudStatus(`Erro cloud: ${err.message || err}`, 'err');
+  }
+}
+
+function setupCloudButtons(){
+  const saveBtn=document.getElementById('cloudSaveBtn');
+  const loadBtn=document.getElementById('cloudLoadBtn');
+  const exportBtn=document.getElementById('exportJsonBtn');
+  const importInput=document.getElementById('importJsonInput');
+
+  if(saveBtn && !saveBtn.dataset.ready){
+    saveBtn.dataset.ready='true';
+    saveBtn.addEventListener('click',saveToCloud);
+  }
+  if(loadBtn && !loadBtn.dataset.ready){
+    loadBtn.dataset.ready='true';
+    loadBtn.addEventListener('click',()=>loadFromCloud(false));
+  }
+  if(exportBtn && !exportBtn.dataset.ready){
+    exportBtn.dataset.ready='true';
+    exportBtn.addEventListener('click',exportJsonFile);
+  }
+  if(importInput && !importInput.dataset.ready){
+    importInput.dataset.ready='true';
+    importInput.addEventListener('change',async()=>{
+      const file=importInput.files?.[0];
+      if(!file) return;
+      try{
+        const payload=JSON.parse(await file.text());
+        importStateObject(payload);
+        showCloudStatus('JSON importado com sucesso.', 'ok');
+      }catch(err){
+        showCloudStatus(`Erro ao importar: ${err.message || err}`, 'err');
+      }finally{
+        importInput.value='';
+      }
+    });
+  }
 }
 
 function defaultState(){return {schedule:{},classes:{},evaluations:{}}}
@@ -4285,6 +4454,7 @@ function clearChecksGlobalHandler(event){
 }
 document.addEventListener('click',clearChecksGlobalHandler);
 
+setupCloudButtons();
 setupLogin();
 renderSchedule();
 </script>
