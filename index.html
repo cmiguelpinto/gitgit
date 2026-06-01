@@ -2720,6 +2720,7 @@ function setupLogin(){
 }
 
 
+
 const CLOUD_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmpEm_PhCAL6omtYq3vznnm5WxWpFDvqXtyN_lwZfLA1fItiXA4NIA-gLT55M1toF2/exec';
 
 function showCloudStatus(message, type='ok'){
@@ -2728,7 +2729,7 @@ function showCloudStatus(message, type='ok'){
   box.textContent=message;
   box.className=`cloud-status show ${type}`;
   clearTimeout(showCloudStatus._timer);
-  showCloudStatus._timer=setTimeout(()=>{box.className='cloud-status';},3200);
+  showCloudStatus._timer=setTimeout(()=>{box.className='cloud-status';},4200);
 }
 
 function getCurrentCloudUser(){
@@ -2772,25 +2773,92 @@ function exportJsonFile(){
   URL.revokeObjectURL(url);
 }
 
+function postFormToCloud(username, payload){
+  return new Promise((resolve,reject)=>{
+    const iframeName=`cloudSaveFrame_${Date.now()}`;
+    const iframe=document.createElement('iframe');
+    iframe.name=iframeName;
+    iframe.style.display='none';
+    document.body.appendChild(iframe);
+
+    const form=document.createElement('form');
+    form.method='POST';
+    form.action=`${CLOUD_WEB_APP_URL}?action=save&username=${encodeURIComponent(username)}`;
+    form.target=iframeName;
+    form.style.display='none';
+
+    const input=document.createElement('textarea');
+    input.name='payload';
+    input.value=JSON.stringify(payload);
+    form.appendChild(input);
+
+    let done=false;
+    const cleanup=()=>{
+      setTimeout(()=>{
+        form.remove();
+        iframe.remove();
+      },500);
+    };
+
+    iframe.addEventListener('load',()=>{
+      if(done) return;
+      done=true;
+      cleanup();
+      resolve({ok:true});
+    });
+
+    setTimeout(()=>{
+      if(done) return;
+      done=true;
+      cleanup();
+      resolve({ok:true, timeout:true});
+    },6500);
+
+    document.body.appendChild(form);
+    form.submit();
+  });
+}
+
+function jsonpCloud(action, username){
+  return new Promise((resolve,reject)=>{
+    const callbackName=`cloudCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script=document.createElement('script');
+    const cleanup=()=>{
+      delete window[callbackName];
+      script.remove();
+    };
+
+    window[callbackName]=(result)=>{
+      cleanup();
+      resolve(result);
+    };
+
+    script.onerror=()=>{
+      cleanup();
+      reject(new Error('Não foi possível contactar a cloud.'));
+    };
+
+    script.src=`${CLOUD_WEB_APP_URL}?action=${encodeURIComponent(action)}&username=${encodeURIComponent(username)}&callback=${encodeURIComponent(callbackName)}&t=${Date.now()}`;
+    document.body.appendChild(script);
+  });
+}
+
 async function saveToCloud(){
   const user=getCurrentCloudUser();
   if(!user?.username){
     showCloudStatus('Faz login antes de guardar na cloud.', 'err');
     return;
   }
+
   try{
     showCloudStatus('A guardar na cloud...', 'ok');
     const payload={
       professorName: professorName,
       appData: state
     };
-    const response=await fetch(`${CLOUD_WEB_APP_URL}?action=save&username=${encodeURIComponent(user.username)}`, {
-      method:'POST',
-      body: JSON.stringify(payload)
-    });
-    const result=await response.json();
-    if(!result.ok) throw new Error(result.error || 'Erro ao guardar.');
-    showCloudStatus(`Guardado na cloud: ${user.username}.json`, 'ok');
+
+    await postFormToCloud(user.username, payload);
+    showCloudStatus(`Pedido de gravação enviado: ${user.username}.json`, 'ok');
   }catch(err){
     showCloudStatus(`Erro cloud: ${err.message || err}`, 'err');
   }
@@ -2802,15 +2870,17 @@ async function loadFromCloud(silent=false){
     if(!silent) showCloudStatus('Faz login antes de carregar da cloud.', 'err');
     return;
   }
+
   try{
     if(!silent) showCloudStatus('A carregar da cloud...', 'ok');
-    const response=await fetch(`${CLOUD_WEB_APP_URL}?action=load&username=${encodeURIComponent(user.username)}`);
-    const result=await response.json();
+    const result=await jsonpCloud('load', user.username);
+
     if(!result.ok) throw new Error(result.error || 'Erro ao carregar.');
     if(!result.exists){
       if(!silent) showCloudStatus(`Ainda não existe ficheiro cloud para ${user.username}.`, 'err');
       return;
     }
+
     const payload=result.data;
     if(payload?.appData){
       state=payload.appData;
