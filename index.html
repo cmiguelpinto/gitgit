@@ -5419,6 +5419,108 @@ function bindScheduleToolbarActions(){
   }
 }
 
+
+function classRecordIdFor(classNameValue, day, time){
+  return `${classId(classNameValue)}_${classId(day)}_${String(time||'').replace(/[^0-9]/g,'_')}`;
+}
+
+
+function ensureEvaluationLinks(){
+  if(!state.evaluationLinks || typeof state.evaluationLinks!=='object'){
+    state.evaluationLinks={};
+  }
+  return state.evaluationLinks;
+}
+
+function linkEvaluationsBlindly(sourceId,targetId){
+  if(!sourceId || !targetId || sourceId===targetId) return;
+
+  const links=ensureEvaluationLinks();
+  if(!Array.isArray(links[sourceId])) links[sourceId]=[];
+  if(!Array.isArray(links[targetId])) links[targetId]=[];
+
+  if(!links[sourceId].includes(targetId)) links[sourceId].push(targetId);
+  if(!links[targetId].includes(sourceId)) links[targetId].push(sourceId);
+}
+
+function linkedEvaluationClassIds(classId){
+  const links=ensureEvaluationLinks();
+  const visited=new Set();
+  const stack=[classId];
+
+  while(stack.length){
+    const current=stack.pop();
+    if(!current || visited.has(current)) continue;
+    visited.add(current);
+    (links[current]||[]).forEach(next=>{
+      if(!visited.has(next)) stack.push(next);
+    });
+  }
+
+  return [...visited].filter(id=>id!==classId);
+}
+
+function cloneEvaluationObject(ev){
+  const cloned=JSON.parse(JSON.stringify(ev || {checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{},levelOverrides:{}}));
+  if(!cloned.checks) cloned.checks={};
+  if(!cloned.studentNotes) cloned.studentNotes={};
+  if(!cloned.finalMessages) cloned.finalMessages={};
+  if(!cloned.levelOverrides) cloned.levelOverrides={};
+  if(!('semester' in cloned)) cloned.semester='';
+  return cloned;
+}
+
+function copyEvaluationBlindly(sourceId,targetId){
+  state.evaluations[targetId]=cloneEvaluationObject(state.evaluations[sourceId] || evalData(sourceId));
+}
+
+function propagateBlindEvaluationFrom(classId){
+  const source=cloneEvaluationObject(state.evaluations[classId] || evalData(classId));
+  linkedEvaluationClassIds(classId).forEach(targetId=>{
+    state.evaluations[targetId]=cloneEvaluationObject(source);
+  });
+}
+
+function cloneClassStudentsForCopy(fromDay, toDay){
+  let copiedStudentsCount=0;
+  let copiedClassesCount=0;
+
+  allTimes.forEach(time=>{
+    if(!dayHasTime(toDay,time)) return;
+
+    const fromKey=slotKey(fromDay,time);
+    const fromSlot=state.schedule[fromKey] || {active:false,className:'',classNames:[]};
+    const classNames=slotClasses(fromSlot);
+
+    classNames.forEach(classNameValue=>{
+      const sourceId=classRecordIdFor(classNameValue, fromDay, time);
+      const targetId=classRecordIdFor(classNameValue, toDay, time);
+      const sourceClass=state.classes[sourceId];
+
+      if(!sourceClass) return;
+
+      const clonedStudents=JSON.parse(JSON.stringify(sourceClass.students || []));
+      state.classes[targetId]={
+        total: Number(sourceClass.total || clonedStudents.length || 0),
+        students: clonedStudents
+      };
+
+      // Blind copy: copied schedule keeps the same evaluation as the original class.
+      if(!state.evaluations[sourceId]){
+        state.evaluations[sourceId]={checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{},levelOverrides:{}};
+      }
+      copyEvaluationBlindly(sourceId,targetId);
+      linkEvaluationsBlindly(sourceId,targetId);
+
+      copiedClassesCount++;
+      copiedStudentsCount += clonedStudents.length;
+    });
+  });
+
+  return {copiedClassesCount,copiedStudentsCount};
+}
+
+
 function copyDay(){
   const fromSelect=document.getElementById('copyFrom');
   const toSelect=document.getElementById('copyTo');
@@ -5435,6 +5537,9 @@ function copyDay(){
     return;
   }
 
+  // First save any visible student name edits before copying.
+  try{ saveStudentsFromDom(); }catch(e){}
+
   allTimes.forEach(time=>{
     const fromKey=slotKey(from,time);
     const toKey=slotKey(to,time);
@@ -5444,9 +5549,15 @@ function copyDay(){
     }
   });
 
+  const copyResult=cloneClassStudentsForCopy(from,to);
+
   saveState();
+  syncClasses();
   renderSchedule();
-  if(msg) msg.textContent=`Horário copiado de ${formatDayLabel(from)} para ${formatDayLabel(to)}.`;
+
+  if(msg){
+    msg.textContent=`Horário copiado de ${formatDayLabel(from)} para ${formatDayLabel(to)}. ${copyResult.copiedStudentsCount} aluno(s) e avaliações copiados em ${copyResult.copiedClassesCount} turma(s). Podes editar manualmente a turma de destino em Turmas / Alunos. As avaliações ficam ligadas e são copiadas cegamente entre as turmas.`;
+  }
 }
 
 bindScheduleToolbarActions();
@@ -5536,17 +5647,22 @@ function renderStudents(){
   selected.forEach(c=>{
     const data=state.classes[c.id] || {total:0,students:[]}; const ev=state.evaluations[c.id]||{};
     const card=document.createElement('div'); card.className='class-card';
-    card.innerHTML=`<div class="class-top"><div><div class="class-title-line"><div class="class-title">${safe(c.displayName||c.className)}</div><button class="inline-evaluate" data-eval-open="${safe(c.id)}">📝 Avaliar</button></div><div class="class-meta">Esta ficha corresponde apenas a este bloco do horário. Referência de capacidade: ${MAX_STUDENTS_PER_CLASS} alunos.</div></div><span class="pill ${ev.updatedAt?'green':'amber'}">${ev.updatedAt?'Avaliada':'Por avaliar'}</span></div><div class="field"><label>Total de alunos</label><input type="number" min="0" value="${data.total||0}" data-total="${safe(c.id)}"></div><div class="students-list" id="students-${safe(c.id)}"></div>`;
+    card.innerHTML=`<div class="class-top"><div><div class="class-title-line"><div class="class-title">${safe(c.displayName||c.className)}</div><button class="inline-evaluate" data-eval-open="${safe(c.id)}">📝 Avaliar</button></div><div class="class-meta">Esta ficha corresponde apenas a este bloco do horário. Máximo: ${MAX_STUDENTS_PER_CLASS} alunos.</div></div><span class="pill ${ev.updatedAt?'green':'amber'}">${ev.updatedAt?'Avaliada':'Por avaliar'}</span></div><div class="field"><label>Total de alunos</label><input type="number" min="0" max="${MAX_STUDENTS_PER_CLASS}" value="${Math.min(data.total||0,MAX_STUDENTS_PER_CLASS)}" data-total="${safe(c.id)}"></div><div class="students-list" id="students-${safe(c.id)}"></div>`;
     grid.appendChild(card); renderStudentInputs(c.id);
   });
   document.querySelectorAll('[data-total]').forEach(inp=>inp.addEventListener('change',()=>{
     const requested=parseInt(inp.value||0);
+    if(requested>MAX_STUDENTS_PER_CLASS){
+      inp.value=MAX_STUDENTS_PER_CLASS;
+      const msg=document.getElementById('studentsMessage');
+      if(msg) msg.textContent=`Máximo permitido: ${MAX_STUDENTS_PER_CLASS} alunos por turma.`;
+    }
     setTotal(inp.dataset.total, requested);
   }));
   document.querySelectorAll('[data-eval-open]').forEach(btn=>btn.addEventListener('click',()=>{saveStudentsFromDom(); activeEvalId=btn.dataset.evalOpen; switchView('evaluationView');}));
 }
 function setTotal(id,total){
-  total=Math.max(0,Math.min(500,total)); if(!state.classes[id]) state.classes[id]={total:0,students:[]};
+  total=Math.max(0,Math.min(MAX_STUDENTS_PER_CLASS,total)); if(!state.classes[id]) state.classes[id]={total:0,students:[]};
   const data=state.classes[id]; data.total=total;
   while(data.students.length<total) data.students.push({firstName:'',lastName:''});
   data.students=data.students.slice(0,total); saveState(); renderStudentInputs(id);
@@ -5588,8 +5704,9 @@ document.getElementById('clearDataBtn').addEventListener('click',()=>{if(confirm
 renderSchedule();renderStudents();renderEvaluationPage();renderDocument();}});
 
 function evalData(id){
-  if(!state.evaluations[id]) state.evaluations[id]={checks:{},notes:'',studentNotes:{},updatedAt:'',semester:''};
+  if(!state.evaluations[id]) state.evaluations[id]={checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{},levelOverrides:{}};
   if(!state.evaluations[id].finalMessages) state.evaluations[id].finalMessages={};
+  if(!state.evaluations[id].levelOverrides) state.evaluations[id].levelOverrides={};
   if(!('semester' in state.evaluations[id])) state.evaluations[id].semester='';
   return state.evaluations[id]
 }
@@ -6587,6 +6704,7 @@ async function saveCurrentEvaluation(){
   ev.updatedAt=new Date().toLocaleString('pt-PT');
   const cls=state.classes?.[activeEvalId];
   (cls?.students||[]).forEach((_s,i)=>syncLinkedStudentEvaluation(activeEvalId,i));
+  propagateBlindEvaluationFrom(activeEvalId);
   saveState();
   renderEvaluationPage();
   await saveToCloud();
@@ -6951,7 +7069,7 @@ function renderTeacherDashboard(){
   if(isAdminUser()){
     metricCards.push(
       ['Turmas cheias',metrics.fullClasses,`${MAX_STUDENTS_PER_CLASS}/${MAX_STUDENTS_PER_CLASS} alunos`],
-      ['Acima referência',metrics.overCapacity,`referência ${MAX_STUDENTS_PER_CLASS} alunos`]
+      ['Acima do limite',metrics.overCapacity,`limite ${MAX_STUDENTS_PER_CLASS} alunos`]
     );
   }
 
@@ -7061,7 +7179,7 @@ function renderAdminClassNavigator(summaries, box){
         <span class="admin-mini-chip">${t.students} alunos</span>
         <span class="admin-mini-chip">${evalPct}% aval.</span>
         <span class="admin-mini-chip">${attPct}% pres.</span>
-        ${t.over?`<span class="admin-mini-chip warn">${t.over} acima ref.</span>`:''}
+        ${t.over?`<span class="admin-mini-chip warn">${t.over} acima limite</span>`:''}
       </div>
     </button>`;
   }).join('');
@@ -7268,7 +7386,7 @@ function renderTeacherClassList(summaries){
 
   const countHtml=`<div class="teacher-class-count">
     <span>${filtered.length}/${summaries.length} turma(s) visíveis</span>
-    <span>Referência: ${MAX_STUDENTS_PER_CLASS} alunos/turma</span>
+    <span>Limite: ${MAX_STUDENTS_PER_CLASS} alunos/turma</span>
   </div>`;
 
   if(!filtered.length){
@@ -7336,7 +7454,7 @@ function renderTeacherObjectiveInsights(summaries){
       box.innerHTML=overCapacity.map(item=>`
         <article class="teacher-objective-card">
           <div class="teacher-objective-title">⚠️ ${safe(item.teacher)} · ${safe(item.className)} · ${safe(item.block)}</div>
-          <div class="teacher-objective-meta">Acima da referência: ${item.total}/${MAX_STUDENTS_PER_CLASS} alunos</div>
+          <div class="teacher-objective-meta">Acima do limite: ${item.total}/${MAX_STUDENTS_PER_CLASS} alunos</div>
           <div class="teacher-progress"><div class="teacher-progress-fill" style="width:100%"></div></div>
         </article>
       `).join('');
