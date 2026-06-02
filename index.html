@@ -2721,6 +2721,146 @@
       visibility:hidden!important;
     }
 
+
+    /* Presenças - época 2025/26 */
+    .attendance-top-panel{
+      display:grid;
+      gap:14px;
+    }
+    .attendance-top-months{
+      display:grid;
+      gap:8px;
+      padding-top:12px;
+      border-top:1px solid #edf0f3;
+    }
+    .attendance-month-filters,
+    .attendance-day-filters{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+    .attendance-month-btn,
+    .attendance-day-btn{
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:11px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+      text-transform:capitalize;
+      white-space:nowrap;
+    }
+    .attendance-month-btn.active{
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 10px 20px rgba(208,0,27,.16);
+    }
+    .attendance-day-btn.active{
+      background:#111827;
+      color:#fff;
+      border-color:#111827;
+      box-shadow:0 10px 20px rgba(15,23,42,.14);
+    }
+    .attendance-season-static{
+      display:flex;
+      align-items:center;
+      height:42px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:0 12px;
+      background:#f9fafb;
+      font-weight:950;
+      color:#111827;
+    }
+    .attendance-class-picker.compact{
+      display:grid;
+      gap:7px;
+      max-height:280px;
+      overflow:auto;
+      padding-right:3px;
+    }
+    .attendance-class-card{
+      width:100%;
+      text-align:left;
+      border:1px solid #edf0f3;
+      background:#fff;
+      border-radius:15px;
+      padding:10px;
+      cursor:pointer;
+      font-family:inherit;
+      transition:.15s ease;
+    }
+    .attendance-class-card:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 20px rgba(15,23,42,.07);
+    }
+    .attendance-class-card.active{
+      border-color:rgba(208,0,27,.38);
+      background:#fff5f6;
+      box-shadow:0 10px 22px rgba(208,0,27,.08);
+    }
+    .attendance-class-card.compact{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 11px;
+    }
+    .attendance-class-card-title{
+      font-size:12px;
+      font-weight:950;
+      color:#111827;
+      line-height:1.25;
+    }
+    .attendance-class-card-meta{
+      margin-top:4px;
+      font-size:11px;
+      font-weight:800;
+      color:var(--muted);
+      line-height:1.3;
+    }
+    .attendance-class-card-time{
+      font-size:11px;
+      font-weight:950;
+      color:#9f0015;
+      white-space:nowrap;
+    }
+    .attendance-annual-note{
+      margin-bottom:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      color:#374151;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .attendance-table.season{
+      min-width:920px;
+    }
+    .attendance-table.season th,
+    .attendance-table.season td{
+      white-space:nowrap;
+    }
+    .attendance-year-total{
+      font-weight:950;
+      color:#111827;
+      background:#fafafa;
+    }
+    .attendance-year-low{
+      color:#991b1b;
+      font-weight:950;
+    }
+    .attendance-year-good{
+      color:#166534;
+      font-weight:950;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -2820,35 +2960,45 @@
     </section>
 
 
-    <section id="attendanceView" class="view">
-      <div class="panel toolbar">
-        <div>
-          <div class="section-label">Presenças</div>
-          <div class="hint">Escolhe a turma, o mês e marca apenas as presenças com checkboxes.</div>
+        <section id="attendanceView" class="view">
+      <div class="panel attendance-top-panel">
+        <div class="toolbar">
+          <div>
+            <div class="section-label">Presenças</div>
+            <div class="hint">Escolhe a turma, o mês e marca apenas as presenças com checkboxes.</div>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
+            <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
+            <button class="btn secondary" id="seasonAttendanceBtn">Relatório época</button>
+            <button class="btn ghost" id="monthlyAttendanceBtn" style="display:none">Voltar ao mês</button>
+          </div>
         </div>
-        <div class="toolbar-actions">
-          <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
-          <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
+
+        <div class="attendance-top-months">
+          <div class="section-label">Mês</div>
+          <div id="attendanceMonthFilters" class="attendance-month-filters"></div>
         </div>
       </div>
 
       <section class="attendance-shell">
         <aside class="attendance-sidebar">
           <div class="field">
-            <label>Turma</label>
-            <select id="attendanceClassSelect"></select>
+            <label>Dia</label>
+            <div id="attendanceDayFilters" class="attendance-day-filters"></div>
           </div>
-          <div class="attendance-date-grid">
-            <div class="field">
-              <label>Mês</label>
-              <select id="attendanceMonthSelect"></select>
-            </div>
-            <div class="field">
-              <label>Ano</label>
-              <select id="attendanceYearSelect"></select>
-            </div>
+
+          <div class="field">
+            <label>Turmas desse dia</label>
+            <div id="attendanceClassPicker" class="attendance-class-picker compact"></div>
           </div>
-          <div class="hint">São mostrados automaticamente os dias desse mês em que a turma tem aula.</div>
+
+          <div class="field">
+            <label>Época</label>
+            <div class="attendance-season-static" id="attendanceSeasonStatic">2025/26</div>
+          </div>
+
+          <div class="hint">Escolhe primeiro o dia e depois a turma desse dia.</div>
         </aside>
 
         <main class="attendance-main">
@@ -3466,7 +3616,12 @@ function studentName(s,i){const first=String(s?.firstName||'').trim();const last
 function studentDisplayName(s,i){const first=String(s?.firstName||'').trim();const last=String(s?.lastName||'').trim();const full=String(s?.fullName||'').trim() || `${first} ${last}`.trim();return full||`Aluno ${i+1}`}
 function getStudentFullName(s){return String(s?.fullName||'').trim() || `${s?.firstName||''} ${s?.lastName||''}`.trim()}
 
+
 let activeAttendanceClassId = null;
+let activeAttendanceDay = 'Segunda';
+let activeAttendanceMonthIndex = 8;
+let attendanceViewMode = 'month';
+const fixedAttendanceSeasonStartYear = 2025;
 
 function attendanceKey(classId, year, month){
   return `${classId}|${year}|${String(month).padStart(2,'0')}`;
@@ -3476,29 +3631,74 @@ function attendanceMonthName(monthIndex){
   return new Date(2026, monthIndex, 1).toLocaleDateString('pt-PT',{month:'long'});
 }
 
+function monthShortName(monthIndex){
+  return new Date(2026, monthIndex, 1).toLocaleDateString('pt-PT',{month:'short'}).replace('.', '');
+}
+
+function seasonMonths(){
+  return [
+    {monthIndex:8, seasonYearOffset:0},
+    {monthIndex:9, seasonYearOffset:0},
+    {monthIndex:10, seasonYearOffset:0},
+    {monthIndex:11, seasonYearOffset:0},
+    {monthIndex:0, seasonYearOffset:1},
+    {monthIndex:1, seasonYearOffset:1},
+    {monthIndex:2, seasonYearOffset:1},
+    {monthIndex:3, seasonYearOffset:1},
+    {monthIndex:4, seasonYearOffset:1},
+    {monthIndex:5, seasonYearOffset:1},
+    {monthIndex:6, seasonYearOffset:1}
+  ];
+}
+
+function calendarYearForSeasonMonth(seasonStartYear, monthIndex){
+  return monthIndex>=8 ? seasonStartYear : seasonStartYear+1;
+}
+
+function seasonLabel(seasonStartYear){
+  return `${seasonStartYear}/${String(seasonStartYear+1).slice(-2)}`;
+}
+
 function setupAttendanceControls(){
-  const monthSelect=document.getElementById('attendanceMonthSelect');
-  const yearSelect=document.getElementById('attendanceYearSelect');
-  if(!monthSelect || !yearSelect) return;
+  const dayFilters=document.getElementById('attendanceDayFilters');
+  const monthFilters=document.getElementById('attendanceMonthFilters');
+  const seasonStatic=document.getElementById('attendanceSeasonStatic');
 
-  if(!monthSelect.options.length){
-    for(let m=0;m<12;m++){
-      monthSelect.insertAdjacentHTML('beforeend',`<option value="${m}">${attendanceMonthName(m)}</option>`);
-    }
+  if(seasonStatic) seasonStatic.textContent='2025/26';
+
+  if(dayFilters && !dayFilters.dataset.ready){
+    dayFilters.dataset.ready='true';
+    ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'].forEach(day=>{
+      dayFilters.insertAdjacentHTML('beforeend',`<button type="button" class="attendance-day-btn" data-attendance-day="${safe(day)}">${safe(day)}</button>`);
+    });
   }
 
-  if(!yearSelect.options.length){
-    const currentYear=new Date().getFullYear();
-    for(let y=currentYear-1;y<=currentYear+2;y++){
-      yearSelect.insertAdjacentHTML('beforeend',`<option value="${y}">${y}</option>`);
-    }
+  if(monthFilters && !monthFilters.dataset.ready){
+    monthFilters.dataset.ready='true';
+    seasonMonths().forEach(({monthIndex})=>{
+      monthFilters.insertAdjacentHTML('beforeend',`<button type="button" class="attendance-month-btn" data-attendance-month="${monthIndex}">${safe(attendanceMonthName(monthIndex))}</button>`);
+    });
   }
 
-  if(monthSelect.value==='') monthSelect.value=String(new Date().getMonth());
-  if(yearSelect.value==='') yearSelect.value=String(new Date().getFullYear());
+  document.querySelectorAll('[data-attendance-day]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.attendanceDay===activeAttendanceDay);
+    btn.onclick=()=>{
+      activeAttendanceDay=btn.dataset.attendanceDay;
+      const classesForDay=selectedClasses().filter(c=>(c.blocks?.[0]?.day)===activeAttendanceDay);
+      activeAttendanceClassId=classesForDay[0]?.id || null;
+      attendanceViewMode='month';
+      renderAttendancePage();
+    };
+  });
 
-  monthSelect.onchange=renderAttendancePage;
-  yearSelect.onchange=renderAttendancePage;
+  const currentMonth=String(activeAttendanceMonthIndex ?? 8);
+  document.querySelectorAll('[data-attendance-month]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.attendanceMonth===currentMonth);
+    btn.onclick=()=>{
+      activeAttendanceMonthIndex=Number(btn.dataset.attendanceMonth);
+      attendanceViewMode==='season' ? renderSeasonAttendanceReport() : renderAttendancePage();
+    };
+  });
 }
 
 function weekdayIndexPt(day){
@@ -3510,6 +3710,7 @@ function classDatesForMonth(classInfo, year, monthIndex){
   const wantedDays=[...new Set((classInfo.blocks||[]).map(b=>weekdayIndexPt(b.day)).filter(v=>v!==undefined))];
   const dates=[];
   const last=new Date(year, monthIndex+1, 0).getDate();
+
   for(let d=1; d<=last; d++){
     const date=new Date(year, monthIndex, d);
     if(wantedDays.includes(date.getDay())){
@@ -3520,6 +3721,7 @@ function classDatesForMonth(classInfo, year, monthIndex){
       });
     }
   }
+
   return dates;
 }
 
@@ -3532,40 +3734,74 @@ function ensureAttendanceMonth(classId, year, monthIndex){
 
 function populateAttendanceClasses(){
   syncClasses();
-  const select=document.getElementById('attendanceClassSelect');
-  if(!select) return [];
+  const picker=document.getElementById('attendanceClassPicker');
   const classes=selectedClasses();
-  const current=select.value || activeAttendanceClassId;
 
-  select.innerHTML='';
-  classes.forEach(c=>{
-    const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
-    select.insertAdjacentHTML('beforeend',`<option value="${safe(c.id)}">${safe(c.className)} - ${safe(block)}</option>`);
-  });
+  if(!picker) return classes;
 
-  if(classes.length){
-    activeAttendanceClassId = classes.find(c=>c.id===current)?.id || classes[0].id;
-    select.value=activeAttendanceClassId;
-  }else{
-    activeAttendanceClassId=null;
+  const availableDays=[...new Set(classes.map(c=>c.blocks?.[0]?.day).filter(Boolean))];
+
+  if(!availableDays.includes(activeAttendanceDay)){
+    activeAttendanceDay=availableDays[0] || 'Segunda';
   }
 
-  select.onchange=()=>{
-    activeAttendanceClassId=select.value;
+  const filtered=classes.filter(c=>(c.blocks?.[0]?.day)===activeAttendanceDay);
+
+  if(classes.length && (!activeAttendanceClassId || !classes.find(c=>c.id===activeAttendanceClassId))){
+    activeAttendanceClassId=filtered[0]?.id || classes[0].id;
+  }
+
+  if(filtered.length && !filtered.find(c=>c.id===activeAttendanceClassId)){
+    activeAttendanceClassId=filtered[0].id;
+  }
+
+  if(!classes.length){
+    activeAttendanceClassId=null;
+    picker.innerHTML='<div class="teacher-empty">Sem turmas guardadas.</div>';
+    return classes;
+  }
+
+  if(!filtered.length){
+    activeAttendanceClassId=null;
+    picker.innerHTML='<div class="teacher-empty">Não existem turmas neste dia.</div>';
+    return classes;
+  }
+
+  picker.innerHTML=filtered.map(c=>{
+    const data=state.classes[c.id]||{students:[]};
+    const block=c.blocks?.[0] || {};
+    return `<button type="button" class="attendance-class-card compact ${c.id===activeAttendanceClassId?'active':''}" data-attendance-class="${safe(c.id)}">
+      <div>
+        <div class="attendance-class-card-title">${safe(c.className)}</div>
+        <div class="attendance-class-card-meta">${(data.students||[]).length} aluno(s)</div>
+      </div>
+      <div class="attendance-class-card-time">${safe(block.time||'')}</div>
+    </button>`;
+  }).join('');
+
+  document.querySelectorAll('[data-attendance-class]').forEach(btn=>btn.addEventListener('click',()=>{
+    activeAttendanceClassId=btn.dataset.attendanceClass;
+    attendanceViewMode='month';
     renderAttendancePage();
-  };
+  }));
 
   return classes;
 }
 
 function renderAttendancePage(){
+  attendanceViewMode='month';
   setupAttendanceControls();
+
+  const annualBtn=document.getElementById('seasonAttendanceBtn');
+  const monthlyBtn=document.getElementById('monthlyAttendanceBtn');
+  if(annualBtn) annualBtn.style.display='inline-flex';
+  if(monthlyBtn) monthlyBtn.style.display='none';
+
   const classes=populateAttendanceClasses();
   const summary=document.getElementById('attendanceSummary');
   const wrap=document.getElementById('attendanceTableWrap');
-  const monthSelect=document.getElementById('attendanceMonthSelect');
-  const yearSelect=document.getElementById('attendanceYearSelect');
-  if(!summary || !wrap || !monthSelect || !yearSelect) return;
+
+  if(!summary || !wrap) return;
 
   if(!classes.length){
     summary.innerHTML='';
@@ -3576,8 +3812,9 @@ function renderAttendancePage(){
   const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
   const data=state.classes[classInfo.id] || {students:[]};
   const students=data.students || [];
-  const monthIndex=Number(monthSelect.value);
-  const year=Number(yearSelect.value);
+  const monthIndex=Number(activeAttendanceMonthIndex ?? 8);
+  const seasonStartYear=fixedAttendanceSeasonStartYear;
+  const year=calendarYearForSeasonMonth(seasonStartYear, monthIndex);
   const dates=classDatesForMonth(classInfo, year, monthIndex);
   const attendance=ensureAttendanceMonth(classInfo.id, year, monthIndex);
 
@@ -3588,6 +3825,7 @@ function renderAttendancePage(){
   summary.innerHTML=`
     <span class="attendance-pill">${safe(classInfo.className)}</span>
     <span class="attendance-pill">${safe(attendanceMonthName(monthIndex))} ${year}</span>
+    <span class="attendance-pill">Época ${safe(seasonLabel(seasonStartYear))}</span>
     <span class="attendance-pill">${students.length} aluno(s)</span>
     <span class="attendance-pill">${dates.length} aula(s)</span>
     <span class="attendance-pill">${percent}% presenças</span>
@@ -3626,6 +3864,107 @@ function renderAttendancePage(){
     saveState();
     renderAttendancePage();
   }));
+}
+
+function seasonAttendanceForStudent(classInfo, studentIndex, seasonStartYear){
+  const months=[];
+  let totalPresent=0;
+  let totalClasses=0;
+
+  seasonMonths().forEach(({monthIndex})=>{
+    const year=calendarYearForSeasonMonth(seasonStartYear, monthIndex);
+    const dates=classDatesForMonth(classInfo, year, monthIndex);
+    const monthData=(state.attendance||{})[attendanceKey(classInfo.id, year, monthIndex+1)] || {};
+    const present=dates.filter(dt=>!!monthData[`${studentIndex}|${dt.iso}`]).length;
+    const total=dates.length;
+
+    totalPresent+=present;
+    totalClasses+=total;
+
+    months.push({monthIndex,year,present,total,percent:total?Math.round((present/total)*100):0});
+  });
+
+  return {
+    months,
+    totalPresent,
+    totalClasses,
+    percent: totalClasses ? Math.round((totalPresent/totalClasses)*100) : 0
+  };
+}
+
+function renderSeasonAttendanceReport(){
+  attendanceViewMode='season';
+  setupAttendanceControls();
+
+  const classes=populateAttendanceClasses();
+  const summary=document.getElementById('attendanceSummary');
+  const wrap=document.getElementById('attendanceTableWrap');
+  const annualBtn=document.getElementById('seasonAttendanceBtn');
+  const monthlyBtn=document.getElementById('monthlyAttendanceBtn');
+
+  if(annualBtn) annualBtn.style.display='none';
+  if(monthlyBtn) monthlyBtn.style.display='inline-flex';
+
+  if(!summary || !wrap) return;
+
+  if(!classes.length){
+    summary.innerHTML='';
+    wrap.innerHTML='<div class="teacher-empty">Ainda não existem turmas. Vai primeiro ao Horário.</div>';
+    return;
+  }
+
+  const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
+  const data=state.classes[classInfo.id] || {students:[]};
+  const students=data.students || [];
+  const seasonStartYear=fixedAttendanceSeasonStartYear;
+  const blockText=(classInfo.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+
+  let classTotalPresent=0;
+  let classTotalPossible=0;
+
+  const studentRows=students.map((student,si)=>{
+    const stats=seasonAttendanceForStudent(classInfo, si, seasonStartYear);
+    classTotalPresent+=stats.totalPresent;
+    classTotalPossible+=stats.totalClasses;
+    return {student,si,stats};
+  });
+
+  const classPercent=classTotalPossible ? Math.round((classTotalPresent/classTotalPossible)*100) : 0;
+
+  summary.innerHTML=`
+    <span class="attendance-pill">${safe(classInfo.className)}</span>
+    <span class="attendance-pill">${safe(blockText)}</span>
+    <span class="attendance-pill">Época ${safe(seasonLabel(seasonStartYear))}</span>
+    <span class="attendance-pill">${students.length} aluno(s)</span>
+    <span class="attendance-pill">${classPercent}% presença época</span>
+  `;
+
+  if(!students.length){
+    wrap.innerHTML='<div class="teacher-empty">Esta turma ainda não tem alunos definidos.</div>';
+    return;
+  }
+
+  let html=`<div class="attendance-annual-note">
+    Relatório de época de presenças da turma selecionada. A época vai de <strong>1 de setembro de 2025 a 31 de julho de 2026</strong>. Cada célula mostra <strong>presenças/aulas</strong> nesse mês.
+  </div>`;
+
+  html+=`<table class="attendance-table season"><thead><tr><th>Aluno</th>`;
+  seasonMonths().forEach(({monthIndex})=>{
+    html+=`<th>${safe(monthShortName(monthIndex))}</th>`;
+  });
+  html+=`<th>Total</th><th>%</th></tr></thead><tbody>`;
+
+  studentRows.forEach(({student,si,stats})=>{
+    html+=`<tr><td>${safe(studentDisplayName(student,si))}</td>`;
+    stats.months.forEach(month=>{
+      html+=`<td>${month.total ? `${month.present}/${month.total}` : '-'}</td>`;
+    });
+    const cls=stats.percent>=75?'attendance-year-good':'attendance-year-low';
+    html+=`<td class="attendance-year-total">${stats.totalPresent}/${stats.totalClasses}</td><td class="${cls}">${stats.percent}%</td></tr>`;
+  });
+
+  html+=`</tbody></table>`;
+  wrap.innerHTML=html;
 }
 
 async function saveAttendance(){
