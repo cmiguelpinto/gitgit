@@ -5420,70 +5420,58 @@ function bindScheduleToolbarActions(){
 }
 
 
+
 function classRecordIdFor(classNameValue, day, time){
   return `${classId(classNameValue)}_${classId(day)}_${String(time||'').replace(/[^0-9]/g,'_')}`;
 }
 
-
-function ensureEvaluationLinks(){
-  if(!state.evaluationLinks || typeof state.evaluationLinks!=='object'){
-    state.evaluationLinks={};
-  }
-  return state.evaluationLinks;
+function emptyClassRecord(){
+  return {total:0,students:[]};
 }
 
-function linkEvaluationsBlindly(sourceId,targetId){
-  if(!sourceId || !targetId || sourceId===targetId) return;
-
-  const links=ensureEvaluationLinks();
-  if(!Array.isArray(links[sourceId])) links[sourceId]=[];
-  if(!Array.isArray(links[targetId])) links[targetId]=[];
-
-  if(!links[sourceId].includes(targetId)) links[sourceId].push(targetId);
-  if(!links[targetId].includes(sourceId)) links[targetId].push(sourceId);
+function emptyEvaluationRecord(){
+  return {checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{},levelOverrides:{}};
 }
 
-function linkedEvaluationClassIds(classId){
-  const links=ensureEvaluationLinks();
-  const visited=new Set();
-  const stack=[classId];
-
-  while(stack.length){
-    const current=stack.pop();
-    if(!current || visited.has(current)) continue;
-    visited.add(current);
-    (links[current]||[]).forEach(next=>{
-      if(!visited.has(next)) stack.push(next);
-    });
-  }
-
-  return [...visited].filter(id=>id!==classId);
+function cloneDeepObject(obj){
+  return JSON.parse(JSON.stringify(obj || {}));
 }
 
-function cloneEvaluationObject(ev){
-  const cloned=JSON.parse(JSON.stringify(ev || {checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{},levelOverrides:{}}));
-  if(!cloned.checks) cloned.checks={};
-  if(!cloned.studentNotes) cloned.studentNotes={};
-  if(!cloned.finalMessages) cloned.finalMessages={};
-  if(!cloned.levelOverrides) cloned.levelOverrides={};
-  if(!('semester' in cloned)) cloned.semester='';
-  return cloned;
+function normalizeEvaluationRecord(ev){
+  const out=cloneDeepObject(ev || emptyEvaluationRecord());
+  if(!out.checks) out.checks={};
+  if(!out.studentNotes) out.studentNotes={};
+  if(!out.finalMessages) out.finalMessages={};
+  if(!out.levelOverrides) out.levelOverrides={};
+  if(!('semester' in out)) out.semester='';
+  if(!('notes' in out)) out.notes='';
+  if(!('updatedAt' in out)) out.updatedAt='';
+  return out;
 }
 
-function copyEvaluationBlindly(sourceId,targetId){
-  state.evaluations[targetId]=cloneEvaluationObject(state.evaluations[sourceId] || evalData(sourceId));
+function copyClassAndEvaluationRecord(sourceId,targetId){
+  const sourceClass=state.classes?.[sourceId] || emptyClassRecord();
+  const sourceStudents=cloneDeepObject(sourceClass.students || []);
+
+  state.classes[targetId]={
+    total:Number(sourceClass.total || sourceStudents.length || 0),
+    students:sourceStudents
+  };
+
+  const sourceEv=state.evaluations?.[sourceId] || emptyEvaluationRecord();
+  state.evaluations[targetId]=normalizeEvaluationRecord(sourceEv);
+
+  return {
+    students:sourceStudents.length,
+    copiedClass:!!state.classes[targetId],
+    copiedEvaluation:!!state.evaluations[targetId]
+  };
 }
 
-function propagateBlindEvaluationFrom(classId){
-  const source=cloneEvaluationObject(state.evaluations[classId] || evalData(classId));
-  linkedEvaluationClassIds(classId).forEach(targetId=>{
-    state.evaluations[targetId]=cloneEvaluationObject(source);
-  });
-}
-
-function cloneClassStudentsForCopy(fromDay, toDay){
-  let copiedStudentsCount=0;
+function copyDayClassesStudentsAndEvaluations(fromDay,toDay){
   let copiedClassesCount=0;
+  let copiedStudentsCount=0;
+  let copiedEvaluationsCount=0;
 
   allTimes.forEach(time=>{
     if(!dayHasTime(toDay,time)) return;
@@ -5493,42 +5481,30 @@ function cloneClassStudentsForCopy(fromDay, toDay){
     const classNames=slotClasses(fromSlot);
 
     classNames.forEach(classNameValue=>{
-      const sourceId=classRecordIdFor(classNameValue, fromDay, time);
-      const targetId=classRecordIdFor(classNameValue, toDay, time);
-      const sourceClass=state.classes[sourceId];
+      const sourceId=classRecordIdFor(classNameValue,fromDay,time);
+      const targetId=classRecordIdFor(classNameValue,toDay,time);
 
-      if(!sourceClass) return;
-
-      const clonedStudents=JSON.parse(JSON.stringify(sourceClass.students || []));
-      state.classes[targetId]={
-        total: Number(sourceClass.total || clonedStudents.length || 0),
-        students: clonedStudents
-      };
-
-      // Blind copy: copied schedule keeps the same evaluation as the original class.
-      if(!state.evaluations[sourceId]){
-        state.evaluations[sourceId]={checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{},levelOverrides:{}};
-      }
-      copyEvaluationBlindly(sourceId,targetId);
-      linkEvaluationsBlindly(sourceId,targetId);
+      const result=copyClassAndEvaluationRecord(sourceId,targetId);
 
       copiedClassesCount++;
-      copiedStudentsCount += clonedStudents.length;
+      copiedStudentsCount += result.students;
+      if(result.copiedEvaluation) copiedEvaluationsCount++;
     });
   });
 
-  return {copiedClassesCount,copiedStudentsCount};
+  return {copiedClassesCount,copiedStudentsCount,copiedEvaluationsCount};
 }
-
 
 function copyDay(){
   const fromSelect=document.getElementById('copyFrom');
   const toSelect=document.getElementById('copyTo');
   const msg=document.getElementById('scheduleMessage');
+
   if(!fromSelect || !toSelect){
     if(msg) msg.textContent='Não foi possível encontrar os campos de copiar horário.';
     return;
   }
+
   const from=fromSelect.value;
   const to=toSelect.value;
 
@@ -5537,26 +5513,42 @@ function copyDay(){
     return;
   }
 
-  // First save any visible student name edits before copying.
+  // Save any open student inputs before copying.
   try{ saveStudentsFromDom(); }catch(e){}
 
+  // 1) Copy schedule slots.
   allTimes.forEach(time=>{
     const fromKey=slotKey(from,time);
     const toKey=slotKey(to,time);
-    if(dayHasTime(to,time)){
-      const fromData=state.schedule[fromKey]||{active:false,className:'',classNames:[]};
-      state.schedule[toKey]={...fromData, classNames:slotClasses(fromData), secondEnabled:!!fromData.secondEnabled};
-    }
+
+    if(!dayHasTime(to,time)) return;
+
+    const fromData=state.schedule[fromKey] || {active:false,className:'',classNames:[]};
+    const classesInSource=slotClasses(fromData);
+
+    state.schedule[toKey]={
+      active:!!fromData.active || classesInSource.length>0,
+      className:classesInSource[0] || '',
+      classNames:classesInSource,
+      secondEnabled:!!fromData.secondEnabled || classesInSource.length>1
+    };
   });
 
-  const copyResult=cloneClassStudentsForCopy(from,to);
+  // 2) Make sure target class IDs exist.
+  syncClasses();
+
+  // 3) Copy students + full evaluation blindly from source day to destination day.
+  const copyResult=copyDayClassesStudentsAndEvaluations(from,to);
 
   saveState();
-  syncClasses();
+
+  // 4) Re-render pages so copied students appear immediately in Turmas / Alunos and Avaliação.
   renderSchedule();
+  try{ renderStudents(); }catch(e){}
+  try{ renderEvaluationPage(); }catch(e){}
 
   if(msg){
-    msg.textContent=`Horário copiado de ${formatDayLabel(from)} para ${formatDayLabel(to)}. ${copyResult.copiedStudentsCount} aluno(s) e avaliações copiados em ${copyResult.copiedClassesCount} turma(s). Podes editar manualmente a turma de destino em Turmas / Alunos. As avaliações ficam ligadas e são copiadas cegamente entre as turmas.`;
+    msg.textContent=`Copiado de ${formatDayLabel(from)} para ${formatDayLabel(to)}: horário, ${copyResult.copiedStudentsCount} aluno(s) e ${copyResult.copiedEvaluationsCount} avaliação(ões).`;
   }
 }
 
@@ -6702,9 +6694,6 @@ async function saveCurrentEvaluation(){
   if(notes) ev.notes=notes.value;
   if(semesterSelect) ev.semester=semesterSelect.value;
   ev.updatedAt=new Date().toLocaleString('pt-PT');
-  const cls=state.classes?.[activeEvalId];
-  (cls?.students||[]).forEach((_s,i)=>syncLinkedStudentEvaluation(activeEvalId,i));
-  propagateBlindEvaluationFrom(activeEvalId);
   saveState();
   renderEvaluationPage();
   await saveToCloud();
