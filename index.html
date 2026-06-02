@@ -4251,6 +4251,38 @@ function adminSlotClasses(appState, day, time){
   return slotClasses(schedule[key]);
 }
 
+
+const TEACHER_SCHEDULE_VIEW_TEMPLATE = `
+      <div class="panel">
+        <div class="toolbar">
+          <div>
+            <div class="section-label">Copiar horário entre dias</div>
+            <div class="hint">Escolhe o dia de origem e cola no dia onde dás exatamente as mesmas aulas. Cada horário pode ter uma ou duas turmas.</div>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn primary" id="saveScheduleBtn">Guardar horário</button>
+            <button class="btn ghost" id="goStudentsBtn">Ir para turmas</button>
+          </div>
+        </div>
+        <div class="copy-grid" style="margin-top:14px">
+          <div class="field"><label>Copiar de</label><select id="copyFrom"></select></div>
+          <div class="arrow">→</div>
+          <div class="field"><label>Colar em</label><select id="copyTo"></select></div>
+          <button class="btn secondary" id="copyBtn">Copiar horário</button>
+        </div>
+        <div class="message" id="scheduleMessage">Depois de escolheres as turmas, carrega em “Guardar horário”.</div>
+      </div>
+      <section class="calendar-card"><table><thead><tr><th>Horário</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th><th>Sábado</th><th>Domingo</th></tr></thead><tbody id="calendarBody"></tbody></table></section>
+    `;
+
+function restoreTeacherScheduleViewIfNeeded(){
+  const scheduleView=document.getElementById('scheduleView');
+  if(!scheduleView) return;
+  if(!document.getElementById('calendarBody')){
+    scheduleView.innerHTML = TEACHER_SCHEDULE_VIEW_TEMPLATE;
+  }
+}
+
 function renderAdminSchedule(){
   const scheduleView=document.getElementById('scheduleView');
   if(!scheduleView) return;
@@ -4353,6 +4385,7 @@ function renderSchedule(){
     return;
   }
 
+  restoreTeacherScheduleViewIfNeeded();
   populateCopyMenus();
   const body=document.getElementById('calendarBody');
   if(!body) return;
