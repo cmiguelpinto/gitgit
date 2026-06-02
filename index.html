@@ -3035,10 +3035,7 @@
           <div class="login-error" id="loginError"></div>
           <button class="login-submit" id="loginSubmitBtn" type="submit" onclick="event.preventDefault(); attemptLogin(); return false;">Entrar</button>
         </form>
-        <div class="login-demo">
-          Utilizadores disponíveis: <strong>CarlaP</strong> / <strong>carla26</strong> · <strong>CarlosP</strong> / <strong>carlos26</strong> · <strong>BrigidaP</strong> / <strong>brigida26</strong> · <strong>EdgarS</strong> / <strong>edgar26</strong> · <strong>Admin</strong> / <strong>admin26</strong><br>
-          Para segurança real online, isto deve ser ligado a autenticação com servidor/base de dados.
-        </div>
+        <div class="login-demo">Se necessitar de alterar password entre em contacto com o Administrador</div>
       </div>
     </div>
   </section>
@@ -3400,8 +3397,18 @@ let pendingStudentCopy = null;
 const LOGIN_USERS = [
   { username:'CarlaP', password:'carla26', name:'Carla Parracho', role:'teacher' },
   { username:'CarlosP', password:'carlos26', name:'Carlos Pinto', role:'teacher' },
-  { username:'BrigidaP', password:'brigida26', name:'Brigida Pedro', role:'teacher' },
-  { username:'EdgarS', password:'edgar26', name:'Edgar Silva', role:'teacher' },
+  { username:'BrigidaP', password:'123', name:'Brigida Pedro', role:'teacher' },
+  { username:'EdgarS', password:'123', name:'Edgar Silva', role:'teacher' },
+  { username:'RodrigoC', password:'123', name:'Rodrigo Carrajola', role:'teacher' },
+  { username:'MarioS', password:'123', name:'Mário Santos', role:'teacher' },
+  { username:'PedroL', password:'123', name:'Pedro Ludovice', role:'teacher' },
+  { username:'RicardoA', password:'123', name:'Ricardo Agostinho', role:'teacher' },
+  { username:'SofiaP', password:'123', name:'Sofia Pinto', role:'teacher' },
+  { username:'MargaridaO', password:'123', name:'Margarida Oliveira', role:'teacher' },
+  { username:'RaulS', password:'123', name:'Raúl Simões', role:'teacher' },
+  { username:'SusanaS', password:'123', name:'Susana Santos', role:'teacher' },
+  { username:'TatianaC', password:'123', name:'Tatiana Cardoso', role:'teacher' },
+  { username:'AlexandraM', password:'123', name:'Alexandra Martinho', role:'teacher' },
   { username:'Admin', password:'admin26', name:'Admin', role:'admin' }
 ];
 
@@ -3409,7 +3416,17 @@ const TEACHER_CLOUD_USERS = [
   { username:'CarlaP', name:'Carla Parracho' },
   { username:'CarlosP', name:'Carlos Pinto' },
   { username:'BrigidaP', name:'Brigida Pedro' },
-  { username:'EdgarS', name:'Edgar Silva' }
+  { username:'EdgarS', name:'Edgar Silva' },
+  { username:'RodrigoC', name:'Rodrigo Carrajola' },
+  { username:'MarioS', name:'Mário Santos' },
+  { username:'PedroL', name:'Pedro Ludovice' },
+  { username:'RicardoA', name:'Ricardo Agostinho' },
+  { username:'SofiaP', name:'Sofia Pinto' },
+  { username:'MargaridaO', name:'Margarida Oliveira' },
+  { username:'RaulS', name:'Raúl Simões' },
+  { username:'SusanaS', name:'Susana Santos' },
+  { username:'TatianaC', name:'Tatiana Cardoso' },
+  { username:'AlexandraM', name:'Alexandra Martinho' }
 ];
 
 let adminTeacherStates = [];
