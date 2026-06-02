@@ -3005,6 +3005,88 @@
       vertical-align:middle;
     }
 
+
+    /* Teacher/Admin class list filters */
+    .teacher-class-filters{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+      margin:10px 0 12px;
+      padding:10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+    }
+    .teacher-class-filters .field{
+      margin:0;
+    }
+    .teacher-class-filters label{
+      font-size:10px;
+      font-weight:950;
+      color:#6b7280;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-bottom:4px;
+      display:block;
+    }
+    .teacher-class-filters select,
+    .teacher-class-filters input{
+      width:100%;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:9px 10px;
+      font-family:inherit;
+      font-weight:850;
+      font-size:12px;
+      background:#fff;
+      color:#111827;
+    }
+    .teacher-class-count{
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+      margin-bottom:8px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+    .teacher-class-list.compact{
+      display:grid;
+      gap:8px;
+    }
+    .teacher-class-card.compact-card{
+      padding:10px 11px;
+      border-radius:15px;
+    }
+    .teacher-class-card.compact-card .teacher-class-title{
+      font-size:13px;
+    }
+    .teacher-class-card.compact-card .teacher-class-meta{
+      font-size:10px;
+    }
+    .teacher-class-card.compact-card .eval-collapse-indicator{
+      width:26px;
+      height:26px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      background:#f3f4f6;
+      font-weight:950;
+      flex:0 0 auto;
+    }
+    .teacher-class-students.compact-students{
+      max-height:260px;
+      overflow:auto;
+    }
+    @media(max-width:900px){
+      .teacher-class-filters{grid-template-columns:1fr 1fr;}
+    }
+    @media(max-width:560px){
+      .teacher-class-filters{grid-template-columns:1fr;}
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3239,7 +3321,7 @@
             <div class="teacher-panel-head">
               <div>
                 <div class="section-label">Turmas do professor</div>
-                <div class="hint">Clica numa turma para abrir/fechar a lista de alunos.</div>
+                <div class="hint">Usa os filtros para reduzir a lista. Clica numa turma para abrir/fechar os alunos.</div>
               </div>
             </div>
             <div id="teacherClassList" class="teacher-class-list"></div>
@@ -5948,6 +6030,7 @@ function statusPillClass(status){
   return 'none';
 }
 
+let teacherClassFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
 function renderTeacherDashboard(){
   const metricsGrid=document.getElementById('teacherMetricsGrid');
   const searchResults=document.getElementById('teacherSearchResults');
@@ -6044,33 +6127,126 @@ function renderTeacherClassList(summaries){
     return;
   }
 
-  if(!teacherOpenClassId || !summaries.find(s=>s.classInfo.id===teacherOpenClassId)){
-    teacherOpenClassId=summaries[0]?.classInfo.id || null;
+  const teacherOptions=[...new Set(summaries.map(s=>s.teacherName||professorName).filter(Boolean))].sort();
+  const dayOptions=[...new Set(summaries.map(s=>(s.classInfo.blocks?.[0]?.day)||'').filter(Boolean))]
+    .sort((a,b)=>({'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6}[a]||99)-({'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6}[b]||99));
+  const classOptionsDash=[...new Set(summaries.map(s=>s.classInfo.className).filter(Boolean))].sort();
+
+  const filtersHtml=`
+    <div class="teacher-class-filters" onclick="event.stopPropagation()">
+      ${isAdminUser()?`<div class="field">
+        <label>Professor</label>
+        <select id="teacherClassFilterTeacher">
+          <option value="all">Todos</option>
+          ${teacherOptions.map(t=>`<option value="${safe(t)}" ${teacherClassFilters.teacher===t?'selected':''}>${safe(t)}</option>`).join('')}
+        </select>
+      </div>`:''}
+      <div class="field">
+        <label>Dia</label>
+        <select id="teacherClassFilterDay">
+          <option value="all">Todos</option>
+          ${dayOptions.map(d=>`<option value="${safe(d)}" ${teacherClassFilters.day===d?'selected':''}>${safe(formatDayForClassBlock ? formatDayForClassBlock(d) : d)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Turma</label>
+        <select id="teacherClassFilterClass">
+          <option value="all">Todas</option>
+          ${classOptionsDash.map(c=>`<option value="${safe(c)}" ${teacherClassFilters.className===c?'selected':''}>${safe(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="teacherClassFilterStatus">
+          <option value="all" ${teacherClassFilters.status==='all'?'selected':''}>Todas</option>
+          <option value="needsEvaluation" ${teacherClassFilters.status==='needsEvaluation'?'selected':''}>Com avaliações por preencher</option>
+          <option value="full" ${teacherClassFilters.status==='full'?'selected':''}>Turmas cheias</option>
+          <option value="lowAttendance" ${teacherClassFilters.status==='lowAttendance'?'selected':''}>Baixa assiduidade</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pesquisa</label>
+        <input id="teacherClassFilterQuery" type="search" placeholder="Nome, turma ou horário..." value="${safe(teacherClassFilters.query||'')}">
+      </div>
+    </div>
+  `;
+
+  let filtered=summaries.filter(summary=>{
+    const c=summary.classInfo;
+    const teacher=summary.teacherName||professorName;
+    const day=(c.blocks?.[0]?.day)||'';
+    const blockText=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} ${b.time}`).join(' ');
+    const query=String(teacherClassFilters.query||'').trim().toLowerCase();
+    const searchable=`${teacher} ${c.className} ${blockText}`.toLowerCase();
+
+    if(isAdminUser() && teacherClassFilters.teacher!=='all' && teacher!==teacherClassFilters.teacher) return false;
+    if(teacherClassFilters.day!=='all' && day!==teacherClassFilters.day) return false;
+    if(teacherClassFilters.className!=='all' && c.className!==teacherClassFilters.className) return false;
+    if(query && !searchable.includes(query)) return false;
+
+    if(teacherClassFilters.status==='needsEvaluation' && summary.evaluated>=summary.rows.length) return false;
+    if(teacherClassFilters.status==='full' && (summary.students?.length||0)!==MAX_STUDENTS_PER_CLASS) return false;
+    if(teacherClassFilters.status==='lowAttendance' && summary.attendanceStats.percent>=70) return false;
+
+    return true;
+  });
+
+  if(teacherOpenClassId && !filtered.find(s=>s.classInfo.id===teacherOpenClassId)){
+    teacherOpenClassId=null;
   }
 
-  box.innerHTML=summaries.map(summary=>{
+  const countHtml=`<div class="teacher-class-count">
+    <span>${filtered.length}/${summaries.length} turma(s) visíveis</span>
+    <span>Limite: ${MAX_STUDENTS_PER_CLASS} alunos/turma</span>
+  </div>`;
+
+  if(!filtered.length){
+    box.innerHTML=filtersHtml + countHtml + '<div class="teacher-empty">Nenhuma turma corresponde aos filtros.</div>';
+    bindTeacherClassFilters();
+    return;
+  }
+
+  box.innerHTML=filtersHtml + countHtml + `<div class="teacher-class-list compact">` + filtered.map(summary=>{
     const c=summary.classInfo;
     const isOpen=c.id===teacherOpenClassId;
     const percent=summary.rows.length ? Math.round((summary.evaluated/summary.rows.length)*100) : 0;
     const blockText=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
-    return `<button type="button" class="teacher-class-card" data-teacher-class="${safe(c.id)}">
+    const count=summary.rows.length;
+    const capacityClass=count>MAX_STUDENTS_PER_CLASS ? '⚠️ ' : '';
+    return `<button type="button" class="teacher-class-card compact-card" data-teacher-class="${safe(c.id)}">
       <div class="teacher-class-top">
         <div>
-          <div class="teacher-class-title">${isAdminUser()? safe(summary.teacherName)+' · ' : ''}${safe(c.className)} - ${safe(blockText)}</div>
-          <div class="teacher-class-meta">${summary.rows.length} aluno(s) · ${summary.evaluated} avaliados · ${summary.transits} transitam · ${percent}% avaliação · ${summary.attendanceStats.percent}% presenças este mês</div>
+          <div class="teacher-class-title">${capacityClass}${isAdminUser()? safe(summary.teacherName)+' · ' : ''}${safe(c.className)} - ${safe(blockText)}</div>
+          <div class="teacher-class-meta">${count}/${MAX_STUDENTS_PER_CLASS} aluno(s) · ${summary.evaluated} avaliados · ${summary.transits} transitam · ${percent}% avaliação · ${summary.attendanceStats.percent}% presenças</div>
         </div>
         <span class="eval-collapse-indicator">${isOpen?'−':'+'}</span>
       </div>
-      ${isOpen ? `<div class="teacher-class-students">
+      ${isOpen ? `<div class="teacher-class-students compact-students">
         ${summary.rows.length ? summary.rows.map(row=>`<div class="teacher-class-student-row"><span>${safe(row.name)}</span><span class="teacher-mini-status">${safe(row.statusText)} · Aval. ${row.percent}% · Pres. ${row.attendance.present}/${row.attendance.total}</span></div>`).join('') : '<div class="teacher-empty">Sem alunos definidos.</div>'}
       </div>` : ''}
     </button>`;
-  }).join('');
+  }).join('') + `</div>`;
+
+  bindTeacherClassFilters();
 
   document.querySelectorAll('[data-teacher-class]').forEach(btn=>btn.addEventListener('click',()=>{
-    teacherOpenClassId=btn.dataset.teacherClass;
+    teacherOpenClassId = teacherOpenClassId===btn.dataset.teacherClass ? null : btn.dataset.teacherClass;
     renderTeacherDashboard();
   }));
+}
+
+function bindTeacherClassFilters(){
+  const teacher=document.getElementById('teacherClassFilterTeacher');
+  const day=document.getElementById('teacherClassFilterDay');
+  const cls=document.getElementById('teacherClassFilterClass');
+  const status=document.getElementById('teacherClassFilterStatus');
+  const query=document.getElementById('teacherClassFilterQuery');
+
+  if(teacher) teacher.onchange=()=>{teacherClassFilters.teacher=teacher.value; teacherOpenClassId=null; renderTeacherDashboard();};
+  if(day) day.onchange=()=>{teacherClassFilters.day=day.value; teacherOpenClassId=null; renderTeacherDashboard();};
+  if(cls) cls.onchange=()=>{teacherClassFilters.className=cls.value; teacherOpenClassId=null; renderTeacherDashboard();};
+  if(status) status.onchange=()=>{teacherClassFilters.status=status.value; teacherOpenClassId=null; renderTeacherDashboard();};
+  if(query) query.oninput=()=>{teacherClassFilters.query=query.value; teacherOpenClassId=null; renderTeacherDashboard();};
 }
 
 function renderTeacherObjectiveInsights(summaries){
