@@ -6686,6 +6686,60 @@ function renderAma1AEvaluation(id,students,ev,holder,className='AMA 1A'){
     setTimeout(()=>{btn.textContent=oldText; btn.classList.remove('saved');},1400);
   }));
 }
+async 
+function pairedDayForEvaluation(day){
+  const pairs={Segunda:'Quarta',Quarta:'Segunda','Terça':'Quinta',Quinta:'Terça'};
+  return pairs[day] || '';
+}
+
+function classRecordIdFor(classNameValue, day, time){
+  return `${classId(classNameValue)}_${classId(day)}_${String(time||'').replace(/[^0-9]/g,'_')}`;
+}
+
+function normalizeEvaluationRecordForPair(ev){
+  const out=JSON.parse(JSON.stringify(ev || {checks:{},notes:'',studentNotes:{},updatedAt:'',semester:'',finalMessages:{},levelOverrides:{}}));
+  if(!out.checks) out.checks={};
+  if(!out.studentNotes) out.studentNotes={};
+  if(!out.finalMessages) out.finalMessages={};
+  if(!out.levelOverrides) out.levelOverrides={};
+  if(!('semester' in out)) out.semester='';
+  if(!('notes' in out)) out.notes='';
+  if(!('updatedAt' in out)) out.updatedAt='';
+  return out;
+}
+
+function syncEvaluationToPairedDay(sourceClassId){
+  const sourceMeta=selectedClasses().find(c=>c.id===sourceClassId);
+  if(!sourceMeta) return {copied:false,targetId:''};
+
+  const block=sourceMeta.blocks?.[0];
+  if(!block) return {copied:false,targetId:''};
+
+  const pairDay=pairedDayForEvaluation(block.day);
+  if(!pairDay) return {copied:false,targetId:''};
+
+  const targetId=classRecordIdFor(sourceMeta.className,pairDay,block.time);
+  const targetExists=selectedClasses().some(c=>c.id===targetId);
+
+  if(!targetExists) return {copied:false,targetId};
+
+  state.evaluations[targetId]=normalizeEvaluationRecordForPair(state.evaluations[sourceClassId] || evalData(sourceClassId));
+
+  // Keep the paired class students aligned if the target class exists but was not yet updated.
+  if(state.classes[sourceClassId] && state.classes[targetId]){
+    const sourceStudents=state.classes[sourceClassId].students || [];
+    const targetStudents=state.classes[targetId].students || [];
+    if(!targetStudents.length && sourceStudents.length){
+      state.classes[targetId]={
+        total:Number(state.classes[sourceClassId].total || sourceStudents.length || 0),
+        students:JSON.parse(JSON.stringify(sourceStudents))
+      };
+    }
+  }
+
+  return {copied:true,targetId};
+}
+
 async function saveCurrentEvaluation(){
   if(!activeEvalId)return;
   const ev=evalData(activeEvalId);
@@ -6694,10 +6748,11 @@ async function saveCurrentEvaluation(){
   if(notes) ev.notes=notes.value;
   if(semesterSelect) ev.semester=semesterSelect.value;
   ev.updatedAt=new Date().toLocaleString('pt-PT');
+  const pairSync=syncEvaluationToPairedDay(activeEvalId);
   saveState();
   renderEvaluationPage();
   await saveToCloud();
-  showCloudStatus('Avaliação guardada localmente e na cloud.', 'ok');
+  showCloudStatus(pairSync.copied ? 'Avaliação guardada e copiada para o par de dias.' : 'Avaliação guardada localmente e na cloud.', 'ok');
 }
 document.getElementById('saveEvaluationPageBtn').addEventListener('click',saveCurrentEvaluation);
 
