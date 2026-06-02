@@ -3000,6 +3000,11 @@
       font-size:10px;
     }
 
+
+    .admin-schedule-table-grouped th{
+      vertical-align:middle;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -4335,12 +4340,10 @@ function renderAdminSchedule(){
   ];
 
   const daySections = adminDayGroups.map(group=>{
-    const totalSlots = group.days.length * group.times.length;
-
     const rows = availableTeachers.map(teacher=>{
       return `<tr>
         <td>${safe(teacher.name || teacher.professorName || teacher.username)}</td>
-        ${group.days.map(day=>group.times.map(time=>`<td>${cellsForAdminTeacher(teacher, day, time)}</td>`).join('')).join('')}
+        ${group.times.map(time=>`<td>${cellsForAdminTeacher(teacher, group.days, time)}</td>`).join('')}
       </tr>`;
     }).join('');
 
@@ -4348,17 +4351,14 @@ function renderAdminSchedule(){
       <section class="admin-schedule-day-card">
         <div class="admin-schedule-day-head">
           <span>${safe(group.title)}</span>
-          <small>${availableTeachers.length} professor(es) · ${totalSlots} bloco(s)</small>
+          <small>${availableTeachers.length} professor(es) · ${group.times.length} horário(s)</small>
         </div>
         <div class="admin-schedule-scroll">
           <table class="admin-schedule-table admin-schedule-table-grouped">
             <thead>
               <tr>
-                <th rowspan="2">Professor</th>
-                ${group.days.map(day=>`<th class="admin-day-group-header" colspan="${group.times.length}">${safe(formatDayLabel(day))}</th>`).join('')}
-              </tr>
-              <tr>
-                ${group.days.map(day=>group.times.map(time=>`<th>${safe(time)}</th>`).join('')).join('')}
+                <th>Professor</th>
+                ${group.times.map(time=>`<th>${safe(time)}</th>`).join('')}
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -4373,7 +4373,7 @@ function renderAdminSchedule(){
       <div class="admin-schedule-hero">
         <div>
           <div class="admin-schedule-title">Horário Geral dos Professores</div>
-          <div class="admin-schedule-subtitle">Vista exclusiva do Admin. Segunda-feira + Quarta-feira estão juntas; Terça-feira + Quinta-feira estão juntas; Sexta-feira e Sábado ficam separados.</div>
+          <div class="admin-schedule-subtitle">Vista exclusiva do Admin. Os pares Segunda/Quarta e Terça/Quinta usam uma única grelha porque partilham o mesmo horário.</div>
         </div>
         <button class="btn secondary" type="button" id="adminReloadSchedulesBtn">Atualizar cloud</button>
       </div>
@@ -4385,8 +4385,10 @@ function renderAdminSchedule(){
   if(btn) btn.addEventListener('click',()=>loadAllTeachersFromCloud(false));
 }
 
-function cellsForAdminTeacher(teacher, day, time){
-  const names = adminSlotClasses(teacher.state, day, time);
+function cellsForAdminTeacher(teacher, dayOrDays, time){
+  const daysToRead = Array.isArray(dayOrDays) ? dayOrDays : [dayOrDays];
+  const names = [...new Set(daysToRead.flatMap(day=>adminSlotClasses(teacher.state, day, time)))];
+
   return names.length
     ? names.map(name=>`<span class="admin-class-pill">${safe(name)}</span>`).join('')
     : '<span class="admin-empty-cell">—</span>';
