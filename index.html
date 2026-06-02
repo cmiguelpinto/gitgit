@@ -3236,6 +3236,299 @@
       gap:8px;
     }
 
+
+    /* Admin compact class navigator */
+    .admin-class-navigator{
+      display:grid;
+      gap:12px;
+    }
+    .admin-teacher-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+      gap:10px;
+    }
+    .admin-teacher-card{
+      border:1px solid #edf0f3;
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      cursor:pointer;
+      text-align:left;
+      font-family:inherit;
+      transition:.15s ease;
+    }
+    .admin-teacher-card:hover{
+      transform:translateY(-1px);
+      box-shadow:0 12px 24px rgba(15,23,42,.08);
+    }
+    .admin-teacher-card.active{
+      border-color:rgba(208,0,27,.35);
+      background:#fff5f6;
+      box-shadow:0 12px 24px rgba(208,0,27,.08);
+    }
+    .admin-teacher-card-title{
+      font-size:13px;
+      font-weight:950;
+      color:#111827;
+      line-height:1.25;
+    }
+    .admin-teacher-card-meta{
+      margin-top:6px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .admin-mini-chip{
+      border-radius:999px;
+      padding:5px 8px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      color:#374151;
+      font-size:10px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .admin-mini-chip.warn{
+      background:#fef2f2;
+      color:#991b1b;
+      border-color:#fecaca;
+    }
+    .admin-day-chip-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+      padding:10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+    }
+    .admin-day-chip{
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:11px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+      white-space:nowrap;
+    }
+    .admin-day-chip.active{
+      background:#111827;
+      border-color:#111827;
+      color:#fff;
+    }
+    .admin-selected-teacher-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:10px 12px;
+      border-radius:16px;
+      background:#fff;
+      border:1px solid #edf0f3;
+    }
+    .admin-selected-teacher-title{
+      font-size:13px;
+      font-weight:950;
+      color:#111827;
+    }
+    .admin-selected-teacher-sub{
+      font-size:11px;
+      font-weight:850;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .admin-compact-class-list{
+      display:grid;
+      gap:7px;
+      max-height:420px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .admin-compact-class-row{
+      border:1px solid #edf0f3;
+      border-radius:15px;
+      background:#fff;
+      padding:10px 11px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      cursor:pointer;
+      font-family:inherit;
+      text-align:left;
+    }
+    .admin-compact-class-row:hover{
+      background:#fffafb;
+      border-color:rgba(208,0,27,.22);
+    }
+    .admin-compact-title{
+      font-size:12px;
+      font-weight:950;
+      color:#111827;
+    }
+    .admin-compact-meta{
+      font-size:10px;
+      font-weight:850;
+      color:var(--muted);
+      margin-top:3px;
+    }
+    .admin-compact-score{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+
+    /* Admin Avaliação filters */
+    .admin-eval-filters{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+      margin-bottom:10px;
+    }
+    .admin-eval-filters .field{
+      margin:0;
+    }
+    .admin-eval-filters label{
+      font-size:10px;
+      font-weight:950;
+      color:#6b7280;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-bottom:4px;
+      display:block;
+    }
+    .admin-eval-filters select,
+    .admin-eval-filters input{
+      width:100%;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:9px 10px;
+      font-family:inherit;
+      font-weight:850;
+      font-size:12px;
+      background:#fff;
+      color:#111827;
+    }
+    .admin-eval-count{
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+      margin-bottom:8px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+    .admin-eval-list{
+      display:grid;
+      gap:8px;
+    }
+    .admin-eval-class-btn{
+      width:100%;
+      text-align:left;
+      border:1px solid #edf0f3;
+      background:#fff;
+      border-radius:15px;
+      padding:10px 11px;
+      cursor:pointer;
+      font-family:inherit;
+      display:grid;
+      gap:5px;
+    }
+    .admin-eval-class-btn:hover{
+      border-color:rgba(208,0,27,.25);
+      background:#fffafb;
+    }
+    .admin-eval-class-btn.active{
+      border-color:rgba(208,0,27,.42);
+      background:#fff5f6;
+      box-shadow:0 10px 20px rgba(208,0,27,.08);
+    }
+    .admin-eval-title{
+      font-size:12px;
+      font-weight:950;
+      color:#111827;
+      line-height:1.25;
+    }
+    .admin-eval-meta{
+      font-size:10px;
+      font-weight:850;
+      color:var(--muted);
+      line-height:1.35;
+    }
+    .admin-eval-student-list{
+      display:grid;
+      gap:8px;
+      margin-top:12px;
+    }
+    .admin-eval-student-card{
+      border:1px solid #edf0f3;
+      border-radius:16px;
+      background:#fff;
+      padding:11px;
+      display:grid;
+      gap:8px;
+    }
+    .admin-eval-student-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .admin-eval-student-name{
+      font-size:13px;
+      font-weight:950;
+      color:#111827;
+    }
+    .admin-eval-student-meta{
+      font-size:10px;
+      font-weight:850;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .admin-eval-pill{
+      border-radius:999px;
+      padding:6px 8px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      color:#374151;
+      font-size:10px;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .admin-eval-pill.ok{
+      background:#dcfce7;
+      color:#166534;
+      border-color:#bbf7d0;
+    }
+    .admin-eval-pill.warn{
+      background:#fef3c7;
+      color:#92400e;
+      border-color:#fde68a;
+    }
+    .admin-eval-pill.none{
+      background:#fee2e2;
+      color:#991b1b;
+      border-color:#fecaca;
+    }
+    @media(max-width:980px){
+      .admin-eval-filters{grid-template-columns:1fr 1fr;}
+    }
+    @media(max-width:560px){
+      .admin-eval-filters{grid-template-columns:1fr;}
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3485,7 +3778,7 @@
             <div class="teacher-panel-head">
               <div>
                 <div class="section-label">Turmas do professor</div>
-                <div class="hint">Usa os filtros para reduzir a lista. Clica numa turma para abrir/fechar os alunos.</div>
+                <div class="hint">No Admin, escolhe primeiro o professor e depois o dia. Isto evita listas enormes.</div>
               </div>
             </div>
             <div id="teacherClassList" class="teacher-class-list"></div>
@@ -3648,6 +3941,8 @@ function getActiveStorageKey(){
 
 let state = loadState();
 let activeEvalId = null;
+let adminActiveEvalKey=null;
+let adminEvalFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
 let documentClassFilterId = null;
 let internalDocumentClassId = null;
 let studentDayFilters = new Set(['Segunda','Terça','Quarta','Quinta','Sexta','Sábado']);
@@ -5776,7 +6071,218 @@ function setupEvaluationDayFilters(){
   });
 }
 
+
+function adminEvalKey(summary){
+  return `${summary.teacherName||''}|${summary.classInfo.id}`;
+}
+
+function adminEvalStatus(summary){
+  if(!summary.rows.length) return 'noStudents';
+  if(summary.evaluated===0) return 'none';
+  if(summary.evaluated>=summary.rows.length) return 'complete';
+  return 'partial';
+}
+
+function adminEvaluationSummaries(){
+  if(!isAdminUser()) return [];
+  if(!adminTeacherStates.length) return [];
+  return allTeacherClassSummaries();
+}
+
+function renderAdminEvaluationPage(){
+  const list=document.getElementById('evalClassList');
+  const main=document.getElementById('evalMain');
+  if(!list || !main) return;
+
+  if(!adminTeacherStates.length){
+    list.innerHTML='<div class="hint">Admin: carrega em <strong>Carregar cloud</strong> para ver as avaliações dos professores.</div>';
+    main.innerHTML='<div class="eval-hero"><h2>Avaliação Admin</h2><p>Usa “Carregar cloud” para juntar as avaliações feitas pelos professores.</p></div>';
+    return;
+  }
+
+  const summaries=adminEvaluationSummaries();
+  const teacherOptions=[...new Set(summaries.map(s=>s.teacherName||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+  const dayOrder={'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6};
+  const dayOptions=[...new Set(summaries.map(s=>s.classInfo.blocks?.[0]?.day).filter(Boolean))]
+    .sort((a,b)=>(dayOrder[a]||99)-(dayOrder[b]||99));
+  const classOptionsEval=[...new Set(summaries.map(s=>s.classInfo.className).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+
+  const filtersHtml=`
+    <div class="admin-eval-filters">
+      <div class="field">
+        <label>Professor</label>
+        <select id="adminEvalFilterTeacher">
+          <option value="all">Todos</option>
+          ${teacherOptions.map(t=>`<option value="${safe(t)}" ${adminEvalFilters.teacher===t?'selected':''}>${safe(t)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Dia</label>
+        <select id="adminEvalFilterDay">
+          <option value="all">Todos</option>
+          ${dayOptions.map(d=>`<option value="${safe(d)}" ${adminEvalFilters.day===d?'selected':''}>${safe(formatDayForClassBlock ? formatDayForClassBlock(d) : d)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Turma</label>
+        <select id="adminEvalFilterClass">
+          <option value="all">Todas</option>
+          ${classOptionsEval.map(c=>`<option value="${safe(c)}" ${adminEvalFilters.className===c?'selected':''}>${safe(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="adminEvalFilterStatus">
+          <option value="all" ${adminEvalFilters.status==='all'?'selected':''}>Todas</option>
+          <option value="complete" ${adminEvalFilters.status==='complete'?'selected':''}>Completa</option>
+          <option value="partial" ${adminEvalFilters.status==='partial'?'selected':''}>Parcial</option>
+          <option value="none" ${adminEvalFilters.status==='none'?'selected':''}>Sem avaliação</option>
+          <option value="transita" ${adminEvalFilters.status==='transita'?'selected':''}>Com alunos a transitar</option>
+          <option value="fica" ${adminEvalFilters.status==='fica'?'selected':''}>Com alunos a continuar</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pesquisa</label>
+        <input id="adminEvalFilterQuery" type="search" placeholder="Aluno, turma, professor..." value="${safe(adminEvalFilters.query||'')}">
+      </div>
+    </div>
+  `;
+
+  const query=String(adminEvalFilters.query||'').trim().toLowerCase();
+
+  const filtered=summaries.filter(summary=>{
+    const c=summary.classInfo;
+    const teacher=summary.teacherName||'';
+    const day=c.blocks?.[0]?.day || '';
+    const status=adminEvalStatus(summary);
+    const studentMatch=summary.rows.some(row=>row.name.toLowerCase().includes(query));
+    const searchable=`${teacher} ${c.className} ${(c.blocks||[]).map(b=>`${b.day} ${b.time}`).join(' ')}`.toLowerCase();
+
+    if(adminEvalFilters.teacher!=='all' && teacher!==adminEvalFilters.teacher) return false;
+    if(adminEvalFilters.day!=='all' && day!==adminEvalFilters.day) return false;
+    if(adminEvalFilters.className!=='all' && c.className!==adminEvalFilters.className) return false;
+
+    if(adminEvalFilters.status==='complete' && status!=='complete') return false;
+    if(adminEvalFilters.status==='partial' && status!=='partial') return false;
+    if(adminEvalFilters.status==='none' && status!=='none') return false;
+    if(adminEvalFilters.status==='transita' && !summary.rows.some(r=>r.status==='transita')) return false;
+    if(adminEvalFilters.status==='fica' && !summary.rows.some(r=>r.status==='fica')) return false;
+
+    if(query && !searchable.includes(query) && !studentMatch) return false;
+
+    return true;
+  });
+
+  if(adminActiveEvalKey && !filtered.find(s=>adminEvalKey(s)===adminActiveEvalKey)){
+    adminActiveEvalKey=null;
+  }
+
+  if(!adminActiveEvalKey && filtered.length){
+    adminActiveEvalKey=adminEvalKey(filtered[0]);
+  }
+
+  list.innerHTML=filtersHtml + `
+    <div class="admin-eval-count">
+      <span>${filtered.length}/${summaries.length} turma(s)</span>
+      <span>Admin · modo consulta</span>
+    </div>
+    <div class="admin-eval-list">
+      ${filtered.length ? filtered.map(summary=>{
+        const c=summary.classInfo;
+        const key=adminEvalKey(summary);
+        const isActive=key===adminActiveEvalKey;
+        const percent=summary.rows.length?Math.round((summary.evaluated/summary.rows.length)*100):0;
+        const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+        const status=adminEvalStatus(summary);
+        const statusText=status==='complete'?'Completa':status==='partial'?'Parcial':status==='none'?'Sem avaliação':'Sem alunos';
+        return `<button type="button" class="admin-eval-class-btn ${isActive?'active':''}" data-admin-eval-key="${safe(key)}">
+          <div class="admin-eval-title">${safe(summary.teacherName)} · ${safe(c.className)}</div>
+          <div class="admin-eval-meta">${safe(block)} · ${summary.evaluated}/${summary.rows.length} avaliados · ${percent}% · ${safe(statusText)}</div>
+        </button>`;
+      }).join('') : '<div class="hint">Nenhuma turma corresponde aos filtros.</div>'}
+    </div>
+  `;
+
+  bindAdminEvaluationFilters();
+
+  document.querySelectorAll('[data-admin-eval-key]').forEach(btn=>btn.addEventListener('click',()=>{
+    adminActiveEvalKey=btn.dataset.adminEvalKey;
+    renderAdminEvaluationPage();
+  }));
+
+  const selected=filtered.find(s=>adminEvalKey(s)===adminActiveEvalKey);
+  renderAdminActiveEvaluation(selected);
+}
+
+function bindAdminEvaluationFilters(){
+  const teacher=document.getElementById('adminEvalFilterTeacher');
+  const day=document.getElementById('adminEvalFilterDay');
+  const cls=document.getElementById('adminEvalFilterClass');
+  const status=document.getElementById('adminEvalFilterStatus');
+  const query=document.getElementById('adminEvalFilterQuery');
+
+  if(teacher) teacher.onchange=()=>{adminEvalFilters.teacher=teacher.value; adminActiveEvalKey=null; renderAdminEvaluationPage();};
+  if(day) day.onchange=()=>{adminEvalFilters.day=day.value; adminActiveEvalKey=null; renderAdminEvaluationPage();};
+  if(cls) cls.onchange=()=>{adminEvalFilters.className=cls.value; adminActiveEvalKey=null; renderAdminEvaluationPage();};
+  if(status) status.onchange=()=>{adminEvalFilters.status=status.value; adminActiveEvalKey=null; renderAdminEvaluationPage();};
+  if(query) query.oninput=()=>{adminEvalFilters.query=query.value; adminActiveEvalKey=null; renderAdminEvaluationPage();};
+}
+
+function renderAdminActiveEvaluation(summary){
+  const main=document.getElementById('evalMain');
+  if(!main) return;
+
+  if(!summary){
+    main.innerHTML='<div class="eval-hero"><h2>Avaliação Admin</h2><p>Escolhe uma turma nos filtros para consultar as avaliações.</p></div>';
+    return;
+  }
+
+  const c=summary.classInfo;
+  const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} · ${b.time}`).join(' | ');
+  const percent=summary.rows.length ? Math.round((summary.evaluated/summary.rows.length)*100) : 0;
+  const transits=summary.rows.filter(r=>r.status==='transita').length;
+  const stays=summary.rows.filter(r=>r.status==='fica').length;
+
+  const studentRows=summary.rows.map(row=>{
+    const pillClass=row.status==='transita'?'ok':row.status==='fica'?'warn':row.status==='none'?'none':'';
+    const stages=(row.stages||[]).map(s=>`<span class="admin-eval-pill">${safe(s.label)} ${s.ok}/${s.total}</span>`).join('');
+    return `<article class="admin-eval-student-card">
+      <div class="admin-eval-student-top">
+        <div>
+          <div class="admin-eval-student-name">${safe(row.name)}</div>
+          <div class="admin-eval-student-meta">Avaliação ${row.percent}% · Presenças ${row.attendance.present}/${row.attendance.total}</div>
+        </div>
+        <span class="admin-eval-pill ${pillClass}">${safe(row.statusText)}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${stages || '<span class="admin-eval-pill none">Sem etapas preenchidas</span>'}</div>
+    </article>`;
+  }).join('');
+
+  main.innerHTML=`
+    <div class="eval-hero">
+      <h2>Avaliação Admin — ${safe(summary.teacherName)} · ${safe(c.className)}</h2>
+      <p>Modo consulta. As avaliações só podem ser editadas pelo professor responsável.</p>
+      <div class="block-chips"><span class="block-chip">${safe(block)}</span></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Alunos</div><div class="stat-value">${summary.rows.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Avaliados</div><div class="stat-value">${summary.evaluated}</div></div>
+      <div class="stat-card"><div class="stat-label">Conclusão</div><div class="stat-value">${percent}%</div></div>
+      <div class="stat-card"><div class="stat-label">Transitam</div><div class="stat-value">${transits}</div></div>
+      <div class="stat-card"><div class="stat-label">Continuam</div><div class="stat-value">${stays}</div></div>
+      <div class="stat-card"><div class="stat-label">Presenças</div><div class="stat-value">${summary.attendanceStats.percent}%</div></div>
+    </div>
+    <div class="admin-eval-student-list">${studentRows || '<div class="teacher-empty">Sem alunos definidos nesta turma.</div>'}</div>
+  `;
+}
+
+
 function renderEvaluationPage(){
+  if(isAdminUser()){
+    renderAdminEvaluationPage();
+    return;
+  }
+
   syncClasses();
   const allSelected=selectedClasses();
   const selected=allSelected.filter(c=>{
@@ -6393,6 +6899,8 @@ function statusPillClass(status){
 }
 
 let teacherClassFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
+let adminClassNavigatorTeacher=null;
+let adminClassNavigatorDay='all';
 function renderTeacherDashboard(){
   const metricsGrid=document.getElementById('teacherMetricsGrid');
   const searchResults=document.getElementById('teacherSearchResults');
@@ -6480,9 +6988,191 @@ function renderTeacherSearchResults(){
   `).join('');
 }
 
+
+function renderAdminClassNavigator(summaries, box){
+  const grouped=new Map();
+
+  summaries.forEach(summary=>{
+    const teacher=summary.teacherName || professorName;
+    if(!grouped.has(teacher)){
+      grouped.set(teacher,{
+        teacher,
+        summaries:[],
+        students:0,
+        evaluated:0,
+        rows:0,
+        full:0,
+        over:0,
+        attendancePresent:0,
+        attendancePossible:0
+      });
+    }
+
+    const entry=grouped.get(teacher);
+    entry.summaries.push(summary);
+    entry.students += summary.students?.length || 0;
+    entry.evaluated += summary.evaluated || 0;
+    entry.rows += summary.rows?.length || 0;
+    if((summary.students?.length||0)===MAX_STUDENTS_PER_CLASS) entry.full++;
+    if((summary.students?.length||0)>MAX_STUDENTS_PER_CLASS) entry.over++;
+    entry.attendancePresent += summary.attendanceStats?.present || 0;
+    entry.attendancePossible += summary.attendanceStats?.totalPossible || 0;
+  });
+
+  const teachers=[...grouped.values()].sort((a,b)=>a.teacher.localeCompare(b.teacher,'pt-PT'));
+
+  if(!teachers.length){
+    box.innerHTML='<div class="teacher-empty">Sem turmas carregadas.</div>';
+    return;
+  }
+
+  if(!adminClassNavigatorTeacher || !grouped.has(adminClassNavigatorTeacher)){
+    adminClassNavigatorTeacher=null;
+    adminClassNavigatorDay='all';
+  }
+
+  const teacherCards=teachers.map(t=>{
+    const evalPct=t.rows?Math.round((t.evaluated/t.rows)*100):0;
+    const attPct=t.attendancePossible?Math.round((t.attendancePresent/t.attendancePossible)*100):0;
+    const isActive=t.teacher===adminClassNavigatorTeacher;
+    return `<button type="button" class="admin-teacher-card ${isActive?'active':''}" data-admin-nav-teacher="${safe(t.teacher)}">
+      <div class="admin-teacher-card-title">${safe(t.teacher)}</div>
+      <div class="admin-teacher-card-meta">
+        <span class="admin-mini-chip">${t.summaries.length} turmas</span>
+        <span class="admin-mini-chip">${t.students} alunos</span>
+        <span class="admin-mini-chip">${evalPct}% aval.</span>
+        <span class="admin-mini-chip">${attPct}% pres.</span>
+        ${t.over?`<span class="admin-mini-chip warn">${t.over} acima limite</span>`:''}
+      </div>
+    </button>`;
+  }).join('');
+
+  let detailHtml='';
+
+  if(adminClassNavigatorTeacher){
+    const current=grouped.get(adminClassNavigatorTeacher);
+    const dayOrder={'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6};
+    const days=[...new Set(current.summaries.map(s=>s.classInfo.blocks?.[0]?.day).filter(Boolean))]
+      .sort((a,b)=>(dayOrder[a]||99)-(dayOrder[b]||99));
+
+    const dayChips=`<div class="admin-day-chip-row">
+      <button type="button" class="admin-day-chip ${adminClassNavigatorDay==='all'?'active':''}" data-admin-nav-day="all">Todos os dias</button>
+      ${days.map(day=>`<button type="button" class="admin-day-chip ${adminClassNavigatorDay===day?'active':''}" data-admin-nav-day="${safe(day)}">${safe(formatDayForClassBlock ? formatDayForClassBlock(day) : day)}</button>`).join('')}
+    </div>`;
+
+    const visible=current.summaries
+      .filter(s=>adminClassNavigatorDay==='all' || s.classInfo.blocks?.[0]?.day===adminClassNavigatorDay)
+      .sort((a,b)=>{
+        const ad=dayOrder[a.classInfo.blocks?.[0]?.day]||99;
+        const bd=dayOrder[b.classInfo.blocks?.[0]?.day]||99;
+        if(ad!==bd) return ad-bd;
+        const at=a.classInfo.blocks?.[0]?.time || '';
+        const bt=b.classInfo.blocks?.[0]?.time || '';
+        if(at!==bt) return at.localeCompare(bt);
+        return a.classInfo.className.localeCompare(b.classInfo.className,'pt-PT');
+      });
+
+    const rows=visible.map(summary=>{
+      const c=summary.classInfo;
+      const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} · ${b.time}`).join(' | ');
+      const evalPct=summary.rows.length ? Math.round((summary.evaluated/summary.rows.length)*100) : 0;
+      const count=summary.students?.length || 0;
+      return `<button type="button" class="admin-compact-class-row" data-admin-nav-class="${safe(c.id)}">
+        <div>
+          <div class="admin-compact-title">${safe(c.className)} · ${safe(block)}</div>
+          <div class="admin-compact-meta">${summary.evaluated}/${summary.rows.length} avaliados · ${summary.transits} transitam · ${summary.attendanceStats.percent}% presenças</div>
+        </div>
+        <div class="admin-compact-score">
+          <span class="admin-mini-chip ${count>MAX_STUDENTS_PER_CLASS?'warn':''}">${count}/${MAX_STUDENTS_PER_CLASS}</span>
+          <span class="admin-mini-chip">${evalPct}%</span>
+        </div>
+      </button>`;
+    }).join('');
+
+    detailHtml=`
+      <div class="admin-selected-teacher-head">
+        <div>
+          <div class="admin-selected-teacher-title">${safe(current.teacher)}</div>
+          <div class="admin-selected-teacher-sub">${visible.length}/${current.summaries.length} turmas visíveis</div>
+        </div>
+        <button type="button" class="btn small ghost" id="adminClearClassNavigator">Fechar professor</button>
+      </div>
+      ${dayChips}
+      <div class="admin-compact-class-list">${rows || '<div class="teacher-empty">Sem turmas neste filtro.</div>'}</div>
+    `;
+  }else{
+    detailHtml='<div class="teacher-empty">Escolhe um professor para ver apenas as turmas dele.</div>';
+  }
+
+  box.innerHTML=`
+    <div class="admin-class-navigator">
+      <div class="teacher-class-count">
+        <span>${teachers.length} professor(es)</span>
+        <span>Abre apenas o professor que queres analisar.</span>
+      </div>
+      <div class="admin-teacher-grid">${teacherCards}</div>
+      ${detailHtml}
+    </div>
+  `;
+
+  document.querySelectorAll('[data-admin-nav-teacher]').forEach(btn=>btn.addEventListener('click',()=>{
+    const teacher=btn.dataset.adminNavTeacher;
+    adminClassNavigatorTeacher = adminClassNavigatorTeacher===teacher ? null : teacher;
+    adminClassNavigatorDay='all';
+    teacherOpenClassId=null;
+    renderTeacherDashboard();
+  }));
+
+  document.querySelectorAll('[data-admin-nav-day]').forEach(btn=>btn.addEventListener('click',()=>{
+    adminClassNavigatorDay=btn.dataset.adminNavDay;
+    teacherOpenClassId=null;
+    renderTeacherDashboard();
+  }));
+
+  document.querySelectorAll('[data-admin-nav-class]').forEach(btn=>btn.addEventListener('click',()=>{
+    teacherOpenClassId=btn.dataset.adminNavClass;
+    const summary=summaries.find(s=>s.classInfo.id===teacherOpenClassId);
+    if(summary){
+      const c=summary.classInfo;
+      const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+      const students=summary.rows.map(row=>`<div class="admin-student-item"><span>${safe(row.name)}</span><strong>${safe(row.statusText)}</strong></div>`).join('');
+      openAdminDrawer('Turma',`${summary.teacherName} · ${c.className}`,`
+        <div class="admin-detail-card">
+          <div class="admin-detail-label">Horário</div>
+          <div class="admin-detail-value" style="font-size:18px">${safe(block)}</div>
+        </div>
+        <div class="admin-detail-grid">
+          <div class="admin-detail-card"><div class="admin-detail-label">Alunos</div><div class="admin-detail-value">${summary.students.length}/${MAX_STUDENTS_PER_CLASS}</div></div>
+          <div class="admin-detail-card"><div class="admin-detail-label">Avaliados</div><div class="admin-detail-value">${summary.evaluated}/${summary.rows.length}</div></div>
+          <div class="admin-detail-card"><div class="admin-detail-label">Transitam</div><div class="admin-detail-value">${summary.transits}</div></div>
+          <div class="admin-detail-card"><div class="admin-detail-label">Presenças</div><div class="admin-detail-value">${summary.attendanceStats.percent}%</div></div>
+        </div>
+        <div class="admin-detail-card">
+          <div class="admin-detail-label">Alunos</div>
+          <div class="admin-student-list" style="margin-top:10px">${students || '<div class="admin-detail-note">Sem alunos definidos.</div>'}</div>
+        </div>
+      `);
+    }
+  }));
+
+  const close=document.getElementById('adminClearClassNavigator');
+  if(close) close.addEventListener('click',()=>{
+    adminClassNavigatorTeacher=null;
+    adminClassNavigatorDay='all';
+    teacherOpenClassId=null;
+    renderTeacherDashboard();
+  });
+}
+
+
 function renderTeacherClassList(summaries){
   const box=document.getElementById('teacherClassList');
   if(!box) return;
+
+  if(isAdminUser()){
+    renderAdminClassNavigator(summaries, box);
+    return;
+  }
 
   if(!summaries.length){
     box.innerHTML='<div class="teacher-empty">Sem turmas guardadas no horário.</div>';
