@@ -6688,8 +6688,9 @@ function renderAma1AEvaluation(id,students,ev,holder,className='AMA 1A'){
 }
 async 
 function pairedDayForEvaluation(day){
+  const clean=String(day||'').replace('-feira','').trim();
   const pairs={Segunda:'Quarta',Quarta:'Segunda','Terça':'Quinta',Quinta:'Terça'};
-  return pairs[day] || '';
+  return pairs[clean] || '';
 }
 
 function classRecordIdFor(classNameValue, day, time){
@@ -6708,27 +6709,41 @@ function normalizeEvaluationRecordForPair(ev){
   return out;
 }
 
+function getClassMetaById(classIdValue){
+  return selectedClasses().find(c=>c.id===classIdValue) || null;
+}
+
 function syncEvaluationToPairedDay(sourceClassId){
-  const sourceMeta=selectedClasses().find(c=>c.id===sourceClassId);
-  if(!sourceMeta) return {copied:false,targetId:''};
+  const sourceMeta=getClassMetaById(sourceClassId);
+  if(!sourceMeta) return {copied:false,targetId:'',reason:'source-not-found'};
 
   const block=sourceMeta.blocks?.[0];
-  if(!block) return {copied:false,targetId:''};
+  if(!block) return {copied:false,targetId:'',reason:'no-block'};
 
   const pairDay=pairedDayForEvaluation(block.day);
-  if(!pairDay) return {copied:false,targetId:''};
+  if(!pairDay) return {copied:false,targetId:'',reason:'no-pair'};
 
   const targetId=classRecordIdFor(sourceMeta.className,pairDay,block.time);
-  const targetExists=selectedClasses().some(c=>c.id===targetId);
 
-  if(!targetExists) return {copied:false,targetId};
+  // The pair can exist either as an active schedule class or already in saved classes.
+  const targetInSchedule=selectedClasses().some(c=>c.id===targetId);
+  const targetInData=!!state.classes?.[targetId];
+
+  if(!targetInSchedule && !targetInData){
+    return {copied:false,targetId,reason:'target-not-found'};
+  }
 
   state.evaluations[targetId]=normalizeEvaluationRecordForPair(state.evaluations[sourceClassId] || evalData(sourceClassId));
 
-  // Keep the paired class students aligned if the target class exists but was not yet updated.
-  if(state.classes[sourceClassId] && state.classes[targetId]){
+  // If the paired class exists but has no students yet, copy students too.
+  if(state.classes[sourceClassId]){
     const sourceStudents=state.classes[sourceClassId].students || [];
-    const targetStudents=state.classes[targetId].students || [];
+    const targetStudents=state.classes[targetId]?.students || [];
+
+    if(!state.classes[targetId]){
+      state.classes[targetId]={total:0,students:[]};
+    }
+
     if(!targetStudents.length && sourceStudents.length){
       state.classes[targetId]={
         total:Number(state.classes[sourceClassId].total || sourceStudents.length || 0),
@@ -6737,7 +6752,7 @@ function syncEvaluationToPairedDay(sourceClassId){
     }
   }
 
-  return {copied:true,targetId};
+  return {copied:true,targetId,reason:'ok'};
 }
 
 async function saveCurrentEvaluation(){
@@ -6752,7 +6767,7 @@ async function saveCurrentEvaluation(){
   saveState();
   renderEvaluationPage();
   await saveToCloud();
-  showCloudStatus(pairSync.copied ? 'Avaliação guardada e copiada para o par de dias.' : 'Avaliação guardada localmente e na cloud.', 'ok');
+  showCloudStatus(pairSync.copied ? 'Avaliação guardada e sincronizada nos dois dias do par.' : `Avaliação guardada. Não encontrei par ativo para sincronizar (${pairSync.reason || 'sem par'}).`, pairSync.copied ? 'ok' : 'ok');
 }
 document.getElementById('saveEvaluationPageBtn').addEventListener('click',saveCurrentEvaluation);
 
