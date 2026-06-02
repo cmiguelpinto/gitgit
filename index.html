@@ -2861,6 +2861,132 @@
       font-weight:950;
     }
 
+
+    /* Admin compiled schedule */
+    .admin-schedule-wrap{
+      display:grid;
+      gap:18px;
+    }
+    .admin-schedule-hero{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .admin-schedule-title{
+      font-size:18px;
+      font-weight:950;
+      color:#111827;
+      letter-spacing:-.03em;
+      margin-bottom:4px;
+    }
+    .admin-schedule-subtitle{
+      font-size:13px;
+      font-weight:750;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .admin-schedule-day-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .admin-schedule-day-head{
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:#fff;
+      padding:12px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      font-weight:950;
+    }
+    .admin-schedule-day-head small{
+      opacity:.85;
+      font-size:11px;
+      font-weight:850;
+    }
+    .admin-schedule-scroll{
+      overflow:auto;
+    }
+    .admin-schedule-table{
+      width:100%;
+      min-width:760px;
+      border-collapse:collapse;
+      background:#fff;
+    }
+    .admin-schedule-table th,
+    .admin-schedule-table td{
+      border-bottom:1px solid #edf0f3;
+      border-right:1px solid #edf0f3;
+      padding:10px 8px;
+      text-align:center;
+      vertical-align:middle;
+      font-size:12px;
+    }
+    .admin-schedule-table th{
+      background:#111827;
+      color:#fff;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .admin-schedule-table th:first-child,
+    .admin-schedule-table td:first-child{
+      text-align:left;
+      position:sticky;
+      left:0;
+      z-index:1;
+      min-width:160px;
+      font-weight:950;
+      background:#fff;
+      color:#111827;
+    }
+    .admin-schedule-table th:first-child{
+      background:#111827;
+      color:#fff;
+      z-index:2;
+    }
+    .admin-class-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:58px;
+      border-radius:999px;
+      padding:5px 8px;
+      background:#fff5f6;
+      border:1px solid rgba(208,0,27,.22);
+      color:#9f0015;
+      font-size:11px;
+      font-weight:950;
+      white-space:nowrap;
+      margin:2px;
+    }
+    .admin-empty-cell{
+      color:#c4c8cf;
+      font-weight:900;
+    }
+    .admin-load-warning{
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      color:#9a3412;
+      border-radius:18px;
+      padding:14px;
+      font-size:13px;
+      font-weight:850;
+      line-height:1.45;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3456,6 +3582,7 @@ async function loadAllTeachersFromCloud(silent=false){
     }
 
     renderTeacherDashboard();
+    if(document.getElementById('scheduleView')?.classList.contains('active')) renderAdminSchedule();
 
     if(!silent) showCloudStatus(`Admin: ${loaded.length} professor(es) carregados.`, 'ok');
   }catch(err){
@@ -4053,6 +4180,7 @@ function switchView(id){
   const view=document.getElementById(id);
   if(view) view.classList.add('active');
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===id));
+  if(id==='scheduleView') renderSchedule();
   if(id==='studentsView'){ setupStudentDayFilters(); renderStudents(); }
   if(id==='attendanceView'){ renderAttendancePage(); }
   if(id==='evaluationView'){ setupEvaluationDayFilters(); renderEvaluationPage(); }
@@ -4112,9 +4240,122 @@ function populateCopyMenus(){
   });
   document.getElementById('copyFrom').value='Segunda'; document.getElementById('copyTo').value='Quarta';
 }
+
+function formatDayLabel(day){
+  return day === 'Sábado' ? 'Sábado' : `${day}-feira`;
+}
+
+function adminSlotClasses(appState, day, time){
+  const schedule = appState?.schedule || {};
+  const key = slotKey(day,time);
+  return slotClasses(schedule[key]);
+}
+
+function renderAdminSchedule(){
+  const scheduleView=document.getElementById('scheduleView');
+  if(!scheduleView) return;
+
+  const loadedTeachers = adminTeacherStates || [];
+  const loadedByUsername = new Map(loadedTeachers.map(t=>[t.username,t]));
+  const availableTeachers = TEACHER_CLOUD_USERS
+    .map(t=>loadedByUsername.get(t.username))
+    .filter(Boolean);
+
+  if(!availableTeachers.length){
+    scheduleView.innerHTML=`
+      <div class="admin-schedule-wrap">
+        <div class="admin-schedule-hero">
+          <div>
+            <div class="admin-schedule-title">Horário Geral dos Professores</div>
+            <div class="admin-schedule-subtitle">Vista exclusiva do Admin. Esta página é apenas de consulta e junta os horários disponíveis na cloud.</div>
+          </div>
+          <button class="btn primary" type="button" id="adminLoadSchedulesBtn">Carregar cloud</button>
+        </div>
+        <div class="admin-load-warning">
+          Ainda não existem horários carregados para o Admin. Carrega em <strong>Carregar cloud</strong> para procurar os ficheiros dos professores no servidor.
+        </div>
+      </div>
+    `;
+
+    const btn=document.getElementById('adminLoadSchedulesBtn');
+    if(btn) btn.addEventListener('click',()=>loadAllTeachersFromCloud(false));
+    return;
+  }
+
+  const daySections = days
+    .filter(day=>day!=='Domingo')
+    .map(day=>{
+      const timesForDay = day==='Sábado' ? saturdayTimes : weekdayTimes;
+
+      const rows = availableTeachers.map(teacher=>{
+        const cells = timesForDay.map(time=>{
+          const names = adminSlotClasses(teacher.state, day, time);
+          return names.length
+            ? names.map(name=>`<span class="admin-class-pill">${safe(name)}</span>`).join('')
+            : '<span class="admin-empty-cell">—</span>';
+        }).join('');
+
+        return `<tr>
+          <td>${safe(teacher.name || teacher.professorName || teacher.username)}</td>
+          ${timesForDay.map((time,idx)=>`<td>${cellsForAdminTeacher(teacher, day, time)}</td>`).join('')}
+        </tr>`;
+      }).join('');
+
+      return `
+        <section class="admin-schedule-day-card">
+          <div class="admin-schedule-day-head">
+            <span>${safe(formatDayLabel(day))}</span>
+            <small>${availableTeachers.length} professor(es) · ${timesForDay.length} horário(s)</small>
+          </div>
+          <div class="admin-schedule-scroll">
+            <table class="admin-schedule-table">
+              <thead>
+                <tr>
+                  <th>Professor</th>
+                  ${timesForDay.map(time=>`<th>${safe(time)}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }).join('');
+
+  scheduleView.innerHTML=`
+    <div class="admin-schedule-wrap">
+      <div class="admin-schedule-hero">
+        <div>
+          <div class="admin-schedule-title">Horário Geral dos Professores</div>
+          <div class="admin-schedule-subtitle">Vista exclusiva do Admin. Compilação não editável com os professores encontrados na cloud.</div>
+        </div>
+        <button class="btn secondary" type="button" id="adminReloadSchedulesBtn">Atualizar cloud</button>
+      </div>
+      ${daySections}
+    </div>
+  `;
+
+  const btn=document.getElementById('adminReloadSchedulesBtn');
+  if(btn) btn.addEventListener('click',()=>loadAllTeachersFromCloud(false));
+}
+
+function cellsForAdminTeacher(teacher, day, time){
+  const names = adminSlotClasses(teacher.state, day, time);
+  return names.length
+    ? names.map(name=>`<span class="admin-class-pill">${safe(name)}</span>`).join('')
+    : '<span class="admin-empty-cell">—</span>';
+}
+
+
 function renderSchedule(){
+  if(isAdminUser()){
+    renderAdminSchedule();
+    return;
+  }
+
   populateCopyMenus();
   const body=document.getElementById('calendarBody');
+  if(!body) return;
   body.innerHTML='';
 
   allTimes.forEach(time=>{
