@@ -3087,6 +3087,155 @@
       .teacher-class-filters{grid-template-columns:1fr;}
     }
 
+
+    /* Admin schedule clickable details drawer */
+    .admin-teacher-link{
+      border:0;
+      background:transparent;
+      color:#111827;
+      font:inherit;
+      font-weight:950;
+      cursor:pointer;
+      padding:0;
+      text-align:left;
+      text-decoration:underline;
+      text-decoration-thickness:1px;
+      text-underline-offset:3px;
+    }
+    .admin-teacher-link:hover{
+      color:var(--slb-red);
+    }
+    .admin-class-pill.admin-clickable{
+      cursor:pointer;
+      font-family:inherit;
+    }
+    .admin-class-pill.admin-clickable:hover{
+      transform:translateY(-1px);
+      box-shadow:0 8px 18px rgba(208,0,27,.12);
+      background:#ffe8eb;
+    }
+    .admin-detail-drawer{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:none;
+      pointer-events:none;
+    }
+    .admin-detail-drawer.open{
+      display:block;
+      pointer-events:auto;
+    }
+    .admin-detail-backdrop{
+      position:absolute;
+      inset:0;
+      background:rgba(15,23,42,.42);
+      backdrop-filter:blur(3px);
+    }
+    .admin-detail-panel{
+      position:absolute;
+      top:0;
+      right:0;
+      width:min(520px,94vw);
+      height:100%;
+      background:#fff;
+      box-shadow:-20px 0 50px rgba(15,23,42,.22);
+      padding:20px;
+      overflow:auto;
+      display:grid;
+      align-content:start;
+      gap:14px;
+    }
+    .admin-detail-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      padding-bottom:12px;
+      border-bottom:1px solid #edf0f3;
+    }
+    .admin-detail-kicker{
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .admin-detail-title{
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:-.04em;
+      color:#111827;
+      line-height:1.1;
+    }
+    .admin-detail-close{
+      border:1px solid #edf0f3;
+      background:#f9fafb;
+      color:#111827;
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:950;
+      font-size:18px;
+    }
+    .admin-detail-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .admin-detail-card{
+      border:1px solid #edf0f3;
+      border-radius:16px;
+      background:#fff;
+      padding:12px;
+    }
+    .admin-detail-label{
+      font-size:10px;
+      font-weight:950;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+    .admin-detail-value{
+      margin-top:5px;
+      font-size:20px;
+      font-weight:950;
+      color:#111827;
+      letter-spacing:-.03em;
+    }
+    .admin-detail-note{
+      font-size:12px;
+      font-weight:800;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .admin-student-list{
+      display:grid;
+      gap:7px;
+      max-height:360px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .admin-student-item{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      padding:9px 10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:13px;
+      font-size:12px;
+      font-weight:850;
+      color:#111827;
+    }
+    .admin-detail-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3227,7 +3376,22 @@
         <main class="attendance-main">
           <div id="attendanceSummary" class="attendance-summary"></div>
           <div id="attendanceTableWrap" class="attendance-table-wrap"></div>
-        </main>
+        
+  <div id="adminDetailDrawer" class="admin-detail-drawer" aria-hidden="true">
+    <div class="admin-detail-backdrop" id="adminDetailBackdrop"></div>
+    <aside class="admin-detail-panel" role="dialog" aria-modal="true">
+      <div class="admin-detail-head">
+        <div>
+          <div class="admin-detail-kicker" id="adminDetailKicker">Admin</div>
+          <div class="admin-detail-title" id="adminDetailTitle">Detalhes</div>
+        </div>
+        <button type="button" class="admin-detail-close" id="adminDetailClose">×</button>
+      </div>
+      <div id="adminDetailBody"></div>
+    </aside>
+  </div>
+
+</main>
       </section>
     </section>
 
@@ -4433,6 +4597,202 @@ function restoreTeacherScheduleViewIfNeeded(){
   }
 }
 
+
+function getAdminTeacherPayload(username){
+  return (adminTeacherStates||[]).find(t=>t.username===username) || null;
+}
+
+function getClassIdForAdmin(className, day, time){
+  return `${classId(className)}_${classId(day)}_${String(time||'').replace(/[^0-9]/g,'_')}`;
+}
+
+function uniqueStudentsFromClassRecords(records){
+  const map=new Map();
+  records.forEach(record=>{
+    (record.students||[]).forEach((student,index)=>{
+      const name=studentDisplayName(student,index);
+      const key=String(student.studentNumber || student.number || name).toLowerCase();
+      if(!map.has(key)) map.set(key,{...student,displayName:name});
+    });
+  });
+  return [...map.values()];
+}
+
+function getAdminClassDetails(username,className,daysString,time){
+  const teacher=getAdminTeacherPayload(username);
+  if(!teacher) return null;
+
+  const daysToRead=String(daysString||'').split('|').filter(Boolean);
+  const records=daysToRead.map(day=>{
+    const id=getClassIdForAdmin(className,day,time);
+    const data=(teacher.state?.classes||{})[id] || {students:[]};
+    const ev=evalDataFromState(teacher.state,id);
+    const c={id,className,blocks:[{day,time}]};
+    const students=data.students||[];
+    const objectives=flattenObjectives(className);
+    const totalObjectives=objectives.length;
+    const rows=students.map((s,i)=>studentEvaluationSummaryForState(teacher.state, teacher.name, c, ev, s, i, totalObjectives));
+    const evaluated=rows.filter(r=>r.hasEvaluation).length;
+    const period=currentAttendancePeriod();
+    const attendanceStats=classAttendanceStatsForState(teacher.state,c,students,period.year,period.monthIndex);
+    return {day,id,c,data,students,rows,evaluated,attendanceStats};
+  });
+
+  const uniqueStudents=uniqueStudentsFromClassRecords(records);
+  const totalRows=records.reduce((acc,r)=>acc+r.rows.length,0);
+  const evaluated=records.reduce((acc,r)=>acc+r.evaluated,0);
+  const attendancePossible=records.reduce((acc,r)=>acc+(r.attendanceStats?.totalPossible||0),0);
+  const attendancePresent=records.reduce((acc,r)=>acc+(r.attendanceStats?.present||0),0);
+  const attendancePercent=attendancePossible?Math.round((attendancePresent/attendancePossible)*100):0;
+  const evaluationPercent=totalRows?Math.round((evaluated/totalRows)*100):0;
+
+  return {
+    teacher,
+    className,
+    days:daysToRead,
+    time,
+    records,
+    uniqueStudents,
+    totalStudents:uniqueStudents.length,
+    evaluated,
+    totalRows,
+    evaluationPercent,
+    attendancePercent,
+    attendancePresent,
+    attendancePossible
+  };
+}
+
+function openAdminDrawer(kicker,title,bodyHtml){
+  const drawer=document.getElementById('adminDetailDrawer');
+  const kickerEl=document.getElementById('adminDetailKicker');
+  const titleEl=document.getElementById('adminDetailTitle');
+  const body=document.getElementById('adminDetailBody');
+  if(!drawer || !body) return;
+
+  if(kickerEl) kickerEl.textContent=kicker;
+  if(titleEl) titleEl.textContent=title;
+  body.innerHTML=bodyHtml;
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden','false');
+}
+
+function closeAdminDrawer(){
+  const drawer=document.getElementById('adminDetailDrawer');
+  if(!drawer) return;
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden','true');
+}
+
+function openAdminTeacherDetails(username){
+  const teacher=getAdminTeacherPayload(username);
+  if(!teacher) return;
+
+  const summaries=teacherClassSummariesForState(teacher.state,teacher.name);
+  const totalClasses=summaries.length;
+  const totalStudents=summaries.reduce((acc,s)=>acc+(s.students?.length||0),0);
+  const totalEvaluated=summaries.reduce((acc,s)=>acc+s.evaluated,0);
+  const totalRows=summaries.reduce((acc,s)=>acc+s.rows.length,0);
+  const evalPercent=totalRows?Math.round((totalEvaluated/totalRows)*100):0;
+  const fullClasses=summaries.filter(s=>(s.students?.length||0)===MAX_STUDENTS_PER_CLASS).length;
+  const lessons=selectedClassesForState(teacher.state).length;
+  const attendancePossible=summaries.reduce((acc,s)=>acc+(s.attendanceStats?.totalPossible||0),0);
+  const attendancePresent=summaries.reduce((acc,s)=>acc+(s.attendanceStats?.present||0),0);
+  const attendancePercent=attendancePossible?Math.round((attendancePresent/attendancePossible)*100):0;
+
+  const topClasses=summaries.slice(0,10).map(s=>{
+    const block=(s.classInfo.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} ${b.time}`).join(' | ');
+    return `<div class="admin-student-item"><span>${safe(s.classInfo.className)} · ${safe(block)}</span><strong>${s.students.length}/${MAX_STUDENTS_PER_CLASS}</strong></div>`;
+  }).join('');
+
+  openAdminDrawer('Professor',teacher.name,`
+    <div class="admin-detail-grid">
+      <div class="admin-detail-card"><div class="admin-detail-label">Turmas</div><div class="admin-detail-value">${totalClasses}</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Alunos</div><div class="admin-detail-value">${totalStudents}</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Aulas semanais</div><div class="admin-detail-value">${lessons}</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Avaliações</div><div class="admin-detail-value">${evalPercent}%</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Presenças</div><div class="admin-detail-value">${attendancePercent}%</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Turmas cheias</div><div class="admin-detail-value">${fullClasses}</div></div>
+    </div>
+    <div class="admin-detail-card">
+      <div class="admin-detail-label">Turmas principais</div>
+      <div class="admin-student-list" style="margin-top:10px">${topClasses || '<div class="admin-detail-note">Sem turmas carregadas.</div>'}</div>
+    </div>
+    <div class="admin-detail-actions">
+      <button class="btn secondary" type="button" onclick="teacherClassFilters.teacher='${safe(teacher.name)}'; switchView('teacherDashboardView'); closeAdminDrawer(); renderTeacherDashboard();">Ver na Área do Professor</button>
+    </div>
+  `);
+}
+
+function openAdminClassDetails(username,className,daysString,time){
+  const details=getAdminClassDetails(username,className,daysString,time);
+  if(!details) return;
+
+  const dayLabel=details.days.map(d=>formatDayForClassBlock ? formatDayForClassBlock(d) : d).join(' + ');
+  const studentsHtml=details.uniqueStudents.map((student,index)=>`
+    <div class="admin-student-item">
+      <span>${safe(student.displayName || studentDisplayName(student,index))}</span>
+      <strong>${student.studentNumber ? safe(student.studentNumber) : ''}</strong>
+    </div>
+  `).join('');
+
+  openAdminDrawer('Turma',`${details.className} · ${details.time}`,`
+    <div class="admin-detail-card">
+      <div class="admin-detail-label">Professor</div>
+      <div class="admin-detail-value" style="font-size:18px">${safe(details.teacher.name)}</div>
+      <div class="admin-detail-note">${safe(dayLabel)} · ${safe(details.time)}</div>
+    </div>
+    <div class="admin-detail-grid">
+      <div class="admin-detail-card"><div class="admin-detail-label">Alunos</div><div class="admin-detail-value">${details.totalStudents}/${MAX_STUDENTS_PER_CLASS}</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Avaliação</div><div class="admin-detail-value">${details.evaluationPercent}%</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Presenças</div><div class="admin-detail-value">${details.attendancePercent}%</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Registos presença</div><div class="admin-detail-value">${details.attendancePresent}/${details.attendancePossible}</div></div>
+    </div>
+    <div class="admin-detail-card">
+      <div class="admin-detail-label">Lista de alunos</div>
+      <div class="admin-student-list" style="margin-top:10px">${studentsHtml || '<div class="admin-detail-note">Sem alunos definidos.</div>'}</div>
+    </div>
+    <div class="admin-detail-actions">
+      <button class="btn secondary" type="button" onclick="teacherClassFilters.teacher='${safe(details.teacher.name)}'; teacherClassFilters.className='${safe(details.className)}'; switchView('teacherDashboardView'); closeAdminDrawer(); renderTeacherDashboard();">Ver turma na Área do Professor</button>
+    </div>
+  `);
+}
+
+function bindAdminScheduleDetails(){
+  document.querySelectorAll('[data-admin-teacher]').forEach(btn=>{
+    if(btn.dataset.detailBound) return;
+    btn.dataset.detailBound='true';
+
+    if(btn.classList.contains('admin-teacher-link')){
+      btn.addEventListener('click',event=>{
+        event.stopPropagation();
+        openAdminTeacherDetails(btn.dataset.adminTeacher);
+      });
+    }
+  });
+
+  document.querySelectorAll('[data-admin-class]').forEach(btn=>{
+    if(btn.dataset.detailBound) return;
+    btn.dataset.detailBound='true';
+    btn.addEventListener('click',event=>{
+      event.stopPropagation();
+      openAdminClassDetails(btn.dataset.adminTeacher,btn.dataset.adminClass,btn.dataset.adminDays,btn.dataset.adminTime);
+    });
+  });
+
+  const close=document.getElementById('adminDetailClose');
+  const backdrop=document.getElementById('adminDetailBackdrop');
+  if(close && !close.dataset.detailBound){
+    close.dataset.detailBound='true';
+    close.addEventListener('click',closeAdminDrawer);
+  }
+  if(backdrop && !backdrop.dataset.detailBound){
+    backdrop.dataset.detailBound='true';
+    backdrop.addEventListener('click',closeAdminDrawer);
+  }
+}
+
+
 function renderAdminSchedule(){
   const scheduleView=document.getElementById('scheduleView');
   if(!scheduleView) return;
@@ -4461,6 +4821,7 @@ function renderAdminSchedule(){
 
     const btn=document.getElementById('adminLoadSchedulesBtn');
     if(btn) btn.addEventListener('click',()=>loadAllTeachersFromCloud(false));
+    bindAdminScheduleDetails();
     return;
   }
 
@@ -4474,7 +4835,7 @@ function renderAdminSchedule(){
   const daySections = adminDayGroups.map(group=>{
     const rows = availableTeachers.map(teacher=>{
       return `<tr>
-        <td>${safe(teacher.name || teacher.professorName || teacher.username)}</td>
+        <td><button type="button" class="admin-teacher-link" data-admin-teacher="${safe(teacher.username)}">${safe(teacher.name || teacher.professorName || teacher.username)}</button></td>
         ${group.times.map(time=>`<td>${cellsForAdminTeacher(teacher, group.days, time)}</td>`).join('')}
       </tr>`;
     }).join('');
@@ -4515,6 +4876,7 @@ function renderAdminSchedule(){
 
   const btn=document.getElementById('adminReloadSchedulesBtn');
   if(btn) btn.addEventListener('click',()=>loadAllTeachersFromCloud(false));
+  bindAdminScheduleDetails();
 }
 
 function cellsForAdminTeacher(teacher, dayOrDays, time){
@@ -4522,7 +4884,7 @@ function cellsForAdminTeacher(teacher, dayOrDays, time){
   const names = [...new Set(daysToRead.flatMap(day=>adminSlotClasses(teacher.state, day, time)))];
 
   return names.length
-    ? names.map(name=>`<span class="admin-class-pill">${safe(name)}</span>`).join('')
+    ? names.map(name=>`<button type="button" class="admin-class-pill admin-clickable" data-admin-class="${safe(name)}" data-admin-teacher="${safe(teacher.username)}" data-admin-days="${safe(daysToRead.join('|'))}" data-admin-time="${safe(time)}">${safe(name)}</button>`).join('')
     : '<span class="admin-empty-cell">—</span>';
 }
 
