@@ -2892,7 +2892,7 @@
           <button class="login-submit" id="loginSubmitBtn" type="submit" onclick="event.preventDefault(); attemptLogin(); return false;">Entrar</button>
         </form>
         <div class="login-demo">
-          Utilizadores disponíveis: <strong>CarlaP</strong> / <strong>carla26</strong> · <strong>CarlosP</strong> / <strong>carlos26</strong><br>
+          Utilizadores disponíveis: <strong>CarlaP</strong> / <strong>carla26</strong> · <strong>CarlosP</strong> / <strong>carlos26</strong> · <strong>BrigidaP</strong> / <strong>brigida26</strong> · <strong>EdgarS</strong> / <strong>edgar26</strong> · <strong>Admin</strong> / <strong>admin26</strong><br>
           Para segurança real online, isto deve ser ligado a autenticação com servidor/base de dados.
         </div>
       </div>
@@ -3254,9 +3254,21 @@ let pendingStudentCopy = null;
 
 
 const LOGIN_USERS = [
-  { username:'CarlaP', password:'carla26', name:'Carla Parracho' },
-  { username:'CarlosP', password:'carlos26', name:'Carlos Pinto' }
+  { username:'CarlaP', password:'carla26', name:'Carla Parracho', role:'teacher' },
+  { username:'CarlosP', password:'carlos26', name:'Carlos Pinto', role:'teacher' },
+  { username:'BrigidaP', password:'brigida26', name:'Brigida Pedro', role:'teacher' },
+  { username:'EdgarS', password:'edgar26', name:'Edgar Silva', role:'teacher' },
+  { username:'Admin', password:'admin26', name:'Admin', role:'admin' }
 ];
+
+const TEACHER_CLOUD_USERS = [
+  { username:'CarlaP', name:'Carla Parracho' },
+  { username:'CarlosP', name:'Carlos Pinto' },
+  { username:'BrigidaP', name:'Brigida Pedro' },
+  { username:'EdgarS', name:'Edgar Silva' }
+];
+
+let adminTeacherStates = [];
 
 const loginSessionKey = `${storeKey}_logged_in`;
 const currentUserKey = `${storeKey}_current_user`;
@@ -3271,7 +3283,7 @@ function currentLoggedUser(){
 
 function setCurrentUser(user){
   if(user){
-    localStorage.setItem(currentUserKey, JSON.stringify({username:user.username, name:user.name}));
+    localStorage.setItem(currentUserKey, JSON.stringify({username:user.username, name:user.name, role:user.role || 'teacher'}));
     localStorage.setItem('avaliacoes_slb_current_professor', user.name);
     professorName=user.name;
   }else{
@@ -3284,7 +3296,7 @@ function setCurrentUser(user){
 
 function updateCurrentUserBadge(){
   const badge=document.getElementById('currentUserBadge');
-  if(badge) badge.textContent=`Professor: ${professorName}`;
+  if(badge){ const u=currentLoggedUser?.(); badge.textContent=(u?.role==='admin') ? 'Admin' : `Professor: ${professorName}`; }
 }
 
 function setLoginVisible(isVisible){
@@ -3324,9 +3336,14 @@ function attemptLogin(){
       setCurrentUser(found);
       if(error) error.textContent='';
       setLoginVisible(false);
-      switchView('scheduleView');
       setupCloudButtons();
-      try{ loadFromCloud(true); }catch(err){ console.error('Cloud load failed', err); }
+      if(found.role==='admin'){
+        switchView('teacherDashboardView');
+        try{ loadFromCloud(false); }catch(err){ console.error('Admin cloud load failed', err); }
+      }else{
+        switchView('scheduleView');
+        try{ loadFromCloud(true); }catch(err){ console.error('Cloud load failed', err); }
+      }
     }else{
       if(error) error.textContent='Credenciais incorretas.';
     }
@@ -3397,6 +3414,53 @@ function showCloudStatus(message, type='ok'){
 
 function getCurrentCloudUser(){
   return currentLoggedUser?.() || null;
+}
+
+
+function isAdminUser(){
+  return currentLoggedUser?.()?.role === 'admin';
+}
+
+async function loadTeacherCloudState(userInfo){
+  const result=await jsonpCloud('load', userInfo.username);
+  if(!result.ok) throw new Error(result.error || `Erro ao carregar ${userInfo.username}.`);
+  if(!result.exists || !result.data?.appData) return null;
+  return {
+    username:userInfo.username,
+    name:userInfo.name,
+    professorName:result.data.professorName || userInfo.name,
+    state:result.data.appData,
+    updatedAt:result.updatedAt || result.data.updatedAt || ''
+  };
+}
+
+async function loadAllTeachersFromCloud(silent=false){
+  try{
+    if(!silent) showCloudStatus('Admin: a carregar dados de todos os professores...', 'ok');
+    const loaded=[];
+
+    for(const teacher of TEACHER_CLOUD_USERS){
+      try{
+        const payload=await loadTeacherCloudState(teacher);
+        if(payload) loaded.push(payload);
+      }catch(err){
+        console.warn('Erro ao carregar professor', teacher.username, err);
+      }
+    }
+
+    adminTeacherStates=loaded;
+
+    if(!loaded.length){
+      if(!silent) showCloudStatus('Admin: ainda não existem ficheiros de professores na cloud.', 'err');
+      return;
+    }
+
+    renderTeacherDashboard();
+
+    if(!silent) showCloudStatus(`Admin: ${loaded.length} professor(es) carregados.`, 'ok');
+  }catch(err){
+    if(!silent) showCloudStatus(`Erro Admin cloud: ${err.message || err}`, 'err');
+  }
 }
 
 function exportStateObject(){
@@ -3520,6 +3584,11 @@ async function saveToCloud(){
     return;
   }
 
+  if(user.role==='admin'){
+    showCloudStatus('Admin: modo consulta. Os dados dos professores não são guardados pelo Admin.', 'ok');
+    return;
+  }
+
   try{
     showCloudStatus('A guardar na cloud...', 'ok');
     const payload={
@@ -3538,6 +3607,11 @@ async function loadFromCloud(silent=false){
   const user=getCurrentCloudUser();
   if(!user?.username){
     if(!silent) showCloudStatus('Faz login antes de carregar da cloud.', 'err');
+    return;
+  }
+
+  if(user.role==='admin'){
+    await loadAllTeachersFromCloud(silent);
     return;
   }
 
@@ -5247,7 +5321,128 @@ function studentAttendanceStats(classInfo, studentIndex, year, monthIndex){
   return {present,total,percent};
 }
 
+
+function selectedClassesForState(appState){
+  const classes=[];
+  Object.entries(appState?.schedule || {}).forEach(([key,val])=>{
+    const names=slotClasses(val);
+    if((!val.active && !names.length) || !names.length) return;
+
+    const [day,time]=key.split('|');
+
+    names.forEach(classNameValue=>{
+      const id = `${classId(classNameValue)}_${classId(day)}_${time.replace(/[^0-9]/g,'_')}`;
+      classes.push({
+        id,
+        className:classNameValue,
+        displayName:`${classNameValue} — ${day}-feira — ${time}`,
+        isSaturday:day==='Sábado',
+        blocks:[{day,time}]
+      });
+    });
+  });
+
+  return classes.sort((a,b)=>{
+    const dayOrder={'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6,'Domingo':7};
+    const ab=a.blocks[0]||{}, bb=b.blocks[0]||{};
+    const d=(dayOrder[ab.day]||99)-(dayOrder[bb.day]||99);
+    if(d!==0) return d;
+    const t=String(ab.time||'').localeCompare(String(bb.time||''));
+    if(t!==0) return t;
+    return String(a.className||'').localeCompare(String(b.className||''));
+  });
+}
+
+function evalDataFromState(appState,id){
+  const ev=(appState?.evaluations || {})[id] || {};
+  if(!ev.checks) ev.checks={};
+  if(!ev.studentNotes) ev.studentNotes={};
+  if(!ev.finalMessages) ev.finalMessages={};
+  if(!ev.levelOverrides) ev.levelOverrides={};
+  return ev;
+}
+
+function classAttendanceStatsForState(appState, classInfo, students, year, monthIndex){
+  const dates=classDatesForMonth(classInfo, year, monthIndex);
+  const monthData=(appState?.attendance||{})[attendanceKey(classInfo.id, year, monthIndex+1)] || {};
+  const totalPossible=students.length * dates.length;
+  const present=students.reduce((acc,_s,si)=>acc+dates.filter(dt=>!!monthData[`${si}|${dt.iso}`]).length,0);
+  const percent=totalPossible ? Math.round((present/totalPossible)*100) : 0;
+  return {dates, present, totalPossible, percent};
+}
+
+function studentAttendanceStatsForState(appState, classInfo, studentIndex, year, monthIndex){
+  const dates=classDatesForMonth(classInfo, year, monthIndex);
+  const monthData=(appState?.attendance||{})[attendanceKey(classInfo.id, year, monthIndex+1)] || {};
+  const present=dates.filter(dt=>!!monthData[`${studentIndex}|${dt.iso}`]).length;
+  const total=dates.length;
+  const percent=total ? Math.round((present/total)*100) : 0;
+  return {present,total,percent};
+}
+
+function studentEvaluationSummaryForState(appState, teacherName, c, ev, student, index, totalObjectives){
+  const done=flattenObjectives(c.className).filter(obj=>!!ev.checks?.[`${index}-${obj.key}`]).length;
+  const hasEvaluation=studentHasEvaluation ? studentHasEvaluation(ev,index,c.className) : (done>0 || !!ev.finalMessages?.[index]);
+  const decision=studentFinalDecision ? studentFinalDecision(ev,index) : '';
+  const target=studentTargetLevel ? studentTargetLevel(ev,index,c.className) : '';
+  const percent=totalObjectives ? Math.round((done/totalObjectives)*100) : 0;
+  let status='none';
+  let statusText='Sem avaliação';
+
+  if(decision==='transita'){status='transita';statusText=`Transita${target?' para '+target:''}`;}
+  else if(decision==='fica'){status='fica';statusText='Continua no mesmo nível';}
+  else if(hasEvaluation){status='progress';statusText='Em avaliação';}
+
+  const stages=getAmaStepsForClass(c.className).map((group,gi)=>{
+    const total=group.items.length;
+    const ok=group.items.filter((_item,ii)=>!!ev.checks?.[`${index}-ama1a-${gi}-${ii}`]).length;
+    return {label:`Etapa ${gi+1}`,ok,total};
+  });
+
+  const period=currentAttendancePeriod();
+  const attendance=studentAttendanceStatsForState(appState, c, index, period.year, period.monthIndex);
+
+  return {
+    index,
+    student,
+    teacherName,
+    name:studentDisplayName(student,index),
+    done,
+    total:totalObjectives,
+    percent,
+    hasEvaluation,
+    decision,
+    target,
+    status,
+    statusText,
+    stages,
+    attendance,
+    blocks:getStudentScheduleText ? getStudentScheduleText(c,student,index) : (c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} ${b.time}`).join(' | ')
+  };
+}
+
+function teacherClassSummariesForState(appState, teacherName){
+  return selectedClassesForState(appState).map(c=>{
+    const data=(appState?.classes || {})[c.id] || {students:[]};
+    const ev=evalDataFromState(appState,c.id);
+    const students=data.students||[];
+    const objectives=flattenObjectives(c.className);
+    const totalObjectives=objectives.length;
+    const rows=students.map((s,i)=>studentEvaluationSummaryForState(appState, teacherName, c, ev, s, i, totalObjectives));
+    const evaluated=rows.filter(r=>r.hasEvaluation).length;
+    const transits=rows.filter(r=>r.status==='transita').length;
+    const stays=rows.filter(r=>r.status==='fica').length;
+    const period=currentAttendancePeriod();
+    const attendanceStats=classAttendanceStatsForState(appState, c, students, period.year, period.monthIndex);
+    return {teacherName,classInfo:c,data,ev,students,rows,totalObjectives,evaluated,transits,stays,attendanceStats};
+  });
+}
+
 function allTeacherClassSummaries(){
+  if(isAdminUser() && adminTeacherStates.length){
+    return adminTeacherStates.flatMap(t=>teacherClassSummariesForState(t.state, t.name));
+  }
+
   syncClasses();
   return selectedClasses().map(c=>{
     const data=state.classes[c.id]||{students:[]};
@@ -5261,7 +5456,7 @@ function allTeacherClassSummaries(){
     const stays=rows.filter(r=>r.status==='fica').length;
     const period=currentAttendancePeriod();
     const attendanceStats=classAttendanceStats(c, students, period.year, period.monthIndex);
-    return {classInfo:c,data,ev,students,rows,totalObjectives,evaluated,transits,stays,attendanceStats};
+    return {teacherName:professorName,classInfo:c,data,ev,students,rows,totalObjectives,evaluated,transits,stays,attendanceStats};
   });
 }
 
@@ -5331,6 +5526,14 @@ function renderTeacherDashboard(){
   const summaries=allTeacherClassSummaries();
   const metrics=teacherDashboardMetrics(summaries);
 
+  if(isAdminUser() && !adminTeacherStates.length){
+    metricsGrid.innerHTML='<div class="teacher-empty" style="grid-column:1/-1">Admin: carrega em <strong>Carregar cloud</strong> para juntar os dados dos professores.</div>';
+    searchResults.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
+    classList.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
+    insights.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
+    return;
+  }
+
   metricsGrid.innerHTML=[
     ['Turmas',metrics.classes,'ativas no horário'],
     ['Alunos',metrics.students,'total nas tuas turmas'],
@@ -5378,7 +5581,7 @@ function renderTeacherSearchResults(){
       <div class="teacher-result-top">
         <div>
           <div class="teacher-result-name">${safe(row.name)}</div>
-          <div class="teacher-result-meta">${safe(summary.classInfo.className)} · ${safe(row.blocks)}</div>
+          <div class="teacher-result-meta">${isAdminUser()? safe(summary.teacherName)+' · ' : ''}${safe(summary.classInfo.className)} · ${safe(row.blocks)}</div>
         </div>
         <span class="teacher-status-pill ${statusPillClass(row.status)}">${safe(row.statusText)}</span>
       </div>
@@ -5412,7 +5615,7 @@ function renderTeacherClassList(summaries){
     return `<button type="button" class="teacher-class-card" data-teacher-class="${safe(c.id)}">
       <div class="teacher-class-top">
         <div>
-          <div class="teacher-class-title">${safe(c.className)} - ${safe(blockText)}</div>
+          <div class="teacher-class-title">${isAdminUser()? safe(summary.teacherName)+' · ' : ''}${safe(c.className)} - ${safe(blockText)}</div>
           <div class="teacher-class-meta">${summary.rows.length} aluno(s) · ${summary.evaluated} avaliados · ${summary.transits} transitam · ${percent}% avaliação · ${summary.attendanceStats.percent}% presenças este mês</div>
         </div>
         <span class="eval-collapse-indicator">${isOpen?'−':'+'}</span>
