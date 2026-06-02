@@ -6527,6 +6527,8 @@ function renderActiveEvaluation(){
   const semesterSelect=document.getElementById('semesterSelect');
   if(semesterSelect){semesterSelect.addEventListener('change',e=>{ev.semester=e.target.value; saveState();});}
   document.getElementById('allOkBtn').onclick=()=>{data.students.forEach((s,i)=>objectives.forEach(obj=>ev.checks[`${i}-${obj.key}`]=true)); saveState(); renderActiveEvaluation();};
+  const clearChecksBtn=document.getElementById('clearChecksBtn');
+  if(clearChecksBtn) clearChecksBtn.onclick=clearCurrentEvaluationChecks;
   document.getElementById('saveEvalBtnInner').onclick=saveCurrentEvaluation;
 }
 
@@ -6542,8 +6544,12 @@ function clearCurrentEvaluationChecks(){
   ev.levelOverrides={};
   ev.updatedAt=new Date().toLocaleString('pt-PT');
 
+  // Keep paired days aligned: Segunda↔Quarta and Terça↔Quinta.
+  try{ syncEvaluationToPairedDay(activeEvalId); }catch(e){ console.warn('Pair clear sync failed', e); }
+
   saveState();
-  renderActiveEvaluation();
+  renderEvaluationPage();
+  showCloudStatus('Checks limpos nesta turma' + (pairedDayForEvaluation(selectedClasses().find(c=>c.id===activeEvalId)?.blocks?.[0]?.day) ? ' e no par de dias.' : '.'), 'ok');
 }
 
 
