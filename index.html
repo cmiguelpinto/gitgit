@@ -3062,15 +3062,15 @@
             <div class="hint">Escolhe o dia de origem e cola no dia onde dás exatamente as mesmas aulas. Cada horário pode ter uma ou duas turmas.</div>
           </div>
           <div class="toolbar-actions">
-            <button class="btn primary" id="saveScheduleBtn">Guardar horário</button>
-            <button class="btn ghost" id="goStudentsBtn">Ir para turmas</button><button class="btn danger" id="clearScheduleBtn">Limpar horário</button>
+            <button class="btn primary" id="saveScheduleBtn" type="button" onclick="saveScheduleNow()">Guardar horário</button>
+            <button class="btn ghost" id="goStudentsBtn" type="button" onclick="switchView('studentsView')">Ir para turmas</button><button class="btn danger" id="clearScheduleBtn" type="button" onclick="clearScheduleOnly()">Limpar horário</button>
           </div>
         </div>
         <div class="copy-grid" style="margin-top:14px">
           <div class="field"><label>Copiar de</label><select id="copyFrom"></select></div>
           <div class="arrow">→</div>
           <div class="field"><label>Colar em</label><select id="copyTo"></select></div>
-          <button class="btn secondary" id="copyBtn">Copiar horário</button>
+          <button class="btn secondary" id="copyBtn" type="button" onclick="copyDay()">Copiar horário</button>
         </div>
         <div class="message" id="scheduleMessage">Depois de escolheres as turmas, carrega em “Guardar horário”.</div>
       </div>
@@ -3465,6 +3465,7 @@ function setCurrentUser(user){
     activeEvalId=null;
     documentClassFilterId=null;
     internalDocumentClassId=null;
+    adminTeacherStates=[];
   }else{
     localStorage.removeItem(currentUserKey);
     localStorage.removeItem('avaliacoes_slb_current_professor');
@@ -3704,6 +3705,11 @@ function postFormToCloud(username, payload){
     input.value=JSON.stringify(payload);
     form.appendChild(input);
 
+    const usernameInput=document.createElement('input');
+    usernameInput.name='username';
+    usernameInput.value=username;
+    form.appendChild(usernameInput);
+
     let done=false;
     const cleanup=()=>{
       setTimeout(()=>{
@@ -3777,12 +3783,14 @@ async function saveToCloud(){
   try{
     showCloudStatus('A guardar na cloud...', 'ok');
     const payload={
+      username: user.username,
       professorName: professorName,
       appData: state
     };
 
-    await postFormToCloud(user.username, payload);
+    const result = await postFormToCloud(user.username, payload);
     showCloudStatus(`Guardado na cloud: ${user.username}.json`, 'ok');
+    return result;
   }catch(err){
     showCloudStatus(`Erro cloud: ${err.message || err}`, 'err');
   }
@@ -4318,15 +4326,15 @@ const TEACHER_SCHEDULE_VIEW_TEMPLATE = `
             <div class="hint">Escolhe o dia de origem e cola no dia onde dás exatamente as mesmas aulas. Cada horário pode ter uma ou duas turmas.</div>
           </div>
           <div class="toolbar-actions">
-            <button class="btn primary" id="saveScheduleBtn">Guardar horário</button>
-            <button class="btn ghost" id="goStudentsBtn">Ir para turmas</button><button class="btn danger" id="clearScheduleBtn">Limpar horário</button>
+            <button class="btn primary" id="saveScheduleBtn" type="button" onclick="saveScheduleNow()">Guardar horário</button>
+            <button class="btn ghost" id="goStudentsBtn" type="button" onclick="switchView('studentsView')">Ir para turmas</button><button class="btn danger" id="clearScheduleBtn" type="button" onclick="clearScheduleOnly()">Limpar horário</button>
           </div>
         </div>
         <div class="copy-grid" style="margin-top:14px">
           <div class="field"><label>Copiar de</label><select id="copyFrom"></select></div>
           <div class="arrow">→</div>
           <div class="field"><label>Colar em</label><select id="copyTo"></select></div>
-          <button class="btn secondary" id="copyBtn">Copiar horário</button>
+          <button class="btn secondary" id="copyBtn" type="button" onclick="copyDay()">Copiar horário</button>
         </div>
         <div class="message" id="scheduleMessage">Depois de escolheres as turmas, carrega em “Guardar horário”.</div>
       </div>
@@ -4566,6 +4574,49 @@ function renderSchedule(){
 
 
 
+
+async function saveScheduleNow(){
+  const msg=document.getElementById('scheduleMessage');
+  const user=getCurrentCloudUser();
+
+  try{
+    if(!user?.username){
+      if(msg) msg.textContent='Faz login antes de guardar o horário.';
+      showCloudStatus('Faz login antes de guardar na cloud.', 'err');
+      return;
+    }
+
+    saveState();
+    syncClasses();
+
+    if(msg) msg.textContent=`Horário guardado localmente para ${user.username}. A enviar para a cloud...`;
+    showCloudStatus(`A guardar na cloud: ${user.username}.json`, 'ok');
+
+    await saveToCloud();
+
+    // Verify the cloud file exists after save. Apps Script/Drive may take a short moment.
+    await new Promise(resolve=>setTimeout(resolve, 900));
+
+    try{
+      const check=await jsonpCloud('load', user.username);
+      if(check?.ok && check.exists && check.data?.appData){
+        if(msg) msg.textContent=`Horário guardado localmente e confirmado na cloud: ${user.username}.json`;
+        showCloudStatus(`Confirmado na cloud: ${user.username}.json`, 'ok');
+      }else{
+        if(msg) msg.textContent=`Horário guardado localmente, mas ainda não consegui confirmar o ficheiro ${user.username}.json na cloud.`;
+        showCloudStatus(`Não consegui confirmar ${user.username}.json na cloud. Verifica o Apps Script/Drive.`, 'err');
+      }
+    }catch(verifyErr){
+      if(msg) msg.textContent=`Horário guardado localmente, mas não foi possível verificar a cloud.`;
+      showCloudStatus(`Guardado localmente. Verificação cloud falhou: ${verifyErr.message || verifyErr}`, 'err');
+    }
+  }catch(err){
+    console.error(err);
+    if(msg) msg.textContent=`Erro ao guardar horário: ${err.message || err}`;
+    showCloudStatus(`Erro ao guardar horário: ${err.message || err}`, 'err');
+  }
+}
+
 function clearScheduleOnly(){
   if(!confirm('Limpar apenas o horário deste utilizador?')){
     return;
@@ -4587,13 +4638,7 @@ function bindScheduleToolbarActions(){
   const saveBtn=document.getElementById('saveScheduleBtn');
   if(saveBtn && !saveBtn.dataset.bound){
     saveBtn.dataset.bound='true';
-    saveBtn.addEventListener('click',async()=>{
-      saveState();
-      const msg=document.getElementById('scheduleMessage');
-      if(msg) msg.textContent='Horário guardado. A guardar também na cloud...';
-      await saveToCloud();
-      if(msg) msg.textContent='Horário guardado localmente e na cloud. Podes avançar para Turmas / Alunos.';
-    });
+    saveBtn.addEventListener('click',saveScheduleNow);
   }
 
   const goBtn=document.getElementById('goStudentsBtn');
