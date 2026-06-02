@@ -2987,6 +2987,19 @@
       line-height:1.45;
     }
 
+
+    .admin-schedule-table-grouped .admin-day-group-header{
+      background:#7f0011;
+      color:#fff;
+      text-align:center;
+      font-size:12px;
+      letter-spacing:.03em;
+    }
+    .admin-schedule-table-grouped thead tr:nth-child(2) th{
+      background:#111827;
+      font-size:10px;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -4314,52 +4327,53 @@ function renderAdminSchedule(){
     return;
   }
 
-  const daySections = days
-    .filter(day=>day!=='Domingo')
-    .map(day=>{
-      const timesForDay = day==='Sábado' ? saturdayTimes : weekdayTimes;
+  const adminDayGroups = [
+    { title:'Segunda-feira + Quarta-feira', days:['Segunda','Quarta'], times:weekdayTimes },
+    { title:'Terça-feira + Quinta-feira', days:['Terça','Quinta'], times:weekdayTimes },
+    { title:'Sexta-feira', days:['Sexta'], times:weekdayTimes },
+    { title:'Sábado', days:['Sábado'], times:saturdayTimes }
+  ];
 
-      const rows = availableTeachers.map(teacher=>{
-        const cells = timesForDay.map(time=>{
-          const names = adminSlotClasses(teacher.state, day, time);
-          return names.length
-            ? names.map(name=>`<span class="admin-class-pill">${safe(name)}</span>`).join('')
-            : '<span class="admin-empty-cell">—</span>';
-        }).join('');
+  const daySections = adminDayGroups.map(group=>{
+    const totalSlots = group.days.length * group.times.length;
 
-        return `<tr>
-          <td>${safe(teacher.name || teacher.professorName || teacher.username)}</td>
-          ${timesForDay.map((time,idx)=>`<td>${cellsForAdminTeacher(teacher, day, time)}</td>`).join('')}
-        </tr>`;
-      }).join('');
-
-      return `
-        <section class="admin-schedule-day-card">
-          <div class="admin-schedule-day-head">
-            <span>${safe(formatDayLabel(day))}</span>
-            <small>${availableTeachers.length} professor(es) · ${timesForDay.length} horário(s)</small>
-          </div>
-          <div class="admin-schedule-scroll">
-            <table class="admin-schedule-table">
-              <thead>
-                <tr>
-                  <th>Professor</th>
-                  ${timesForDay.map(time=>`<th>${safe(time)}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </section>
-      `;
+    const rows = availableTeachers.map(teacher=>{
+      return `<tr>
+        <td>${safe(teacher.name || teacher.professorName || teacher.username)}</td>
+        ${group.days.map(day=>group.times.map(time=>`<td>${cellsForAdminTeacher(teacher, day, time)}</td>`).join('')).join('')}
+      </tr>`;
     }).join('');
+
+    return `
+      <section class="admin-schedule-day-card">
+        <div class="admin-schedule-day-head">
+          <span>${safe(group.title)}</span>
+          <small>${availableTeachers.length} professor(es) · ${totalSlots} bloco(s)</small>
+        </div>
+        <div class="admin-schedule-scroll">
+          <table class="admin-schedule-table admin-schedule-table-grouped">
+            <thead>
+              <tr>
+                <th rowspan="2">Professor</th>
+                ${group.days.map(day=>`<th class="admin-day-group-header" colspan="${group.times.length}">${safe(formatDayLabel(day))}</th>`).join('')}
+              </tr>
+              <tr>
+                ${group.days.map(day=>group.times.map(time=>`<th>${safe(time)}</th>`).join('')).join('')}
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  }).join('');
 
   scheduleView.innerHTML=`
     <div class="admin-schedule-wrap">
       <div class="admin-schedule-hero">
         <div>
           <div class="admin-schedule-title">Horário Geral dos Professores</div>
-          <div class="admin-schedule-subtitle">Vista exclusiva do Admin. Compilação não editável com os professores encontrados na cloud.</div>
+          <div class="admin-schedule-subtitle">Vista exclusiva do Admin. Segunda/Quarta e Terça/Quinta aparecem juntas; Sexta e Sábado ficam separados.</div>
         </div>
         <button class="btn secondary" type="button" id="adminReloadSchedulesBtn">Atualizar cloud</button>
       </div>
