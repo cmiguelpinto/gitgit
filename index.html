@@ -7492,6 +7492,39 @@ function renderTeacherObjectiveInsights(summaries){
   `).join('');
 }
 
+
+function pairedInternalDayLabel(day, hasPair){
+  if(day==='Sábado') return 'Sábado';
+  if(hasPair && day==='Segunda') return 'Segunda e Quarta-feira';
+  if(hasPair && day==='Quarta') return 'Segunda e Quarta-feira';
+  if(hasPair && day==='Terça') return 'Terça e Quinta-feira';
+  if(hasPair && day==='Quinta') return 'Terça e Quinta-feira';
+  return formatDayForClassBlock(day);
+}
+
+function internalDocumentBlocksText(classInfo){
+  const all=selectedClasses();
+  const seen=new Set();
+
+  return (classInfo.blocks||[]).map(block=>{
+    const pairMap={Segunda:'Quarta',Quarta:'Segunda','Terça':'Quinta',Quinta:'Terça'};
+    const pairDay=pairMap[block.day];
+    const hasPair=!!pairDay && all.some(other=>{
+      const otherBlock=other.blocks?.[0] || {};
+      return other.className===classInfo.className &&
+        otherBlock.day===pairDay &&
+        otherBlock.time===block.time;
+    });
+
+    const label=pairedInternalDayLabel(block.day, hasPair);
+    const key=`${label}|${block.time}`;
+    if(seen.has(key)) return '';
+    seen.add(key);
+
+    return `${label} ${block.time}`;
+  }).filter(Boolean).join(' | ');
+}
+
 function renderInternalDocument(){
   saveStudentsFromDom();
 
@@ -7508,7 +7541,7 @@ function renderInternalDocument(){
   const ev=evalData(c.id);
   const students=data.students || [];
   const steps=getAmaStepsForClass(c.className);
-  const blocks=(c.blocks||[]).map(b=>`${formatDayForClassBlock(b.day)} ${b.time}`).join(' | ');
+  const blocks=internalDocumentBlocksText(c);
   const semesterText=ev.semester ? `${ev.semester}º semestre` : '';
   const nextLevel=nextLevelForClass(c.className);
   const internalGoals=getInternalGoalsForClass(c.className);
