@@ -3653,7 +3653,7 @@
           <h2>Entrar na plataforma</h2>
           <p class="hint">Insere as credenciais para aceder à aplicação.</p>
         </div>
-        <form id="loginForm" class="login-form" onsubmit="event.preventDefault(); attemptLogin(); return false;">
+        <form id="loginForm" class="login-form" onsubmit="return attemptLogin();">
           <div class="login-field">
             <label for="loginUser">Utilizador</label>
             <input id="loginUser" type="text" autocomplete="username" placeholder="Utilizador">
@@ -3663,7 +3663,7 @@
             <input id="loginPass" type="password" autocomplete="current-password" placeholder="Password">
           </div>
           <div class="login-error" id="loginError"></div>
-          <button class="login-submit" id="loginSubmitBtn" type="submit" onclick="event.preventDefault(); attemptLogin(); return false;">Entrar</button>
+          <button class="login-submit" id="loginSubmitBtn" type="submit" onclick="return attemptLogin();">Entrar</button>
         </form>
         <div class="login-demo">Se necessitar de alterar password entre em contacto com o Administrador</div>
       </div>
@@ -4218,31 +4218,57 @@ function bindCopyStudentModalButtons(){
 
 function attemptLogin(){
   const error=document.getElementById('loginError');
+
   try{
-    const userValue=document.getElementById('loginUser')?.value.trim() || '';
-    const passValue=document.getElementById('loginPass')?.value || '';
+    const userValue=(document.getElementById('loginUser')?.value || '').trim();
+    const passValue=(document.getElementById('loginPass')?.value || '').trim();
 
     const found=LOGIN_USERS.find(user=>user.username===userValue && user.password===passValue);
 
-    if(found){
-      localStorage.setItem(loginSessionKey,'true');
-      setCurrentUser(found);
-      if(error) error.textContent='';
-      setLoginVisible(false);
-      setupCloudButtons();
-      if(found.role==='admin'){
-        switchView('teacherDashboardView');
-        try{ loadFromCloud(false); }catch(err){ console.error('Admin cloud load failed', err); }
-      }else{
-        switchView('scheduleView');
-        try{ loadFromCloud(true); }catch(err){ console.error('Cloud load failed', err); }
-      }
-    }else{
+    if(!found){
       if(error) error.textContent='Credenciais incorretas.';
+      return false;
     }
+
+    // Save session first.
+    localStorage.setItem(loginSessionKey,'true');
+    setCurrentUser(found);
+
+    if(error) error.textContent='';
+
+    // Force unlock UI. This prevents the login page from staying over the app.
+    const loginScreen=document.getElementById('loginScreen');
+    if(loginScreen){
+      loginScreen.style.display='none';
+      loginScreen.style.pointerEvents='none';
+      loginScreen.classList.add('is-hidden');
+    }
+    document.body.classList.remove('login-locked');
+    updateCurrentUserBadge();
+
+    // Render after unlocking. If something fails, login still succeeds.
+    setTimeout(()=>{
+      try{
+        setupCloudButtons();
+
+        if(found.role==='admin'){
+          switchView('teacherDashboardView');
+          loadFromCloud(false).catch(err=>console.error('Admin cloud load failed', err));
+        }else{
+          switchView('scheduleView');
+          loadFromCloud(true).catch(err=>console.error('Cloud load failed', err));
+        }
+      }catch(renderErr){
+        console.error('Post-login render failed', renderErr);
+        try{ switchView(found.role==='admin' ? 'teacherDashboardView' : 'scheduleView'); }catch(e){}
+      }
+    },0);
+
+    return false;
   }catch(err){
     if(error) error.textContent='Erro no login: '+(err.message || err);
     console.error(err);
+    return false;
   }
 }
 
