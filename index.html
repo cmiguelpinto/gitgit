@@ -4218,7 +4218,6 @@ function bindCopyStudentModalButtons(){
 
 function attemptLogin(){
   const error=document.getElementById('loginError');
-
   try{
     const userValue=(document.getElementById('loginUser')?.value || '').trim();
     const passValue=(document.getElementById('loginPass')?.value || '').trim();
@@ -4230,13 +4229,10 @@ function attemptLogin(){
       return false;
     }
 
-    // Save session first.
     localStorage.setItem(loginSessionKey,'true');
     setCurrentUser(found);
-
     if(error) error.textContent='';
 
-    // Force unlock UI. This prevents the login page from staying over the app.
     const loginScreen=document.getElementById('loginScreen');
     if(loginScreen){
       loginScreen.style.display='none';
@@ -4246,11 +4242,9 @@ function attemptLogin(){
     document.body.classList.remove('login-locked');
     updateCurrentUserBadge();
 
-    // Render after unlocking. If something fails, login still succeeds.
     setTimeout(()=>{
       try{
         setupCloudButtons();
-
         if(found.role==='admin'){
           switchView('teacherDashboardView');
           loadFromCloud(false).catch(err=>console.error('Admin cloud load failed', err));
@@ -4258,9 +4252,8 @@ function attemptLogin(){
           switchView('scheduleView');
           loadFromCloud(true).catch(err=>console.error('Cloud load failed', err));
         }
-      }catch(renderErr){
-        console.error('Post-login render failed', renderErr);
-        try{ switchView(found.role==='admin' ? 'teacherDashboardView' : 'scheduleView'); }catch(e){}
+      }catch(err){
+        console.error('Post-login action failed', err);
       }
     },0);
 
@@ -5195,7 +5188,7 @@ function printReportStable(){
     setTimeout(()=>window.print(),150);
   });
 }
-</script>
+<\/script>
 
 </body>
 </html>`;
