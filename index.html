@@ -3575,7 +3575,7 @@
   <main class="page">
     <header class="header">
       <div><h1>Avaliações SLB</h1><p>Horário, turmas, alunos, avaliação e documento final — ficheiro vazio</p></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="logout-btn teacher-profile-btn" id="currentUserBadge" type="button" data-view-btn="teacherDashboardView">Professor</button><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button">Sair</button></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="logout-btn teacher-profile-btn" id="currentUserBadge" type="button" data-view-btn="teacherDashboardView">Professor</button><button class="logout-btn" id="cloudLoadBtn" type="button">Carregar cloud</button><button class="logout-btn" id="logoutBtn" type="button" onclick="robustLogout()">Sair</button></div>
     </header>
 
     <nav class="tabs">
@@ -3729,14 +3729,14 @@
           <h3 id="copyStudentTitle">Copiar aluno para outra turma</h3>
           <p class="hint">A avaliação será mantida igual, mas só é possível copiar para turmas do mesmo nível.</p>
         </div>
-        <button type="button" class="btn small ghost" id="closeCopyStudentModal">Fechar</button>
+        <button type="button" class="btn small ghost" id="closeCopyStudentModal" onclick="closeCopyStudentModal()">Fechar</button>
       </div>
       <div class="field">
         <label>Turma de destino</label>
         <select id="copyStudentTarget"></select>
       </div>
       <div class="copy-student-actions">
-        <button type="button" class="btn primary" id="confirmCopyStudentBtn">Copiar aluno</button>
+        <button type="button" class="btn primary" id="confirmCopyStudentBtn" onclick="confirmCopyStudent()">Copiar aluno</button>
       </div>
       <div class="message" id="copyStudentMessage"></div>
     </div>
@@ -3834,14 +3834,14 @@
           <h3 id="copyStudentTitle">Copiar aluno para outra turma</h3>
           <p class="hint">A avaliação será mantida igual, mas só é possível copiar para turmas do mesmo nível.</p>
         </div>
-        <button type="button" class="btn small ghost" id="closeCopyStudentModal">Fechar</button>
+        <button type="button" class="btn small ghost" id="closeCopyStudentModal" onclick="closeCopyStudentModal()">Fechar</button>
       </div>
       <div class="field">
         <label>Turma de destino</label>
         <select id="copyStudentTarget"></select>
       </div>
       <div class="copy-student-actions">
-        <button type="button" class="btn primary" id="confirmCopyStudentBtn">Copiar aluno</button>
+        <button type="button" class="btn primary" id="confirmCopyStudentBtn" onclick="confirmCopyStudent()">Copiar aluno</button>
       </div>
       <div class="message" id="copyStudentMessage"></div>
     </div>
@@ -4059,6 +4059,65 @@ function checkLoginSession(){
   }
 }
 
+
+function robustLogout(){
+  try{
+    localStorage.removeItem(loginSessionKey);
+    localStorage.removeItem(currentUserKey);
+    localStorage.removeItem('avaliacoes_slb_current_professor');
+  }catch(e){}
+
+  setCurrentUser(null);
+  adminTeacherStates=[];
+  activeEvalId=null;
+  documentClassFilterId=null;
+  internalDocumentClassId=null;
+  pendingStudentCopy=null;
+
+  closeCopyStudentModal();
+  setLoginVisible(true);
+
+  const loginUser=document.getElementById('loginUser');
+  const loginPass=document.getElementById('loginPass');
+  const error=document.getElementById('loginError');
+  if(loginUser) loginUser.value='';
+  if(loginPass) loginPass.value='';
+  if(error) error.textContent='';
+
+  switchView('scheduleView');
+}
+
+function bindCopyStudentModalButtons(){
+  const closeBtn=document.getElementById('closeCopyStudentModal');
+  const confirmBtn=document.getElementById('confirmCopyStudentBtn');
+  const modal=document.getElementById('copyStudentModal');
+
+  if(closeBtn && !closeBtn.dataset.copyModalBound){
+    closeBtn.dataset.copyModalBound='true';
+    closeBtn.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      closeCopyStudentModal();
+    });
+  }
+
+  if(confirmBtn && !confirmBtn.dataset.copyModalBound){
+    confirmBtn.dataset.copyModalBound='true';
+    confirmBtn.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      confirmCopyStudent();
+    });
+  }
+
+  if(modal && !modal.dataset.copyModalBound){
+    modal.dataset.copyModalBound='true';
+    modal.addEventListener('click',event=>{
+      if(event.target===modal) closeCopyStudentModal();
+    });
+  }
+}
+
 function attemptLogin(){
   const error=document.getElementById('loginError');
   try{
@@ -4125,14 +4184,14 @@ function setupLogin(){
 
   if(logout && !logout.dataset.loginReady){
     logout.dataset.loginReady='true';
-    logout.addEventListener('click',()=>{
-      localStorage.removeItem(loginSessionKey);
-      setCurrentUser(null);
-      setLoginVisible(true);
+    logout.addEventListener('click',event=>{
+      event.preventDefault();
+      robustLogout();
     });
   }
 
   checkLoginSession();
+  bindCopyStudentModalButtons();
 }
 
 
@@ -6048,6 +6107,7 @@ function openCopyStudentModal(sourceClassId, sourceIndex){
     }
   }
   const modal=document.getElementById('copyStudentModal');
+  bindCopyStudentModalButtons();
   if(modal) modal.style.display='flex';
 }
 function closeCopyStudentModal(){
@@ -6075,6 +6135,7 @@ function confirmCopyStudent(){
   }
 
   const sourceClass=state.classes[pendingStudentCopy.sourceClassId];
+  if(!state.classes[targetClassId]) state.classes[targetClassId]={total:0,students:[]};
   const targetClass=state.classes[targetClassId];
   const sourceStudent=sourceClass?.students?.[pendingStudentCopy.sourceIndex];
 
@@ -6492,6 +6553,7 @@ function renderEvaluationPage(){
     });
   });
   renderActiveEvaluation();
+  bindCopyStudentModalButtons();
 }
 function renderActiveEvaluation(){
   const c=selectedClasses().find(x=>x.id===activeEvalId); const main=document.getElementById('evalMain'); if(!c) return;
