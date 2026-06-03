@@ -6237,6 +6237,7 @@ function removeStudentFromOnlyThisClass(classId, studentIndex){
   activeEvalId=classId;
   renderStudents();
   renderEvaluationPage();
+  showCloudStatus(`${name} removido desta turma.`, 'ok');
 }
 
 
@@ -6552,6 +6553,17 @@ function renderEvaluationPage(){
       openCopyStudentModal(classId, studentIndex);
     });
   });
+
+  document.querySelectorAll('[data-remove-class]').forEach(removeBtn=>{
+    removeBtn.addEventListener('click',(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      const classId=removeBtn.dataset.removeClass;
+      const studentIndex=Number(removeBtn.dataset.removeIndex);
+      removeStudentFromOnlyThisClass(classId, studentIndex);
+    });
+  });
+
   renderActiveEvaluation();
   bindCopyStudentModalButtons();
 }
