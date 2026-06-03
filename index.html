@@ -3537,6 +3537,104 @@
       line-height:1.2;
     }
 
+
+    /* Attendance season report */
+    .attendance-season-report{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      display:grid;
+      gap:14px;
+    }
+    .attendance-season-report-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+      border-bottom:1px solid #edf0f3;
+      padding-bottom:12px;
+    }
+    .attendance-season-report-title{
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:-.04em;
+      color:#111827;
+    }
+    .attendance-season-report-sub{
+      margin-top:4px;
+      font-size:12px;
+      font-weight:850;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .attendance-season-kpis{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+    }
+    .attendance-season-kpi{
+      border:1px solid #edf0f3;
+      background:#f9fafb;
+      border-radius:16px;
+      padding:12px;
+    }
+    .attendance-season-kpi-label{
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      color:var(--muted);
+    }
+    .attendance-season-kpi-value{
+      margin-top:5px;
+      font-size:22px;
+      font-weight:950;
+      color:#111827;
+    }
+    .attendance-season-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    @media(max-width:800px){
+      .attendance-season-kpis{grid-template-columns:1fr 1fr;}
+    }
+    @media print{
+      body.print-attendance .header,
+      body.print-attendance .tabs,
+      body.print-attendance .attendance-top-panel,
+      body.print-attendance .attendance-sidebar,
+      body.print-attendance .footer-note{
+        display:none!important;
+      }
+      body.print-attendance{
+        background:#fff!important;
+        padding:0!important;
+      }
+      body.print-attendance .view{
+        display:none!important;
+      }
+      body.print-attendance #attendanceView{
+        display:block!important;
+      }
+      body.print-attendance .attendance-shell{
+        display:block!important;
+        box-shadow:none!important;
+        border:none!important;
+      }
+      body.print-attendance .attendance-main{
+        width:100%!important;
+      }
+      body.print-attendance .attendance-season-report{
+        box-shadow:none!important;
+        border:none!important;
+        border-radius:0!important;
+      }
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3643,8 +3741,8 @@
           <div class="toolbar-actions">
             <button class="btn primary" id="saveAttendanceBtn">Guardar presenças</button>
             <button class="btn ghost" id="refreshAttendanceBtn">Atualizar</button>
-            <button class="btn secondary" id="seasonAttendanceBtn">Relatório época</button>
-            <button class="btn ghost" id="monthlyAttendanceBtn" style="display:none">Voltar ao mês</button>
+            <button class="btn secondary" id="seasonAttendanceBtn" type="button" onclick="openSeasonAttendanceReportDocument()">Relatório época</button>
+            <button class="btn ghost" id="monthlyAttendanceBtn" type="button" onclick="renderAttendancePage()" style="display:none">Voltar ao mês</button>
           </div>
         </div>
 
@@ -4134,7 +4232,6 @@ function attemptLogin(){
       setupCloudButtons();
       if(found.role==='admin'){
         switchView('teacherDashboardView');
-        hydrateAdminFromCache();
         try{ loadFromCloud(false); }catch(err){ console.error('Admin cloud load failed', err); }
       }else{
         switchView('scheduleView');
@@ -4197,44 +4294,6 @@ function setupLogin(){
 
 
 
-
-const adminCloudCacheKey = `${storeKey}_admin_cloud_cache_v1`;
-
-function saveAdminCloudCache(loaded){
-  try{
-    localStorage.setItem(adminCloudCacheKey, JSON.stringify({
-      savedAt:new Date().toISOString(),
-      teachers:loaded || []
-    }));
-  }catch(e){
-    console.warn('Não foi possível guardar cache Admin', e);
-  }
-}
-
-function loadAdminCloudCache(){
-  try{
-    const cached=JSON.parse(localStorage.getItem(adminCloudCacheKey) || 'null');
-    if(!cached || !Array.isArray(cached.teachers)) return null;
-    return cached;
-  }catch(e){
-    return null;
-  }
-}
-
-function hydrateAdminFromCache(){
-  const cached=loadAdminCloudCache();
-  if(!cached || !cached.teachers?.length) return false;
-
-  adminTeacherStates=cached.teachers;
-  renderTeacherDashboard();
-  if(document.getElementById('scheduleView')?.classList.contains('active')) renderAdminSchedule();
-  if(document.getElementById('evaluationView')?.classList.contains('active')) renderEvaluationPage();
-
-  const loadedAt=new Date(cached.savedAt).toLocaleString('pt-PT');
-  showCloudStatus(`Admin: dados em cache carregados (${loadedAt}). A atualizar cloud em segundo plano...`, 'ok');
-  return true;
-}
-
 const CLOUD_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw3G8Z5JitYbmzbzaEdzVa_0qLZ0JFHNPqsvaNpyOgobULKPyOipDRq4CNsGi-1oLcg/exec';
 
 function showCloudStatus(message, type='ok'){
@@ -4270,27 +4329,17 @@ async function loadTeacherCloudState(userInfo){
 
 async function loadAllTeachersFromCloud(silent=false){
   try{
-    const total=TEACHER_CLOUD_USERS.length;
-    if(!silent) showCloudStatus(`Admin: a carregar ${total} professor(es) em paralelo...`, 'ok');
+    if(!silent) showCloudStatus('Admin: a carregar dados de todos os professores...', 'ok');
+    const loaded=[];
 
-    let completed=0;
-
-    const tasks=TEACHER_CLOUD_USERS.map(async teacher=>{
+    for(const teacher of TEACHER_CLOUD_USERS){
       try{
         const payload=await loadTeacherCloudState(teacher);
-        completed++;
-        if(!silent) showCloudStatus(`Admin: carregados ${completed}/${total} professor(es)...`, 'ok');
-        return payload;
+        if(payload) loaded.push(payload);
       }catch(err){
-        completed++;
         console.warn('Erro ao carregar professor', teacher.username, err);
-        if(!silent) showCloudStatus(`Admin: carregados ${completed}/${total} professor(es)...`, 'ok');
-        return null;
       }
-    });
-
-    const results=await Promise.all(tasks);
-    const loaded=results.filter(Boolean);
+    }
 
     adminTeacherStates=loaded;
 
@@ -4299,13 +4348,10 @@ async function loadAllTeachersFromCloud(silent=false){
       return;
     }
 
-    saveAdminCloudCache(loaded);
-
     renderTeacherDashboard();
     if(document.getElementById('scheduleView')?.classList.contains('active')) renderAdminSchedule();
-    if(document.getElementById('evaluationView')?.classList.contains('active')) renderEvaluationPage();
 
-    if(!silent) showCloudStatus(`Admin: ${loaded.length}/${total} professor(es) carregados em paralelo.`, 'ok');
+    if(!silent) showCloudStatus(`Admin: ${loaded.length} professor(es) carregados.`, 'ok');
   }catch(err){
     if(!silent) showCloudStatus(`Erro Admin cloud: ${err.message || err}`, 'err');
   }
@@ -4821,6 +4867,189 @@ function seasonAttendanceForStudent(classInfo, studentIndex, seasonStartYear){
   };
 }
 
+
+function buildSeasonAttendanceReportHtml(){
+  const classes=populateAttendanceClasses();
+
+  if(!classes.length){
+    return {
+      ok:false,
+      message:'Ainda não existem turmas. Vai primeiro ao Horário.'
+    };
+  }
+
+  if(!activeAttendanceClassId || !classes.find(c=>c.id===activeAttendanceClassId)){
+    const filtered=classes.filter(c=>(c.blocks?.[0]?.day)===activeAttendanceDay);
+    activeAttendanceClassId=(filtered[0] || classes[0]).id;
+  }
+
+  const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
+  const data=state.classes[classInfo.id] || {students:[]};
+  const students=data.students || [];
+  const seasonStartYear=fixedAttendanceSeasonStartYear;
+  const blockText=(classInfo.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+
+  if(!students.length){
+    return {
+      ok:false,
+      message:'Esta turma ainda não tem alunos definidos.'
+    };
+  }
+
+  let classTotalPresent=0;
+  let classTotalPossible=0;
+
+  const studentRows=students.map((student,si)=>{
+    const stats=seasonAttendanceForStudent(classInfo, si, seasonStartYear);
+    classTotalPresent+=stats.totalPresent;
+    classTotalPossible+=stats.totalClasses;
+    return {student,si,stats};
+  });
+
+  const classPercent=classTotalPossible ? Math.round((classTotalPresent/classTotalPossible)*100) : 0;
+  const generatedAt=new Date().toLocaleString('pt-PT');
+
+  let tableRows='';
+  studentRows.forEach(({student,si,stats})=>{
+    tableRows+=`<tr><td>${safe(studentDisplayName(student,si))}</td>`;
+    stats.months.forEach(month=>{
+      tableRows+=`<td>${month.total ? `${month.present}/${month.total}` : '-'}</td>`;
+    });
+    const cls=stats.percent>=75?'good':'low';
+    tableRows+=`<td class="total">${stats.totalPresent}/${stats.totalClasses}</td><td class="${cls}">${stats.percent}%</td></tr>`;
+  });
+
+  let monthHeads='';
+  seasonMonths().forEach(({monthIndex})=>{
+    monthHeads+=`<th>${safe(monthShortName(monthIndex))}</th>`;
+  });
+
+  const reportHtml=`<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relatório de Presenças - ${safe(classInfo.className)} - ${safe(seasonLabel(seasonStartYear))}</title>
+<style>
+  :root{--red:#d0001b;--dark:#111827;--muted:#6b7280;--line:#e5e7eb;}
+  *{box-sizing:border-box}
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f3f4f6;color:var(--dark);padding:24px}
+  .page{max-width:1180px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 46px rgba(15,23,42,.12)}
+  .banner{background:linear-gradient(135deg,#b40018,var(--red));color:#fff;padding:24px 28px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+  .kicker{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 11px;display:inline-block}
+  h1{margin:12px 0 0;font-size:30px;letter-spacing:-.04em;line-height:1}
+  .sub{margin-top:8px;font-size:14px;opacity:.92;line-height:1.35}
+  .logo{
+    min-width:150px;
+    display:flex;
+    justify-content:flex-end;
+    align-items:flex-start;
+  }
+  .report-logo-img{
+    width:150px;
+    max-height:96px;
+    object-fit:contain;
+    display:block;
+    background:transparent;
+  }
+  .body{padding:24px 28px 30px}
+  .meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+  .card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:13px 14px}
+  .label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .value{margin-top:5px;font-size:20px;font-weight:900;color:var(--dark)}
+  .wide{grid-column:span 2}
+  table{width:100%;border-collapse:collapse;table-layout:auto;background:#fff;border:1px solid var(--line)}
+  th,td{border:1px solid var(--line);padding:8px 7px;font-size:12px;text-align:center}
+  th{background:#f9fafb;font-weight:900;color:#374151}
+  td:first-child,th:first-child{text-align:left;min-width:190px;font-weight:800}
+  .total{font-weight:900;background:#f9fafb}
+  .good{font-weight:900;color:#166534;background:#dcfce7}
+  .low{font-weight:900;color:#991b1b;background:#fee2e2}
+  .note{margin:14px 0;color:var(--muted);font-size:12px;font-weight:700;line-height:1.45}
+  .actions{display:flex;gap:8px;justify-content:flex-end;margin-bottom:14px}
+  button{border:0;border-radius:999px;padding:10px 14px;font-weight:900;cursor:pointer}
+  .primary{background:var(--red);color:#fff}
+  .secondary{background:#111827;color:#fff}
+  @media(max-width:800px){body{padding:12px}.banner{display:block}.logo{justify-content:flex-start;margin-top:15px}.meta{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}.page{border-radius:14px;overflow:auto}}
+  @media print{body{background:#fff;padding:0}.page{box-shadow:none;border:0;border-radius:0}.actions{display:none}.banner{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="banner">
+      <div>
+        <div class="kicker">Relatório de Presenças</div>
+        <h1>Época ${safe(seasonLabel(seasonStartYear))}</h1>
+        <div class="sub">${safe(classInfo.className)} · ${safe(blockText)}<br>Professor: ${safe(professorName)} · Gerado em ${safe(generatedAt)}</div>
+      </div>
+      <div class="logo"><img src="${reportLogoDataUrl}" alt="Complexo de Piscinas" class="report-logo-img"></div>
+    </section>
+    <section class="body">
+      <div class="actions">
+        <button class="secondary" onclick="window.close()">Fechar</button>
+        <button class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+      </div>
+      <div class="meta">
+        <div class="card wide"><div class="label">Turma / Horário</div><div class="value" style="font-size:16px">${safe(classInfo.className)} · ${safe(blockText)}</div></div>
+        <div class="card"><div class="label">Alunos</div><div class="value">${students.length}</div></div>
+        <div class="card"><div class="label">% Época</div><div class="value">${classPercent}%</div></div>
+        <div class="card"><div class="label">Presenças</div><div class="value">${classTotalPresent}/${classTotalPossible}</div></div>
+        <div class="card"><div class="label">Período</div><div class="value" style="font-size:16px">Setembro a Julho</div></div>
+      </div>
+      <div class="note">Cada célula mostra presenças/aulas nesse mês. O relatório utiliza a turma selecionada na página Presenças.</div>
+      <table>
+        <thead><tr><th>Aluno</th>${monthHeads}<th>Total</th><th>%</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>`;
+
+  return {
+    ok:true,
+    html:reportHtml,
+    classInfo,
+    blockText,
+    students,
+    classTotalPresent,
+    classTotalPossible,
+    classPercent,
+    seasonStartYear
+  };
+}
+
+function openSeasonAttendanceReportDocument(){
+  const built=buildSeasonAttendanceReportHtml();
+  const summary=document.getElementById('attendanceSummary');
+  const wrap=document.getElementById('attendanceTableWrap');
+
+  if(!built.ok){
+    if(wrap) wrap.innerHTML=`<div class="teacher-empty">${safe(built.message)}</div>`;
+    return;
+  }
+
+  const popup=window.open('', '_blank');
+  if(popup){
+    popup.document.open();
+    popup.document.write(built.html);
+    popup.document.close();
+    popup.focus();
+  }else{
+    // Fallback if the browser blocks popups.
+    if(summary){
+      summary.innerHTML=`
+        <span class="attendance-pill">Relatório gerado</span>
+        <span class="attendance-pill">${safe(built.classInfo.className)}</span>
+        <span class="attendance-pill">${safe(built.blockText)}</span>
+      `;
+    }
+    if(wrap){
+      wrap.innerHTML=`<div class="teacher-empty">O navegador bloqueou a nova janela. Permite pop-ups ou usa o relatório abaixo.</div><iframe title="Relatório de Presenças" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:18px;background:#fff" srcdoc="${safe(built.html)}"></iframe>`;
+    }
+  }
+}
+
 function renderSeasonAttendanceReport(){
   attendanceViewMode='season';
   setupAttendanceControls();
@@ -4842,6 +5071,11 @@ function renderSeasonAttendanceReport(){
     return;
   }
 
+  if(!activeAttendanceClassId || !classes.find(c=>c.id===activeAttendanceClassId)){
+    const filtered=classes.filter(c=>(c.blocks?.[0]?.day)===activeAttendanceDay);
+    activeAttendanceClassId=(filtered[0] || classes[0]).id;
+  }
+
   const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
   const data=state.classes[classInfo.id] || {students:[]};
   const students=data.students || [];
@@ -4861,11 +5095,10 @@ function renderSeasonAttendanceReport(){
   const classPercent=classTotalPossible ? Math.round((classTotalPresent/classTotalPossible)*100) : 0;
 
   summary.innerHTML=`
+    <span class="attendance-pill">Relatório de época</span>
     <span class="attendance-pill">${safe(classInfo.className)}</span>
     <span class="attendance-pill">${safe(blockText)}</span>
     <span class="attendance-pill">Época ${safe(seasonLabel(seasonStartYear))}</span>
-    <span class="attendance-pill">${students.length} aluno(s)</span>
-    <span class="attendance-pill">${classPercent}% presença época</span>
   `;
 
   if(!students.length){
@@ -4873,14 +5106,50 @@ function renderSeasonAttendanceReport(){
     return;
   }
 
-  let html=`<div class="attendance-annual-note">
-    Relatório de época de presenças da turma selecionada. A época vai de <strong>1 de setembro de 2025 a 31 de julho de 2026</strong>. Cada célula mostra <strong>presenças/aulas</strong> nesse mês.
-  </div>`;
+  let html=`<section class="attendance-season-report">
+    <div class="attendance-season-report-head">
+      <div>
+        <div class="attendance-season-report-title">Relatório de Presenças da Época</div>
+        <div class="attendance-season-report-sub">
+          ${safe(classInfo.className)} · ${safe(blockText)}<br>
+          Época ${safe(seasonLabel(seasonStartYear))} · 1 de setembro de ${seasonStartYear} a 31 de julho de ${seasonStartYear+1}
+        </div>
+      </div>
+      <div class="attendance-season-actions">
+        <button type="button" class="btn small secondary" onclick="openSeasonAttendanceReportDocument()">Abrir documento</button><button type="button" class="btn small secondary" onclick="printAttendanceReport()">Imprimir / Guardar PDF</button>
+        <button type="button" class="btn small ghost" onclick="renderAttendancePage()">Voltar ao mês</button>
+      </div>
+    </div>
 
-  html+=`<table class="attendance-table season"><thead><tr><th>Aluno</th>`;
+    <div class="attendance-season-kpis">
+      <div class="attendance-season-kpi">
+        <div class="attendance-season-kpi-label">Alunos</div>
+        <div class="attendance-season-kpi-value">${students.length}</div>
+      </div>
+      <div class="attendance-season-kpi">
+        <div class="attendance-season-kpi-label">Presenças</div>
+        <div class="attendance-season-kpi-value">${classTotalPresent}/${classTotalPossible}</div>
+      </div>
+      <div class="attendance-season-kpi">
+        <div class="attendance-season-kpi-label">% Época</div>
+        <div class="attendance-season-kpi-value">${classPercent}%</div>
+      </div>
+      <div class="attendance-season-kpi">
+        <div class="attendance-season-kpi-label">Meses</div>
+        <div class="attendance-season-kpi-value">${seasonMonths().length}</div>
+      </div>
+    </div>
+
+    <div class="attendance-annual-note">
+      Cada célula mostra <strong>presenças/aulas</strong> nesse mês para a turma selecionada.
+    </div>
+
+    <table class="attendance-table season"><thead><tr><th>Aluno</th>`;
+
   seasonMonths().forEach(({monthIndex})=>{
     html+=`<th>${safe(monthShortName(monthIndex))}</th>`;
   });
+
   html+=`<th>Total</th><th>%</th></tr></thead><tbody>`;
 
   studentRows.forEach(({student,si,stats})=>{
@@ -4892,9 +5161,16 @@ function renderSeasonAttendanceReport(){
     html+=`<td class="attendance-year-total">${stats.totalPresent}/${stats.totalClasses}</td><td class="${cls}">${stats.percent}%</td></tr>`;
   });
 
-  html+=`</tbody></table>`;
+  html+=`</tbody></table></section>`;
   wrap.innerHTML=html;
 }
+
+function printAttendanceReport(){
+  document.body.classList.add('print-attendance');
+  setTimeout(()=>window.print(),200);
+}
+
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-attendance'));
 
 async function saveAttendance(){
   saveState();
@@ -7240,7 +7516,7 @@ function renderTeacherDashboard(){
   const metrics=teacherDashboardMetrics(summaries);
 
   if(isAdminUser() && !adminTeacherStates.length){
-    metricsGrid.innerHTML='<div class="teacher-empty" style="grid-column:1/-1">Admin: carrega em <strong>Carregar cloud</strong> para juntar os dados dos professores. O carregamento usa cache local e atualização em paralelo.</div>';
+    metricsGrid.innerHTML='<div class="teacher-empty" style="grid-column:1/-1">Admin: carrega em <strong>Carregar cloud</strong> para juntar os dados dos professores.</div>';
     searchResults.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
     classList.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
     insights.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
@@ -8126,6 +8402,20 @@ if(saveAttendanceBtn){
 const refreshAttendanceBtn=document.getElementById('refreshAttendanceBtn');
 if(refreshAttendanceBtn){
   refreshAttendanceBtn.addEventListener('click',renderAttendancePage);
+}
+
+const seasonAttendanceBtn=document.getElementById('seasonAttendanceBtn');
+if(seasonAttendanceBtn){
+  seasonAttendanceBtn.addEventListener('click',()=>{
+    renderSeasonAttendanceReport();
+  });
+}
+
+const monthlyAttendanceBtn=document.getElementById('monthlyAttendanceBtn');
+if(monthlyAttendanceBtn){
+  monthlyAttendanceBtn.addEventListener('click',()=>{
+    renderAttendancePage();
+  });
 }
 
 setupCloudButtons();
