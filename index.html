@@ -4134,6 +4134,7 @@ function attemptLogin(){
       setupCloudButtons();
       if(found.role==='admin'){
         switchView('teacherDashboardView');
+        hydrateAdminFromCache();
         try{ loadFromCloud(false); }catch(err){ console.error('Admin cloud load failed', err); }
       }else{
         switchView('scheduleView');
@@ -4196,6 +4197,44 @@ function setupLogin(){
 
 
 
+
+const adminCloudCacheKey = `${storeKey}_admin_cloud_cache_v1`;
+
+function saveAdminCloudCache(loaded){
+  try{
+    localStorage.setItem(adminCloudCacheKey, JSON.stringify({
+      savedAt:new Date().toISOString(),
+      teachers:loaded || []
+    }));
+  }catch(e){
+    console.warn('Não foi possível guardar cache Admin', e);
+  }
+}
+
+function loadAdminCloudCache(){
+  try{
+    const cached=JSON.parse(localStorage.getItem(adminCloudCacheKey) || 'null');
+    if(!cached || !Array.isArray(cached.teachers)) return null;
+    return cached;
+  }catch(e){
+    return null;
+  }
+}
+
+function hydrateAdminFromCache(){
+  const cached=loadAdminCloudCache();
+  if(!cached || !cached.teachers?.length) return false;
+
+  adminTeacherStates=cached.teachers;
+  renderTeacherDashboard();
+  if(document.getElementById('scheduleView')?.classList.contains('active')) renderAdminSchedule();
+  if(document.getElementById('evaluationView')?.classList.contains('active')) renderEvaluationPage();
+
+  const loadedAt=new Date(cached.savedAt).toLocaleString('pt-PT');
+  showCloudStatus(`Admin: dados em cache carregados (${loadedAt}). A atualizar cloud em segundo plano...`, 'ok');
+  return true;
+}
+
 const CLOUD_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw3G8Z5JitYbmzbzaEdzVa_0qLZ0JFHNPqsvaNpyOgobULKPyOipDRq4CNsGi-1oLcg/exec';
 
 function showCloudStatus(message, type='ok'){
@@ -4231,17 +4270,27 @@ async function loadTeacherCloudState(userInfo){
 
 async function loadAllTeachersFromCloud(silent=false){
   try{
-    if(!silent) showCloudStatus('Admin: a carregar dados de todos os professores...', 'ok');
-    const loaded=[];
+    const total=TEACHER_CLOUD_USERS.length;
+    if(!silent) showCloudStatus(`Admin: a carregar ${total} professor(es) em paralelo...`, 'ok');
 
-    for(const teacher of TEACHER_CLOUD_USERS){
+    let completed=0;
+
+    const tasks=TEACHER_CLOUD_USERS.map(async teacher=>{
       try{
         const payload=await loadTeacherCloudState(teacher);
-        if(payload) loaded.push(payload);
+        completed++;
+        if(!silent) showCloudStatus(`Admin: carregados ${completed}/${total} professor(es)...`, 'ok');
+        return payload;
       }catch(err){
+        completed++;
         console.warn('Erro ao carregar professor', teacher.username, err);
+        if(!silent) showCloudStatus(`Admin: carregados ${completed}/${total} professor(es)...`, 'ok');
+        return null;
       }
-    }
+    });
+
+    const results=await Promise.all(tasks);
+    const loaded=results.filter(Boolean);
 
     adminTeacherStates=loaded;
 
@@ -4250,10 +4299,13 @@ async function loadAllTeachersFromCloud(silent=false){
       return;
     }
 
+    saveAdminCloudCache(loaded);
+
     renderTeacherDashboard();
     if(document.getElementById('scheduleView')?.classList.contains('active')) renderAdminSchedule();
+    if(document.getElementById('evaluationView')?.classList.contains('active')) renderEvaluationPage();
 
-    if(!silent) showCloudStatus(`Admin: ${loaded.length} professor(es) carregados.`, 'ok');
+    if(!silent) showCloudStatus(`Admin: ${loaded.length}/${total} professor(es) carregados em paralelo.`, 'ok');
   }catch(err){
     if(!silent) showCloudStatus(`Erro Admin cloud: ${err.message || err}`, 'err');
   }
@@ -7188,7 +7240,7 @@ function renderTeacherDashboard(){
   const metrics=teacherDashboardMetrics(summaries);
 
   if(isAdminUser() && !adminTeacherStates.length){
-    metricsGrid.innerHTML='<div class="teacher-empty" style="grid-column:1/-1">Admin: carrega em <strong>Carregar cloud</strong> para juntar os dados dos professores.</div>';
+    metricsGrid.innerHTML='<div class="teacher-empty" style="grid-column:1/-1">Admin: carrega em <strong>Carregar cloud</strong> para juntar os dados dos professores. O carregamento usa cache local e atualização em paralelo.</div>';
     searchResults.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
     classList.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
     insights.innerHTML='<div class="teacher-empty">Sem dados carregados.</div>';
