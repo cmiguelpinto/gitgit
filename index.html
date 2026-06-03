@@ -4868,6 +4868,92 @@ function seasonAttendanceForStudent(classInfo, studentIndex, seasonStartYear){
 }
 
 
+
+function pairedAttendanceDay(day){
+  const pairs={Segunda:'Quarta',Quarta:'Segunda','Terça':'Quinta',Quinta:'Terça'};
+  return pairs[day] || '';
+}
+
+function attendanceClassGroupForReport(classInfo){
+  const classes=selectedClasses();
+  const block=classInfo?.blocks?.[0] || {};
+  const pairDay=pairedAttendanceDay(block.day);
+
+  const group=[classInfo];
+
+  if(pairDay){
+    const paired=classes.find(c=>{
+      const b=c.blocks?.[0] || {};
+      return c.id!==classInfo.id &&
+        c.className===classInfo.className &&
+        b.day===pairDay &&
+        b.time===block.time;
+    });
+
+    if(paired) group.push(paired);
+  }
+
+  return group.sort((a,b)=>{
+    const order={Segunda:1,Terça:2,Quarta:3,Quinta:4,Sexta:5,Sábado:6};
+    return (order[a.blocks?.[0]?.day]||99)-(order[b.blocks?.[0]?.day]||99);
+  });
+}
+
+function attendanceGroupLabel(classGroup){
+  const first=classGroup?.[0];
+  const time=first?.blocks?.[0]?.time || '';
+  const days=(classGroup||[]).map(c=>c.blocks?.[0]?.day).filter(Boolean);
+
+  if(days.includes('Segunda') && days.includes('Quarta')) return `Segunda e Quarta-feira - ${time}`;
+  if(days.includes('Terça') && days.includes('Quinta')) return `Terça e Quinta-feira - ${time}`;
+
+  const day=days[0] || '';
+  return `${formatDayForClassBlock ? formatDayForClassBlock(day) : day} - ${time}`;
+}
+
+function classDatesForMonthWithClassId(classGroup, year, monthIndex){
+  const dates=[];
+
+  (classGroup||[]).forEach(classInfo=>{
+    classDatesForMonth(classInfo, year, monthIndex).forEach(dt=>{
+      dates.push({...dt, classId:classInfo.id, className:classInfo.className, day:classInfo.blocks?.[0]?.day || ''});
+    });
+  });
+
+  dates.sort((a,b)=>a.iso.localeCompare(b.iso) || String(a.classId).localeCompare(String(b.classId)));
+  return dates;
+}
+
+function seasonAttendanceForStudentGrouped(classGroup, studentIndex, seasonStartYear){
+  const months=[];
+  let totalPresent=0;
+  let totalClasses=0;
+
+  seasonMonths().forEach(({monthIndex})=>{
+    const year=calendarYearForSeasonMonth(seasonStartYear, monthIndex);
+    const dates=classDatesForMonthWithClassId(classGroup, year, monthIndex);
+
+    const present=dates.filter(dt=>{
+      const monthData=(state.attendance||{})[attendanceKey(dt.classId, year, monthIndex+1)] || {};
+      return !!monthData[`${studentIndex}|${dt.iso}`];
+    }).length;
+
+    const total=dates.length;
+
+    totalPresent+=present;
+    totalClasses+=total;
+
+    months.push({monthIndex,year,present,total,percent:total?Math.round((present/total)*100):0});
+  });
+
+  return {
+    months,
+    totalPresent,
+    totalClasses,
+    percent: totalClasses ? Math.round((totalPresent/totalClasses)*100) : 0
+  };
+}
+
 function buildSeasonAttendanceReportHtml(){
   const classes=populateAttendanceClasses();
 
@@ -4884,10 +4970,11 @@ function buildSeasonAttendanceReportHtml(){
   }
 
   const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
+  const classGroup=attendanceClassGroupForReport(classInfo);
   const data=state.classes[classInfo.id] || {students:[]};
   const students=data.students || [];
   const seasonStartYear=fixedAttendanceSeasonStartYear;
-  const blockText=(classInfo.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+  const blockText=attendanceGroupLabel(classGroup);
 
   if(!students.length){
     return {
@@ -4900,7 +4987,7 @@ function buildSeasonAttendanceReportHtml(){
   let classTotalPossible=0;
 
   const studentRows=students.map((student,si)=>{
-    const stats=seasonAttendanceForStudent(classInfo, si, seasonStartYear);
+    const stats=seasonAttendanceForStudentGrouped(classGroup, si, seasonStartYear);
     classTotalPresent+=stats.totalPresent;
     classTotalPossible+=stats.totalClasses;
     return {student,si,stats};
@@ -4971,7 +5058,70 @@ function buildSeasonAttendanceReportHtml(){
   .primary{background:var(--red);color:#fff}
   .secondary{background:#111827;color:#fff}
   @media(max-width:800px){body{padding:12px}.banner{display:block}.logo{justify-content:flex-start;margin-top:15px}.meta{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}.page{border-radius:14px;overflow:auto}}
-  @media print{body{background:#fff;padding:0}.page{box-shadow:none;border:0;border-radius:0}.actions{display:none}.banner{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  @media print{
+    @page{size:A4 landscape;margin:10mm}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    body{
+      background:#f3f4f6!important;
+      padding:24px!important;
+      margin:0!important;
+    }
+    .page{
+      max-width:1180px!important;
+      margin:0 auto!important;
+      background:#fff!important;
+      border:1px solid var(--line)!important;
+      border-radius:22px!important;
+      overflow:hidden!important;
+      box-shadow:0 18px 46px rgba(15,23,42,.12)!important;
+      break-inside:avoid!important;
+      page-break-inside:avoid!important;
+    }
+    .banner{
+      display:flex!important;
+      justify-content:space-between!important;
+      align-items:flex-start!important;
+      gap:16px!important;
+      background:linear-gradient(135deg,#b40018,var(--red))!important;
+      color:#fff!important;
+      padding:24px 28px!important;
+      break-inside:avoid!important;
+      page-break-inside:avoid!important;
+    }
+    .logo{
+      min-width:150px!important;
+      display:flex!important;
+      justify-content:flex-end!important;
+      align-items:flex-start!important;
+      margin-top:0!important;
+      text-align:right!important;
+      flex:0 0 150px!important;
+    }
+    .report-logo-img{
+      width:150px!important;
+      max-height:96px!important;
+      object-fit:contain!important;
+      display:block!important;
+      background:transparent!important;
+      margin:0!important;
+      padding:0!important;
+      transform:none!important;
+      position:static!important;
+    }
+    .body{
+      padding:24px 28px 30px!important;
+    }
+    .actions{
+      display:none!important;
+    }
+    table{
+      page-break-inside:auto!important;
+    }
+    tr{
+      page-break-inside:avoid!important;
+      page-break-after:auto!important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -4987,7 +5137,7 @@ function buildSeasonAttendanceReportHtml(){
     <section class="body">
       <div class="actions">
         <button class="secondary" onclick="window.close()">Fechar</button>
-        <button class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+        <button class="primary" onclick="printReportStable()">Imprimir / Guardar PDF</button>
       </div>
       <div class="meta">
         <div class="card wide"><div class="label">Turma / Horário</div><div class="value" style="font-size:16px">${safe(classInfo.className)} · ${safe(blockText)}</div></div>
@@ -4996,13 +5146,31 @@ function buildSeasonAttendanceReportHtml(){
         <div class="card"><div class="label">Presenças</div><div class="value">${classTotalPresent}/${classTotalPossible}</div></div>
         <div class="card"><div class="label">Período</div><div class="value" style="font-size:16px">Setembro a Julho</div></div>
       </div>
-      <div class="note">Cada célula mostra presenças/aulas nesse mês. O relatório utiliza a turma selecionada na página Presenças.</div>
+      <div class="note">Cada célula mostra presenças/aulas nesse mês. Quando a turma existe em par semanal, o relatório junta automaticamente Segunda+Quarta ou Terça+Quinta.</div>
       <table>
         <thead><tr><th>Aluno</th>${monthHeads}<th>Total</th><th>%</th></tr></thead>
         <tbody>${tableRows}</tbody>
       </table>
     </section>
   </main>
+
+<script>
+function printReportStable(){
+  const imgs=[...document.images];
+  const waitForImages=imgs.map(img=>{
+    if(img.complete) return Promise.resolve();
+    return new Promise(resolve=>{
+      img.onload=resolve;
+      img.onerror=resolve;
+    });
+  });
+
+  Promise.all(waitForImages).then(()=>{
+    setTimeout(()=>window.print(),150);
+  });
+}
+</script>
+
 </body>
 </html>`;
 
@@ -5077,16 +5245,17 @@ function renderSeasonAttendanceReport(){
   }
 
   const classInfo=classes.find(c=>c.id===activeAttendanceClassId) || classes[0];
+  const classGroup=attendanceClassGroupForReport(classInfo);
   const data=state.classes[classInfo.id] || {students:[]};
   const students=data.students || [];
   const seasonStartYear=fixedAttendanceSeasonStartYear;
-  const blockText=(classInfo.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+  const blockText=attendanceGroupLabel(classGroup);
 
   let classTotalPresent=0;
   let classTotalPossible=0;
 
   const studentRows=students.map((student,si)=>{
-    const stats=seasonAttendanceForStudent(classInfo, si, seasonStartYear);
+    const stats=seasonAttendanceForStudentGrouped(classGroup, si, seasonStartYear);
     classTotalPresent+=stats.totalPresent;
     classTotalPossible+=stats.totalClasses;
     return {student,si,stats};
