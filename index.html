@@ -8610,5 +8610,194 @@ setupCloudButtons();
 setupLogin();
 renderSchedule();
 </script>
+
+<script>
+/* LOGIN HOTFIX - independent from the main app script */
+(function(){
+  const STORE_KEY='avaliacoes_slb_preview_two_dropdown_slots_second_fixed_v1';
+  const LOGIN_SESSION_KEY=STORE_KEY+'_logged_in';
+  const CURRENT_USER_KEY=STORE_KEY+'_current_user';
+
+  const USERS=[
+    {username:'CarlaP',password:'carla26',name:'Carla Parracho',role:'teacher'},
+    {username:'CarlosP',password:'carlos26',name:'Carlos Pinto',role:'teacher'},
+    {username:'BrigidaP',password:'123',name:'Brigida Pedro',role:'teacher'},
+    {username:'EdgarS',password:'123',name:'Edgar Silva',role:'teacher'},
+    {username:'RodrigoC',password:'123',name:'Rodrigo Carrajola',role:'teacher'},
+    {username:'MarioS',password:'123',name:'Mário Santos',role:'teacher'},
+    {username:'PedroL',password:'123',name:'Pedro Ludovice',role:'teacher'},
+    {username:'RicardoA',password:'123',name:'Ricardo Agostinho',role:'teacher'},
+    {username:'SofiaP',password:'123',name:'Sofia Pinto',role:'teacher'},
+    {username:'MargaridaO',password:'123',name:'Margarida Oliveira',role:'teacher'},
+    {username:'RaulS',password:'123',name:'Raúl Simões',role:'teacher'},
+    {username:'SusanaS',password:'123',name:'Susana Santos',role:'teacher'},
+    {username:'TatianaC',password:'123',name:'Tatiana Cardoso',role:'teacher'},
+    {username:'AlexandraM',password:'123',name:'Alexandra Martinho',role:'teacher'},
+    {username:'Admin',password:'admin26',name:'Admin',role:'admin'}
+  ];
+
+  function showLogin(){
+    const loginScreen=document.getElementById('loginScreen');
+    if(loginScreen){
+      loginScreen.style.display='flex';
+      loginScreen.style.pointerEvents='auto';
+      loginScreen.style.visibility='visible';
+      loginScreen.classList.remove('is-hidden');
+    }
+    document.body.classList.add('login-locked');
+  }
+
+  function hideLogin(){
+    const loginScreen=document.getElementById('loginScreen');
+    if(loginScreen){
+      loginScreen.style.display='none';
+      loginScreen.style.pointerEvents='none';
+      loginScreen.style.visibility='hidden';
+      loginScreen.classList.add('is-hidden');
+    }
+    document.body.classList.remove('login-locked');
+  }
+
+  function activateView(viewId){
+    try{
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      const view=document.getElementById(viewId);
+      if(view) view.classList.add('active');
+
+      document.querySelectorAll('.tab').forEach(tab=>{
+        const tabView=tab.getAttribute('data-view');
+        tab.classList.toggle('active', tabView===viewId);
+      });
+    }catch(e){}
+  }
+
+  function completeLogin(user){
+    localStorage.setItem(LOGIN_SESSION_KEY,'true');
+    localStorage.setItem(CURRENT_USER_KEY,JSON.stringify({username:user.username,name:user.name,role:user.role||'teacher'}));
+    localStorage.setItem('avaliacoes_slb_current_professor',user.name);
+
+    hideLogin();
+
+    const badge=document.getElementById('currentUserBadge');
+    if(badge) badge.textContent=user.role==='admin' ? 'Admin' : 'Professor: '+user.name;
+
+    const targetView=user.role==='admin' ? 'teacherDashboardView' : 'scheduleView';
+
+    try{
+      if(typeof window.setCurrentUser==='function') window.setCurrentUser(user);
+    }catch(e){}
+
+    try{
+      if(typeof window.switchView==='function') window.switchView(targetView);
+      else activateView(targetView);
+    }catch(e){
+      activateView(targetView);
+    }
+
+    setTimeout(function(){
+      try{ if(typeof window.setupCloudButtons==='function') window.setupCloudButtons(); }catch(e){}
+      try{
+        if(typeof window.loadFromCloud==='function'){
+          const result=window.loadFromCloud(user.role!=='admin');
+          if(result && typeof result.catch==='function') result.catch(function(err){console.warn('Cloud load skipped',err);});
+        }
+      }catch(e){}
+      try{ if(typeof window.renderSchedule==='function' && user.role!=='admin') window.renderSchedule(); }catch(e){}
+      try{ if(typeof window.renderTeacherDashboard==='function' && user.role==='admin') window.renderTeacherDashboard(); }catch(e){}
+    },80);
+  }
+
+  function doLogin(evt){
+    if(evt){
+      evt.preventDefault();
+      evt.stopPropagation();
+    }
+
+    const error=document.getElementById('loginError');
+    const username=(document.getElementById('loginUser')?.value||'').trim();
+    const password=(document.getElementById('loginPass')?.value||'').trim();
+    const user=USERS.find(u=>u.username===username && u.password===password);
+
+    if(!user){
+      if(error) error.textContent='Credenciais incorretas.';
+      return false;
+    }
+
+    if(error) error.textContent='';
+    completeLogin(user);
+    return false;
+  }
+
+  function doLogout(evt){
+    if(evt){
+      evt.preventDefault();
+      evt.stopPropagation();
+    }
+    localStorage.removeItem(LOGIN_SESSION_KEY);
+    localStorage.removeItem(CURRENT_USER_KEY);
+    localStorage.removeItem('avaliacoes_slb_current_professor');
+
+    const u=document.getElementById('loginUser');
+    const p=document.getElementById('loginPass');
+    const e=document.getElementById('loginError');
+    if(u) u.value='';
+    if(p) p.value='';
+    if(e) e.textContent='';
+
+    showLogin();
+    return false;
+  }
+
+  function bindLogin(){
+    window.attemptLogin=doLogin;
+    window.robustLogout=doLogout;
+
+    const form=document.getElementById('loginForm');
+    const submit=document.getElementById('loginSubmitBtn');
+    const logout=document.getElementById('logoutBtn');
+    const userInput=document.getElementById('loginUser');
+    const passInput=document.getElementById('loginPass');
+
+    if(form){
+      form.onsubmit=doLogin;
+      form.addEventListener('submit',doLogin,true);
+    }
+
+    if(submit){
+      submit.type='button';
+      submit.onclick=doLogin;
+      submit.addEventListener('click',doLogin,true);
+    }
+
+    if(logout){
+      logout.onclick=doLogout;
+      logout.addEventListener('click',doLogout,true);
+    }
+
+    [userInput,passInput].forEach(input=>{
+      if(input){
+        input.addEventListener('keydown',function(evt){
+          if(evt.key==='Enter') doLogin(evt);
+        },true);
+      }
+    });
+
+    let saved=null;
+    try{ saved=JSON.parse(localStorage.getItem(CURRENT_USER_KEY)||'null'); }catch(e){}
+    const logged=localStorage.getItem(LOGIN_SESSION_KEY)==='true';
+
+    if(logged && saved && saved.username){
+      const fullUser=USERS.find(u=>u.username===saved.username) || saved;
+      completeLogin(fullUser);
+    }else{
+      showLogin();
+    }
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindLogin);
+  else bindLogin();
+})();
+</script>
+
 </body>
 </html>
