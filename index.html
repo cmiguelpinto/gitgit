@@ -3803,6 +3803,25 @@
       display:inline-flex!important;
     }
 
+
+    /* Role corrected tab visibility */
+    html:not(.admin-user) .tabs .tab[data-view="adminCentralView"],
+    body:not(.admin-user) .tabs .tab[data-view="adminCentralView"],
+    html.teacher-user .tabs .tab[data-view="adminCentralView"],
+    body.teacher-user .tabs .tab[data-view="adminCentralView"]{
+      display:none!important;
+    }
+    html.admin-user .tabs .tab[data-view="adminCentralView"],
+    body.admin-user .tabs .tab[data-view="adminCentralView"]{
+      display:inline-flex!important;
+    }
+    html.admin-user .tabs .tab[data-view="studentsView"],
+    body.admin-user .tabs .tab[data-view="studentsView"],
+    html.admin-user .tabs .tab[data-view="attendanceView"],
+    body.admin-user .tabs .tab[data-view="attendanceView"]{
+      display:none!important;
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -4328,6 +4347,25 @@ function setCurrentUser(user){
 }
 
 
+function applyUserRoleClasses(user){
+  const isAdmin=user?.role==='admin';
+  const isTeacher=!!user && user.role!=='admin';
+
+  document.body.classList.toggle('admin-user', isAdmin);
+  document.body.classList.toggle('teacher-user', isTeacher);
+  document.documentElement.classList.toggle('admin-user', isAdmin);
+  document.documentElement.classList.toggle('teacher-user', isTeacher);
+
+  if(!user){
+    document.body.classList.remove('admin-user','teacher-user');
+    document.documentElement.classList.remove('admin-user','teacher-user');
+  }
+}
+
+function updateRoleVisibility(){
+  applyUserRoleClasses(currentLoggedUser?.());
+}
+
 function updateCurrentUserBadge(){
   const badge=document.getElementById('currentUserBadge');
   if(badge){ const u=currentLoggedUser?.(); badge.textContent=(u?.role==='admin') ? 'Admin' : `Professor: ${professorName}`; }
@@ -4445,6 +4483,7 @@ function attemptLogin(){
 
     localStorage.setItem(loginSessionKey,'true');
     setCurrentUser(found);
+    try{ applyUserRoleClasses(found); }catch(e){}
     if(error) error.textContent='';
 
     const loginScreen=document.getElementById('loginScreen');
@@ -6093,6 +6132,7 @@ function switchView(id){
   if(currentUser && currentUser.role!=='admin' && id==='adminCentralView'){
     id='scheduleView';
   }
+  updateRoleVisibility();
 
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const view=document.getElementById(id);
@@ -9881,6 +9921,11 @@ renderSchedule();
 
     hideLogin();
 
+    document.body.classList.toggle('admin-user', user.role==='admin');
+    document.body.classList.toggle('teacher-user', user.role!=='admin');
+    document.documentElement.classList.toggle('admin-user', user.role==='admin');
+    document.documentElement.classList.toggle('teacher-user', user.role!=='admin');
+
     const badge=document.getElementById('currentUserBadge');
     if(badge) badge.textContent=user.role==='admin' ? 'Admin' : 'Professor: '+user.name;
 
@@ -9946,6 +9991,9 @@ renderSchedule();
     if(u) u.value='';
     if(p) p.value='';
     if(e) e.textContent='';
+
+    document.body.classList.remove('admin-user','teacher-user');
+    document.documentElement.classList.remove('admin-user','teacher-user');
 
     showLogin();
     return false;
