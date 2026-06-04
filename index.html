@@ -3822,6 +3822,16 @@
       display:none!important;
     }
 
+
+    /* Teacher safety: never show Admin drawer/pop-up fallback */
+    body.teacher-user #adminDetailDrawer,
+    html.teacher-user #adminDetailDrawer,
+    body:not(.admin-user) #adminDetailDrawer,
+    html:not(.admin-user) #adminDetailDrawer{
+      display:none!important;
+      pointer-events:none!important;
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -3989,7 +3999,7 @@ document.documentElement.classList.add('teacher-user');
     <section id="evaluationView" class="view">
       <div class="panel toolbar">
         <div><div class="section-label">Página de avaliação</div><div class="hint">Esta página está sempre disponível. Escolhe uma turma à esquerda e preenche a grelha de avaliação.</div></div>
-        <div class="toolbar-actions"><button class="btn primary" id="saveEvaluationPageBtn">Guardar avaliação</button><button class="btn ghost" id="showReportFromEvalBtn">Ver Relatório Evolução Época</button><button class="btn secondary" id="showInternalDocFromEvalBtn">Ver Documento Interno</button><button class="btn ghost" data-view-btn="documentView">Ver documento</button></div>
+        <div class="toolbar-actions"><button class="btn primary" id="saveEvaluationPageBtn">Guardar avaliação</button><button class="btn ghost" id="showReportFromEvalBtn" type="button" onclick="showSelectedEvaluationReport()">Ver Relatório Evolução Época</button><button class="btn secondary" id="showInternalDocFromEvalBtn" type="button" onclick="showSelectedEvaluationInternalDocument()">Ver Documento Interno</button><button class="btn ghost" data-view-btn="documentView">Ver documento</button></div>
       </div>
       <section class="eval-card evaluation-shell">
         <aside class="eval-sidebar">
@@ -5036,6 +5046,7 @@ function populateAttendanceClasses(){
 }
 
 function renderAttendancePage(){
+  forceCloseAdminDrawerForTeachers();
   attendanceViewMode='month';
   setupAttendanceControls();
 
@@ -6124,6 +6135,22 @@ function bindAdminCentralControls(){
   if(query) query.oninput=()=>{adminCentralFilters.query=query.value; renderAdminCentral();};
 }
 
+
+function forceCloseAdminDrawerForTeachers(){
+  const user=currentLoggedUser?.();
+  if(user?.role==='admin') return;
+
+  const drawer=document.getElementById('adminDetailDrawer');
+  if(drawer){
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden','true');
+    drawer.style.display='';
+  }
+
+  const body=document.getElementById('adminDetailBody');
+  if(body) body.innerHTML='';
+}
+
 function switchView(id){
   const currentUser=currentLoggedUser?.();
   if(currentUser?.role==='admin' && (id==='studentsView' || id==='attendanceView')){
@@ -6133,6 +6160,7 @@ function switchView(id){
     id='scheduleView';
   }
   updateRoleVisibility();
+  forceCloseAdminDrawerForTeachers();
 
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const view=document.getElementById(id);
@@ -9712,6 +9740,47 @@ function printTeacherDocumentStable(){
   }
 }
 
+
+function showSelectedEvaluationReport(){
+  if(!activeEvalId){
+    alert('Seleciona primeiro uma turma na página Avaliação.');
+    return;
+  }
+
+  try{
+    saveCurrentEvaluation();
+  }catch(e){
+    console.warn('Não foi possível guardar antes de abrir o relatório', e);
+  }
+
+  documentClassFilterId=activeEvalId;
+  switchView('documentView');
+  setTimeout(()=>{
+    documentClassFilterId=activeEvalId;
+    renderDocument();
+  },0);
+}
+
+function showSelectedEvaluationInternalDocument(){
+  if(!activeEvalId){
+    alert('Seleciona primeiro uma turma na página Avaliação.');
+    return;
+  }
+
+  try{
+    saveCurrentEvaluation();
+  }catch(e){
+    console.warn('Não foi possível guardar antes de abrir o documento interno', e);
+  }
+
+  internalDocumentClassId=activeEvalId;
+  switchView('internalDocumentView');
+  setTimeout(()=>{
+    internalDocumentClassId=activeEvalId;
+    renderInternalDocument();
+  },0);
+}
+
 function clearPrintMode(){
   document.body.classList.remove('print-final','print-internal');
 }
@@ -9732,10 +9801,9 @@ if(printPdfBtn){
 
 const showReportFromEvalBtn=document.getElementById('showReportFromEvalBtn');
 if(showReportFromEvalBtn){
-  showReportFromEvalBtn.addEventListener('click',()=>{
-    saveCurrentEvaluation();
-    documentClassFilterId = activeEvalId;
-    switchView('documentView');
+  showReportFromEvalBtn.addEventListener('click',(event)=>{
+    event.preventDefault();
+    showSelectedEvaluationReport();
   });
 }
 
@@ -9751,10 +9819,9 @@ document.addEventListener('click',removeStudentGlobalHandler);
 
 const showInternalDocFromEvalBtn=document.getElementById('showInternalDocFromEvalBtn');
 if(showInternalDocFromEvalBtn){
-  showInternalDocFromEvalBtn.addEventListener('click',()=>{
-    saveCurrentEvaluation();
-    internalDocumentClassId=activeEvalId;
-    switchView('internalDocumentView');
+  showInternalDocFromEvalBtn.addEventListener('click',(event)=>{
+    event.preventDefault();
+    showSelectedEvaluationInternalDocument();
   });
 }
 
