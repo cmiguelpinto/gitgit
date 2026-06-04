@@ -3784,6 +3784,12 @@
       display:none!important;
     }
 
+
+    /* Teacher-only tab visibility */
+    body.teacher-user .tabs .tab[data-view="adminCentralView"]{
+      display:none!important;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -6060,6 +6066,9 @@ function switchView(id){
   const currentUser=currentLoggedUser?.();
   if(currentUser?.role==='admin' && (id==='studentsView' || id==='attendanceView')){
     id='adminCentralView';
+  }
+  if(currentUser && currentUser.role!=='admin' && id==='adminCentralView'){
+    id='scheduleView';
   }
 
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
