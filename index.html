@@ -4090,6 +4090,19 @@
       padding-right:4px;
     }
 
+
+    .teacher-alert-teacher-filter{
+      min-width:220px;
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:11px;
+      font-weight:950;
+      font-family:inherit;
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -4607,6 +4620,7 @@ let adminTeacherStates = [];
 let adminCentralMode='classes';
 let adminCentralFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
 let teacherAlertFilter='all';
+let teacherAlertTeacherFilter='all';
 
 const loginSessionKey = `${storeKey}_logged_in`;
 const currentUserKey = `${storeKey}_current_user`;
@@ -9340,47 +9354,54 @@ function buildTeacherAlerts(summaries){
 
   (summaries||[]).forEach(summary=>{
     const c=summary.classInfo;
+    const teacherName=summary.teacherName || professorName || '';
     const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} · ${b.time}`).join(' | ');
     const count=summary.students?.length || 0;
     const evalPct=summary.rows?.length ? Math.round((summary.evaluated/summary.rows.length)*100) : 0;
     const attendancePct=summary.attendanceStats?.percent || 0;
 
+    const base={teacherName, classId:c.id};
+
     if(count>CLASS_CAPACITY_REFERENCE){
       alerts.push({
+        ...base,
         type:'limit',
         level:'danger',
         tag:'Limite',
-        title:`${c.className} · ${block}`,
+        title:`${isAdminUser()?teacherName+' · ':''}${c.className} · ${block}`,
         text:`Turma acima da referência: ${count}/${CLASS_CAPACITY_REFERENCE} alunos. É permitido, mas deve ser acompanhado.`
       });
     }
 
     if(count===0){
       alerts.push({
+        ...base,
         type:'empty',
         level:'warning',
         tag:'Sem alunos',
-        title:`${c.className} · ${block}`,
+        title:`${isAdminUser()?teacherName+' · ':''}${c.className} · ${block}`,
         text:'Esta turma ainda não tem alunos registados.'
       });
     }
 
     if(count>0 && evalPct<100){
       alerts.push({
+        ...base,
         type:'evaluation',
         level:'warning',
         tag:'Avaliação',
-        title:`${c.className} · ${block}`,
+        title:`${isAdminUser()?teacherName+' · ':''}${c.className} · ${block}`,
         text:`Avaliação incompleta: ${summary.evaluated}/${summary.rows.length} alunos avaliados.`
       });
     }
 
     if(summary.attendanceStats?.totalPossible>0 && attendancePct<75){
       alerts.push({
+        ...base,
         type:'attendance',
         level:'warning',
         tag:'Presenças',
-        title:`${c.className} · ${block}`,
+        title:`${isAdminUser()?teacherName+' · ':''}${c.className} · ${block}`,
         text:`Presenças baixas este mês: ${attendancePct}% (${summary.attendanceStats.present}/${summary.attendanceStats.totalPossible}).`
       });
     }
@@ -9394,16 +9415,34 @@ function setTeacherAlertFilter(filter){
   renderTeacherDashboard();
 }
 
+function setTeacherAlertTeacherFilter(teacherName){
+  teacherAlertTeacherFilter=teacherName || 'all';
+  renderTeacherDashboard();
+}
+
 function renderTeacherAlertFilters(alerts){
   const box=document.getElementById('teacherAlertFilters');
   if(!box) return;
 
+  const teacherOptions=[...new Set((alerts||[]).map(a=>a.teacherName).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'pt-PT'));
+
+  if(!isAdminUser()){
+    teacherAlertTeacherFilter='all';
+  }else if(teacherAlertTeacherFilter!=='all' && !teacherOptions.includes(teacherAlertTeacherFilter)){
+    teacherAlertTeacherFilter='all';
+  }
+
+  const teacherFilteredAlerts=teacherAlertTeacherFilter==='all'
+    ? alerts
+    : alerts.filter(a=>a.teacherName===teacherAlertTeacherFilter);
+
   const counts={
-    all:alerts.length,
-    evaluation:alerts.filter(a=>a.type==='evaluation').length,
-    limit:alerts.filter(a=>a.type==='limit').length,
-    attendance:alerts.filter(a=>a.type==='attendance').length,
-    empty:alerts.filter(a=>a.type==='empty').length
+    all:teacherFilteredAlerts.length,
+    evaluation:teacherFilteredAlerts.filter(a=>a.type==='evaluation').length,
+    limit:teacherFilteredAlerts.filter(a=>a.type==='limit').length,
+    attendance:teacherFilteredAlerts.filter(a=>a.type==='attendance').length,
+    empty:teacherFilteredAlerts.filter(a=>a.type==='empty').length
   };
 
   const filters=[
@@ -9414,11 +9453,21 @@ function renderTeacherAlertFilters(alerts){
     ['empty','Sem alunos']
   ];
 
-  box.innerHTML=filters.map(([key,label])=>`
-    <button type="button" class="teacher-alert-filter-btn ${teacherAlertFilter===key?'active':''}" onclick="setTeacherAlertFilter('${key}')">
-      ${safe(label)} · ${counts[key] || 0}
-    </button>
-  `).join('');
+  const teacherSelect=isAdminUser()
+    ? `<select class="teacher-alert-teacher-filter" onchange="setTeacherAlertTeacherFilter(this.value)">
+        <option value="all" ${teacherAlertTeacherFilter==='all'?'selected':''}>Todos os professores</option>
+        ${teacherOptions.map(name=>`<option value="${safe(name)}" ${teacherAlertTeacherFilter===name?'selected':''}>${safe(name)}</option>`).join('')}
+      </select>`
+    : '';
+
+  box.innerHTML=`
+    ${teacherSelect}
+    ${filters.map(([key,label])=>`
+      <button type="button" class="teacher-alert-filter-btn ${teacherAlertFilter===key?'active':''}" onclick="setTeacherAlertFilter('${key}')">
+        ${safe(label)} · ${counts[key] || 0}
+      </button>
+    `).join('')}
+  `;
 }
 
 function renderTeacherAlerts(summaries, metrics){
@@ -9428,9 +9477,13 @@ function renderTeacherAlerts(summaries, metrics){
   const alerts=buildTeacherAlerts(summaries);
   renderTeacherAlertFilters(alerts);
 
-  const filtered=teacherAlertFilter==='all'
+  const teacherFiltered=teacherAlertTeacherFilter==='all'
     ? alerts
-    : alerts.filter(alert=>alert.type===teacherAlertFilter);
+    : alerts.filter(alert=>alert.teacherName===teacherAlertTeacherFilter);
+
+  const filtered=teacherAlertFilter==='all'
+    ? teacherFiltered
+    : teacherFiltered.filter(alert=>alert.type===teacherAlertFilter);
 
   if(!alerts.length){
     box.innerHTML=`<div class="teacher-alert-card ok">
@@ -9447,7 +9500,7 @@ function renderTeacherAlerts(summaries, metrics){
     box.innerHTML=`<div class="teacher-alert-card ok">
       <div>
         <div class="teacher-alert-title">Sem alertas neste filtro</div>
-        <div class="teacher-alert-text">Não existem alertas para o filtro selecionado.</div>
+        <div class="teacher-alert-text">Não existem alertas para o professor/filtro selecionado.</div>
       </div>
       <span class="teacher-alert-tag">OK</span>
     </div>`;
