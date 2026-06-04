@@ -3832,6 +3832,215 @@
       pointer-events:none!important;
     }
 
+
+    /* Teacher newsletter / Admin notices */
+    .teacher-news-panel{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      display:grid;
+      gap:12px;
+    }
+    .teacher-news-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .teacher-news-composer{
+      display:grid;
+      gap:8px;
+    }
+    .teacher-news-form{
+      display:grid;
+      grid-template-columns:1.1fr .75fr .55fr .65fr;
+      gap:8px;
+      padding:10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+    }
+    .teacher-news-form input,
+    .teacher-news-form select,
+    .teacher-news-form textarea{
+      width:100%;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:9px 10px;
+      font-family:inherit;
+      font-weight:800;
+      font-size:12px;
+      background:#fff;
+      color:#111827;
+    }
+    .teacher-news-form textarea{
+      grid-column:1 / -1;
+      min-height:82px;
+      resize:vertical;
+      line-height:1.35;
+    }
+    .teacher-news-form-actions{
+      grid-column:1 / -1;
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .teacher-news-list{
+      display:grid;
+      gap:9px;
+    }
+    .teacher-news-card{
+      border:1px solid #edf0f3;
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      display:grid;
+      gap:8px;
+      box-shadow:0 8px 18px rgba(15,23,42,.04);
+    }
+    .teacher-news-card.unread{
+      border-color:rgba(208,0,27,.28);
+      background:linear-gradient(180deg,#fff5f6,#fff);
+    }
+    .teacher-news-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .teacher-news-title{
+      font-size:14px;
+      font-weight:950;
+      color:#111827;
+      letter-spacing:-.02em;
+    }
+    .teacher-news-meta{
+      margin-top:3px;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:850;
+      line-height:1.35;
+    }
+    .teacher-news-message{
+      color:#374151;
+      font-size:12px;
+      font-weight:750;
+      line-height:1.45;
+      white-space:pre-wrap;
+    }
+    .teacher-news-actions{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .teacher-news-chip{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:10px;
+      font-weight:950;
+      border:1px solid #edf0f3;
+      background:#f9fafb;
+      color:#374151;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .teacher-news-chip.urgent{
+      background:#fee2e2;
+      border-color:#fecaca;
+      color:#991b1b;
+    }
+    .teacher-news-chip.important{
+      background:#fef3c7;
+      border-color:#fde68a;
+      color:#92400e;
+    }
+    .teacher-news-chip.normal{
+      background:#e0f2fe;
+      border-color:#bae6fd;
+      color:#075985;
+    }
+    @media(max-width:900px){
+      .teacher-news-form{grid-template-columns:1fr 1fr;}
+      .teacher-news-form textarea,
+      .teacher-news-form-actions{grid-column:1 / -1;}
+    }
+    @media(max-width:560px){
+      .teacher-news-form{grid-template-columns:1fr;}
+    }
+
+
+    /* Teacher alerts */
+    .teacher-alerts-panel{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      display:grid;
+      gap:12px;
+    }
+    .teacher-alerts-list{
+      display:grid;
+      gap:8px;
+    }
+    .teacher-alert-card{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+      padding:11px 12px;
+      background:#f9fafb;
+    }
+    .teacher-alert-card.warning{
+      border-color:#fde68a;
+      background:#fffbeb;
+      color:#92400e;
+    }
+    .teacher-alert-card.danger{
+      border-color:#fecaca;
+      background:#fef2f2;
+      color:#991b1b;
+    }
+    .teacher-alert-card.ok{
+      border-color:#bbf7d0;
+      background:#f0fdf4;
+      color:#166534;
+    }
+    .teacher-alert-title{
+      font-size:12px;
+      font-weight:950;
+      color:#111827;
+    }
+    .teacher-alert-text{
+      margin-top:3px;
+      font-size:11px;
+      font-weight:800;
+      line-height:1.35;
+      color:inherit;
+    }
+    .teacher-alert-tag{
+      flex:0 0 auto;
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:10px;
+      font-weight:950;
+      background:#fff;
+      border:1px solid currentColor;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -4067,6 +4276,7 @@ document.documentElement.classList.add('teacher-user');
         <button type="button" class="admin-central-tab" data-admin-central-mode="attendance">Presenças</button>
         <button type="button" class="admin-central-tab" data-admin-central-mode="reports">Relatórios Evolução</button>
         <button type="button" class="admin-central-tab" data-admin-central-mode="internal">Documentos Internos</button>
+        <button type="button" class="admin-central-tab" data-admin-central-mode="notices">Avisos</button>
       </div>
 
       <div id="adminCentralFilters" class="admin-central-filters"></div>
@@ -4086,6 +4296,29 @@ document.documentElement.classList.add('teacher-user');
       </div>
 
       <section class="teacher-dashboard">
+        <section class="teacher-news-panel">
+          <div class="teacher-news-head">
+            <div>
+              <div class="section-label">Avisos / Informações do Admin</div>
+              <div class="hint">Notícias, semanas especiais, reuniões e eventos para os professores.</div>
+            </div>
+            <button class="btn small ghost" type="button" id="refreshTeacherNewsBtn">Atualizar avisos</button>
+          </div>
+
+          <div id="teacherNewsComposer" class="teacher-news-composer"></div>
+          <div id="teacherNewsList" class="teacher-news-list"></div>
+        </section>
+
+        <section class="teacher-alerts-panel">
+          <div class="teacher-news-head">
+            <div>
+              <div class="section-label">Alertas do Professor</div>
+              <div class="hint">Problemas e avisos rápidos: turmas acima de 10, avaliações por preencher e presenças baixas.</div>
+            </div>
+          </div>
+          <div id="teacherAlertsList" class="teacher-alerts-list"></div>
+        </section>
+
         <div class="teacher-search-card">
           <div>
             <div class="section-label">Pesquisar aluno</div>
@@ -5989,6 +6222,31 @@ function renderAdminCentral(){
     return;
   }
 
+
+  if(adminCentralMode==='notices'){
+    filtersBox.innerHTML='';
+    summaryBox.innerHTML=`
+      <span class="admin-central-pill">Avisos</span>
+      <span class="admin-central-pill">${loadTeacherNotices().length} aviso(s)</span>
+      <span class="admin-central-pill">Visível na Área do Professor</span>
+    `;
+    listBox.innerHTML=`
+      <section class="teacher-news-panel">
+        <div class="teacher-news-head">
+          <div>
+            <div class="section-label">Criar / Gerir Avisos</div>
+            <div class="hint">Estes avisos aparecem no topo da Área do Professor de todos os professores.</div>
+          </div>
+        </div>
+        <div id="teacherNewsComposer" class="teacher-news-composer"></div>
+        <div id="teacherNewsList" class="teacher-news-list"></div>
+      </section>
+    `;
+    renderTeacherNotices();
+    bindAdminCentralControls();
+    return;
+  }
+
   const rows=adminCentralRows();
   const teacherOptions=[...new Set(rows.map(r=>r.teacherName).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
   const dayOrder={Segunda:1,Terça:2,Quarta:3,Quinta:4,Sexta:5,Sábado:6};
@@ -6055,7 +6313,8 @@ function renderAdminCentral(){
     classes:'Turmas',
     attendance:'Presenças',
     reports:'Relatórios Evolução',
-    internal:'Documentos Internos'
+    internal:'Documentos Internos',
+    notices:'Avisos'
   }[adminCentralMode] || 'Turmas';
 
   summaryBox.innerHTML=`
@@ -8828,12 +9087,229 @@ function statusPillClass(status){
 let teacherClassFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
 let adminClassNavigatorTeacher=null;
 let adminClassNavigatorDay='all';
+
+const teacherNoticesKey = `${storeKey}_teacher_notices_v1`;
+
+function loadTeacherNotices(){
+  try{
+    const data=JSON.parse(localStorage.getItem(teacherNoticesKey) || '[]');
+    return Array.isArray(data) ? data : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveTeacherNotices(notices){
+  localStorage.setItem(teacherNoticesKey, JSON.stringify(notices || []));
+}
+
+function noticeReadKey(noticeId){
+  const user=currentLoggedUser?.();
+  return `${storeKey}_notice_read_${user?.username || 'guest'}_${noticeId}`;
+}
+
+function isNoticeRead(noticeId){
+  return localStorage.getItem(noticeReadKey(noticeId))==='true';
+}
+
+function markTeacherNoticeRead(noticeId){
+  localStorage.setItem(noticeReadKey(noticeId),'true');
+  renderTeacherNotices();
+}
+
+function deleteTeacherNotice(noticeId){
+  if(!isAdminUser()) return;
+  if(!confirm('Apagar este aviso?')) return;
+
+  const notices=loadTeacherNotices().filter(n=>n.id!==noticeId);
+  saveTeacherNotices(notices);
+  renderTeacherNotices();
+}
+
+function publishTeacherNotice(){
+  if(!isAdminUser()) return;
+
+  const title=document.getElementById('noticeTitle')?.value.trim();
+  const category=document.getElementById('noticeCategory')?.value || 'Geral';
+  const priority=document.getElementById('noticePriority')?.value || 'normal';
+  const date=document.getElementById('noticeDate')?.value || '';
+  const message=document.getElementById('noticeMessage')?.value.trim();
+
+  if(!title || !message){
+    alert('Preenche pelo menos o título e a mensagem.');
+    return;
+  }
+
+  const notices=loadTeacherNotices();
+  notices.unshift({
+    id:`notice_${Date.now()}`,
+    title,
+    category,
+    priority,
+    date,
+    message,
+    createdAt:new Date().toISOString(),
+    author:professorName || 'Admin'
+  });
+
+  saveTeacherNotices(notices);
+
+  ['noticeTitle','noticeDate','noticeMessage'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+
+  renderTeacherNotices();
+}
+
+function renderTeacherNotices(){
+  const composer=document.getElementById('teacherNewsComposer');
+  const list=document.getElementById('teacherNewsList');
+  if(!composer || !list) return;
+
+  const notices=loadTeacherNotices()
+    .sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+
+  if(isAdminUser()){
+    composer.innerHTML=`
+      <div class="teacher-news-form">
+        <input id="noticeTitle" type="text" placeholder="Título do aviso">
+        <select id="noticeCategory">
+          <option>Geral</option>
+          <option>Semana especial</option>
+          <option>Reunião</option>
+          <option>Evento</option>
+          <option>Competição</option>
+          <option>Formação</option>
+        </select>
+        <select id="noticePriority">
+          <option value="normal">Normal</option>
+          <option value="important">Importante</option>
+          <option value="urgent">Urgente</option>
+        </select>
+        <input id="noticeDate" type="date">
+        <textarea id="noticeMessage" placeholder="Mensagem para os professores..."></textarea>
+        <div class="teacher-news-form-actions">
+          <button class="btn primary" type="button" onclick="publishTeacherNotice()">Publicar aviso</button>
+        </div>
+      </div>
+    `;
+  }else{
+    composer.innerHTML='';
+  }
+
+  if(!notices.length){
+    list.innerHTML='<div class="teacher-empty">Ainda não existem avisos publicados pelo Admin.</div>';
+    return;
+  }
+
+  list.innerHTML=notices.map(notice=>{
+    const read=isNoticeRead(notice.id);
+    const created=notice.createdAt ? new Date(notice.createdAt).toLocaleString('pt-PT') : '';
+    const dateText=notice.date ? ` · Data/evento: ${new Date(notice.date+'T00:00:00').toLocaleDateString('pt-PT')}` : '';
+    const priorityLabel=notice.priority==='urgent'?'Urgente':notice.priority==='important'?'Importante':'Normal';
+
+    return `<article class="teacher-news-card ${read?'':'unread'}">
+      <div class="teacher-news-top">
+        <div>
+          <div class="teacher-news-title">${safe(notice.title)}</div>
+          <div class="teacher-news-meta">${safe(notice.category || 'Geral')} · Publicado por ${safe(notice.author || 'Admin')} · ${safe(created)}${safe(dateText)}</div>
+        </div>
+        <span class="teacher-news-chip ${safe(notice.priority || 'normal')}">${safe(priorityLabel)}</span>
+      </div>
+      <div class="teacher-news-message">${safe(notice.message)}</div>
+      <div class="teacher-news-actions">
+        <span class="teacher-news-chip ${read?'normal':'important'}">${read?'Lido':'Por ler'}</span>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          ${!read ? `<button class="btn small ghost" type="button" onclick="markTeacherNoticeRead('${safe(notice.id)}')">Marcar como lido</button>` : ''}
+          ${isAdminUser() ? `<button class="btn small danger" type="button" onclick="deleteTeacherNotice('${safe(notice.id)}')">Apagar</button>` : ''}
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+
+function renderTeacherAlerts(summaries, metrics){
+  const box=document.getElementById('teacherAlertsList');
+  if(!box) return;
+
+  const alerts=[];
+
+  (summaries||[]).forEach(summary=>{
+    const c=summary.classInfo;
+    const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} · ${b.time}`).join(' | ');
+    const count=summary.students?.length || 0;
+    const evalPct=summary.rows?.length ? Math.round((summary.evaluated/summary.rows.length)*100) : 0;
+    const attendancePct=summary.attendanceStats?.percent || 0;
+
+    if(count>CLASS_CAPACITY_REFERENCE){
+      alerts.push({
+        level:'danger',
+        tag:'Acima de 10',
+        title:`${c.className} · ${block}`,
+        text:`Turma acima da referência: ${count}/${CLASS_CAPACITY_REFERENCE} alunos. É permitido, mas deve ser acompanhado.`
+      });
+    }
+
+    if(count===0){
+      alerts.push({
+        level:'warning',
+        tag:'Sem alunos',
+        title:`${c.className} · ${block}`,
+        text:'Esta turma ainda não tem alunos registados.'
+      });
+    }
+
+    if(count>0 && evalPct<100){
+      alerts.push({
+        level:'warning',
+        tag:'Avaliação',
+        title:`${c.className} · ${block}`,
+        text:`Avaliação incompleta: ${summary.evaluated}/${summary.rows.length} alunos avaliados.`
+      });
+    }
+
+    if(summary.attendanceStats?.totalPossible>0 && attendancePct<75){
+      alerts.push({
+        level:'warning',
+        tag:'Presenças',
+        title:`${c.className} · ${block}`,
+        text:`Presenças baixas este mês: ${attendancePct}% (${summary.attendanceStats.present}/${summary.attendanceStats.totalPossible}).`
+      });
+    }
+  });
+
+  if(!alerts.length){
+    box.innerHTML=`<div class="teacher-alert-card ok">
+      <div>
+        <div class="teacher-alert-title">Sem alertas importantes</div>
+        <div class="teacher-alert-text">Não existem turmas acima da referência, sem alunos, avaliações incompletas críticas ou presenças baixas neste momento.</div>
+      </div>
+      <span class="teacher-alert-tag">OK</span>
+    </div>`;
+    return;
+  }
+
+  box.innerHTML=alerts.slice(0,8).map(alert=>`
+    <article class="teacher-alert-card ${safe(alert.level)}">
+      <div>
+        <div class="teacher-alert-title">${safe(alert.title)}</div>
+        <div class="teacher-alert-text">${safe(alert.text)}</div>
+      </div>
+      <span class="teacher-alert-tag">${safe(alert.tag)}</span>
+    </article>
+  `).join('') + (alerts.length>8 ? `<div class="teacher-empty">+ ${alerts.length-8} alerta(s) adicionais.</div>` : '');
+}
+
 function renderTeacherDashboard(){
   const metricsGrid=document.getElementById('teacherMetricsGrid');
   const searchResults=document.getElementById('teacherSearchResults');
   const classList=document.getElementById('teacherClassList');
   const insights=document.getElementById('teacherObjectiveInsights');
   if(!metricsGrid || !searchResults || !classList || !insights) return;
+
+  renderTeacherNotices();
 
   const summaries=allTeacherClassSummaries();
   const metrics=teacherDashboardMetrics(summaries);
@@ -8865,6 +9341,7 @@ function renderTeacherDashboard(){
 
   metricsGrid.innerHTML=metricCards.map(([label,value,sub])=>`<div class="teacher-metric-card"><div class="teacher-metric-label">${safe(label)}</div><div class="teacher-metric-value">${safe(value)}</div><div class="teacher-metric-sub">${safe(sub)}</div></div>`).join('');
 
+  renderTeacherAlerts(summaries, metrics);
   renderTeacherSearchResults();
   renderTeacherClassList(summaries);
   renderTeacherObjectiveInsights(summaries);
@@ -9882,6 +10359,12 @@ function clearChecksGlobalHandler(event){
 }
 document.addEventListener('click',clearChecksGlobalHandler);
 
+
+
+const refreshTeacherNewsBtn=document.getElementById('refreshTeacherNewsBtn');
+if(refreshTeacherNewsBtn){
+  refreshTeacherNewsBtn.addEventListener('click',renderTeacherNotices);
+}
 
 const teacherStudentSearchInput=document.getElementById('teacherStudentSearch');
 if(teacherStudentSearchInput){
