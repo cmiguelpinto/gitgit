@@ -4159,6 +4159,257 @@
       }
     }
 
+
+    /* Área do Professor top priority layout */
+    .teacher-dashboard-hero{
+      display:grid;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .teacher-dashboard-top-search{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns:minmax(220px,.45fr) minmax(280px,1fr);
+      gap:14px;
+      align-items:center;
+    }
+    .teacher-dashboard-hero .teacher-metrics-grid{
+      margin:0;
+    }
+    @media(max-width:760px){
+      .teacher-dashboard-top-search{
+        grid-template-columns:1fr;
+      }
+    }
+
+
+    .teacher-search-stack{
+      display:grid;
+      gap:10px;
+      min-width:0;
+    }
+    .teacher-search-quick-results{
+      display:grid;
+      gap:8px;
+    }
+    .teacher-search-quick-results:empty{
+      display:none;
+    }
+    .teacher-search-quick-results .teacher-result-card{
+      box-shadow:0 8px 18px rgba(15,23,42,.05);
+      border-radius:16px;
+    }
+    .teacher-search-quick-results .teacher-empty{
+      margin:0;
+      padding:10px 12px;
+      border-radius:14px;
+    }
+
+
+    .teacher-result-card.clickable{
+      cursor:pointer;
+      transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .teacher-result-card.clickable:hover{
+      transform:translateY(-1px);
+      border-color:rgba(208,0,27,.28);
+      box-shadow:0 14px 28px rgba(15,23,42,.09);
+    }
+    .teacher-result-card .teacher-result-action{
+      margin-top:7px;
+      font-size:11px;
+      font-weight:950;
+      color:var(--slb-red);
+    }
+    .evaluation-student-focus{
+      outline:3px solid rgba(208,0,27,.32)!important;
+      box-shadow:0 0 0 6px rgba(208,0,27,.08)!important;
+      border-radius:16px!important;
+      transition:box-shadow .2s ease, outline .2s ease;
+    }
+
+
+    .eval-student-jump.evaluation-student-focus{
+      outline:3px solid rgba(208,0,27,.32)!important;
+      box-shadow:0 0 0 6px rgba(208,0,27,.08)!important;
+      border-radius:12px!important;
+    }
+
+
+    /* Hard visibility for Avaliação back-to-top button */
+    body.evaluation-page-active #evaluationBackTopBtn,
+    #evaluationView.active ~ #evaluationBackTopBtn{
+      display:flex!important;
+      opacity:1!important;
+      visibility:visible!important;
+      pointer-events:auto!important;
+    }
+    #evaluationBackTopBtn.evaluation-back-top{
+      left:24px!important;
+      right:auto!important;
+      bottom:24px!important;
+      display:none;
+      z-index:2147483000!important;
+    }
+
+
+    /* Avaliação sidebar class cards restored */
+    .eval-class-btn.eval-class-collapse{
+      width:100%;
+      text-align:left;
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:24px;
+      padding:18px;
+      color:#111827;
+      font-family:inherit;
+      box-shadow:0 8px 22px rgba(15,23,42,.04);
+      cursor:pointer;
+      display:block;
+    }
+    .eval-class-btn.eval-class-collapse.active.open{
+      background:#fff1f2;
+      border-color:#fb7185;
+    }
+    .eval-class-headline{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .eval-class-title-lines{
+      font-size:20px;
+      font-weight:950;
+      letter-spacing:-.035em;
+      line-height:1.15;
+      color:#111827;
+    }
+    .eval-collapse-indicator{
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#ffe4e6;
+      color:#6b7280;
+      font-size:24px;
+      font-weight:950;
+      flex:0 0 auto;
+    }
+    .eval-student-jump-list{
+      display:grid;
+      gap:10px;
+      margin-top:16px;
+      padding-top:16px;
+      border-top:1px solid #e5e7eb;
+      padding-bottom:14px;
+      border-bottom:1px solid #e5e7eb;
+    }
+    .eval-student-row{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:9px;
+      align-items:center;
+    }
+    .eval-student-jump{
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:14px;
+      padding:12px 14px;
+      color:#374151;
+      font-size:16px;
+      font-weight:950;
+      font-family:inherit;
+      text-align:left;
+      cursor:pointer;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .eval-student-copy,
+    .eval-student-remove{
+      border:1px solid #fecaca;
+      background:#fff;
+      color:#b40018;
+      border-radius:14px;
+      padding:12px 13px;
+      font-size:13px;
+      font-weight:950;
+      font-family:inherit;
+      cursor:pointer;
+    }
+    .eval-class-meta{
+      display:block;
+      margin-top:14px;
+      padding-top:0;
+      color:#6b7280;
+      font-size:14px;
+      font-weight:900;
+      line-height:1.35;
+    }
+    @media(max-width:700px){
+      .eval-student-row{
+        grid-template-columns:1fr auto auto;
+        gap:7px;
+      }
+      .eval-class-title-lines{
+        font-size:18px;
+      }
+      .eval-student-jump{
+        font-size:15px;
+        padding:11px 12px;
+      }
+      .eval-student-copy,
+      .eval-student-remove{
+        font-size:12px;
+        padding:11px 10px;
+      }
+    }
+
+
+    /* Avaliação sidebar compact student buttons */
+    .eval-student-jump{
+      font-size:13px!important;
+      font-weight:750!important;
+      line-height:1.15!important;
+      padding:10px 12px!important;
+      letter-spacing:-.01em!important;
+      color:#111827!important;
+    }
+    .eval-student-copy,
+    .eval-student-remove{
+      font-size:11px!important;
+      font-weight:750!important;
+      line-height:1.15!important;
+      padding:10px 11px!important;
+      letter-spacing:-.01em!important;
+    }
+    .eval-class-title-lines{
+      font-size:13px!important;
+      font-weight:850!important;
+      line-height:1.2!important;
+    }
+    @media(max-width:700px){
+      .eval-student-jump{
+        font-size:12px!important;
+        padding:9px 10px!important;
+      }
+      .eval-student-copy,
+      .eval-student-remove{
+        font-size:10px!important;
+        padding:9px 9px!important;
+      }
+      .eval-class-title-lines{
+        font-size:12px!important;
+      }
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -4403,14 +4654,18 @@ document.documentElement.classList.add('teacher-user');
     </section>
 
     <section id="teacherDashboardView" class="view">
-      <div class="panel toolbar">
-        <div>
-          <div class="section-label">Área do Professor</div>
-          <div class="hint">Pesquisa alunos, consulta turmas, avaliação e presenças do mês atual.</div>
+      <div class="teacher-dashboard-hero">
+        <div class="teacher-dashboard-top-search">
+          <div>
+            <div class="section-label">Pesquisar aluno</div>
+            <div class="hint">Procura pelo nome completo ou parte do nome.</div>
+          </div>
+          <div class="teacher-search-stack">
+            <input id="teacherStudentSearch" class="teacher-search-input" type="search" placeholder="Escrever nome do aluno..." oninput="renderTeacherSearchResults()">
+            <div id="teacherSearchQuickResults" class="teacher-search-quick-results"></div>
+          </div>
         </div>
-        <div class="toolbar-actions">
-          <button class="btn ghost" id="refreshTeacherDashboardBtn">Atualizar dashboard</button>
-        </div>
+        <div id="teacherMetricsGrid" class="teacher-metrics-grid"></div>
       </div>
 
       <section class="teacher-dashboard">
@@ -4437,16 +4692,6 @@ document.documentElement.classList.add('teacher-user');
           <div id="teacherAlertFilters" class="teacher-alert-filter-row"></div>
           <div id="teacherAlertsList" class="teacher-alerts-list"></div>
         </section>
-
-        <div class="teacher-search-card">
-          <div>
-            <div class="section-label">Pesquisar aluno</div>
-            <div class="hint">Procura pelo nome completo ou parte do nome.</div>
-          </div>
-          <input id="teacherStudentSearch" class="teacher-search-input" type="search" placeholder="Escrever nome do aluno...">
-        </div>
-
-        <div id="teacherMetricsGrid" class="teacher-metrics-grid"></div>
 
         <div class="teacher-dashboard-grid">
           <section class="teacher-panel">
@@ -4629,12 +4874,15 @@ function getActiveStorageKey(){
 
 let state = loadState();
 let activeEvalId = null;
+let pendingEvaluationOpenClassId = null;
+let pendingEvaluationStudentFocus = null;
 let adminActiveEvalKey=null;
 let adminEvalFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
 let documentClassFilterId = null;
 let internalDocumentClassId = null;
 let studentDayFilters = new Set(['Segunda','Terça','Quarta','Quinta','Sexta','Sábado']);
 let evaluationDayFilters = new Set(['Segunda','Terça','Quarta','Quinta','Sexta','Sábado']);
+let evaluationCloudAutoLoadTried=false;
 let pendingStudentCopy = null;
 
 
@@ -4698,6 +4946,7 @@ function setCurrentUser(user){
     professorName=user.name;
     state=loadState();
     activeEvalId=null;
+    evaluationCloudAutoLoadTried=false;
     documentClassFilterId=null;
     internalDocumentClassId=null;
     adminTeacherStates=[];
@@ -4872,14 +5121,43 @@ window.addEventListener('scroll',updateEvaluationBackTopButton,{passive:true});
 window.addEventListener('resize',updateEvaluationBackTopButton);
 
 
-document.addEventListener('click',function(event){
-  const btn=event.target.closest?.('#evaluationBackTopBtn');
-  if(btn){
+
+function handleSearchResultOpenEvent(event){
+  const card=event.target.closest?.('[data-search-open-class]');
+  if(card){
     event.preventDefault();
     event.stopPropagation();
-    scrollEvaluationToTop();
+    openStudentEvaluationFromSearch(card.dataset.searchOpenClass, card.dataset.searchOpenIndex);
+    return false;
+  }
+}
+
+document.addEventListener('click',handleSearchResultOpenEvent,true);
+document.addEventListener('touchend',handleSearchResultOpenEvent,true);
+
+document.addEventListener('keydown',function(event){
+  const card=event.target.closest?.('[data-search-open-class]');
+  if(card && (event.key==='Enter' || event.key===' ')){
+    event.preventDefault();
+    event.stopPropagation();
+    openStudentEvaluationFromSearch(card.dataset.searchOpenClass, card.dataset.searchOpenIndex);
   }
 },true);
+
+
+
+try{
+  window.switchView=switchView;
+  window.renderEvaluationPage=renderEvaluationPage;
+  window.renderActiveEvaluation=renderActiveEvaluation;
+  window.syncClasses=syncClasses;
+  window.selectedClasses=selectedClasses;
+}catch(e){}
+
+
+setInterval(()=>{
+  try{ updateEvaluationBackTopButton(); }catch(e){}
+},700);
 
 setupCloudButtons();
         if(found.role==='admin'){
@@ -6557,8 +6835,11 @@ function updateEvaluationBackTopButton(){
   if(!btn || !evaluationView) return;
 
   const isEvaluationActive=evaluationView.classList.contains('active');
+  document.body.classList.toggle('evaluation-page-active', isEvaluationActive);
   btn.classList.toggle('visible', isEvaluationActive);
   btn.style.display=isEvaluationActive ? 'flex' : 'none';
+  btn.style.visibility=isEvaluationActive ? 'visible' : 'hidden';
+  btn.style.pointerEvents=isEvaluationActive ? 'auto' : 'none';
 }
 
 function scrollEvaluationToTop(){
@@ -7734,9 +8015,85 @@ function copyDay(){
 
 bindScheduleToolbarActions();
 
+
+function classFromSavedClassRecordId(id){
+  const raw=String(id||'');
+
+  const classMap=[
+    ['ama_1a','AMA 1A'],
+    ['ama_1b','AMA 1B'],
+    ['ama_2a','AMA 2A'],
+    ['ama_2b','AMA 2B'],
+    ['ama_3','AMA 3'],
+    ['nivel_1','Nível 1'],
+    ['nivel_2','Nível 2'],
+    ['nivel_3','Nível 3'],
+    ['n_1','Nível 1'],
+    ['n_2','Nível 2'],
+    ['n_3','Nível 3']
+  ];
+
+  const dayMap=[
+    ['segunda','Segunda'],
+    ['terca','Terça'],
+    ['terça','Terça'],
+    ['quarta','Quarta'],
+    ['quinta','Quinta'],
+    ['sexta','Sexta'],
+    ['sabado','Sábado'],
+    ['sábado','Sábado']
+  ];
+
+  const classEntry=classMap.find(([prefix])=>raw.startsWith(prefix+'_'));
+  const dayEntry=dayMap.find(([dayId])=>raw.includes('_'+dayId+'_'));
+
+  if(!classEntry || !dayEntry) return null;
+
+  const className=classEntry[1];
+  const day=dayEntry[1];
+  const dayToken=dayEntry[0];
+
+  const afterDay=raw.split('_'+dayToken+'_')[1] || '';
+  const nums=(afterDay.match(/\d+/g)||[]).map(n=>String(n).padStart(2,'0'));
+
+  let time='Horário não definido';
+  if(nums.length>=4){
+    time=`${nums[0]}:${nums[1]} - ${nums[2]}:${nums[3]}`;
+  }
+
+  return {
+    id:raw,
+    className,
+    displayName:`${className} — ${day}-feira — ${time}`,
+    isSaturday:day==='Sábado',
+    blocks:[{day,time}]
+  };
+}
+
+function fallbackClassesFromSavedData(){
+  const keys=[
+    ...Object.keys(state.classes || {}),
+    ...Object.keys(state.evaluations || {})
+  ];
+
+  const unique=[...new Set(keys)];
+  return unique
+    .map(classFromSavedClassRecordId)
+    .filter(Boolean)
+    .sort((a,b)=>{
+      const dayOrder={'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6,'Domingo':7};
+      const ab=a.blocks[0]||{}, bb=b.blocks[0]||{};
+      const d=(dayOrder[ab.day]||99)-(dayOrder[bb.day]||99);
+      if(d!==0) return d;
+      const t=String(ab.time||'').localeCompare(String(bb.time||''));
+      if(t!==0) return t;
+      return String(a.className||'').localeCompare(String(b.className||''),'pt-PT');
+    });
+}
+
 function selectedClasses(){
   const classes=[];
-  Object.entries(state.schedule).forEach(([key,val])=>{
+  Object.entries(state.schedule || {}).forEach(([key,val])=>{
     const names=slotClasses(val);
     if((!val.active && !names.length) || !names.length) return;
 
@@ -7754,15 +8111,23 @@ function selectedClasses(){
     });
   });
 
-  return classes.sort((a,b)=>{
+  const sorted=classes.sort((a,b)=>{
     const dayOrder={'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6,'Domingo':7};
     const ab=a.blocks[0]||{}, bb=b.blocks[0]||{};
     const d=(dayOrder[ab.day]||99)-(dayOrder[bb.day]||99);
     if(d!==0) return d;
     const t=String(ab.time||'').localeCompare(String(bb.time||''));
     if(t!==0) return t;
-    return String(a.className||'').localeCompare(String(b.className||''));
+    return String(a.className||'').localeCompare(String(b.className||''),'pt-PT');
   });
+
+  // Emergency fallback: if schedule is empty but class/student data exists,
+  // rebuild Avaliação class list from saved class records.
+  if(!sorted.length){
+    return fallbackClassesFromSavedData();
+  }
+
+  return sorted;
 }
 
 function syncClasses(){
@@ -8584,6 +8949,96 @@ function renderAdminActiveEvaluation(summary){
 }
 
 
+
+function resetEvaluationDayFilters(){
+  const all=selectedClasses();
+  const daysToShow=all.length
+    ? all.map(c=>c.blocks?.[0]?.day).filter(Boolean)
+    : ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+  evaluationDayFilters = new Set(daysToShow);
+
+  document.querySelectorAll('[data-eval-day-filter]').forEach(btn=>{
+    btn.classList.toggle('active', evaluationDayFilters.has(btn.dataset.evalDayFilter));
+  });
+
+  renderEvaluationPage();
+}
+
+
+function hasAnyTeacherDataForEvaluation(){
+  try{
+    return selectedClasses().length>0 ||
+      Object.keys(state.schedule||{}).length>0 ||
+      Object.keys(state.classes||{}).length>0 ||
+      Object.keys(state.evaluations||{}).length>0;
+  }catch(e){
+    return false;
+  }
+}
+
+function manualLoadEvaluationClassesFromCloud(){
+  const main=document.getElementById('evalMain');
+  const list=document.getElementById('evalClassList');
+
+  if(list){
+    list.innerHTML='<div class="hint">A carregar turmas da cloud...</div>';
+  }
+  if(main){
+    main.innerHTML='<div class="eval-hero"><h2>Avaliação</h2><p>A carregar dados da cloud...</p></div>';
+  }
+
+  Promise.resolve(loadFromCloud(true))
+    .then(()=>{
+      evaluationCloudAutoLoadTried=true;
+      syncClasses();
+      resetEvaluationDayFilters();
+      renderEvaluationPage();
+    })
+    .catch(err=>{
+      console.error(err);
+      if(main){
+        main.innerHTML='<div class="eval-hero"><h2>Avaliação</h2><p>Não consegui carregar a cloud. Usa o botão “Carregar cloud” no topo e volta à Avaliação.</p></div>';
+      }
+    });
+}
+
+window.manualLoadEvaluationClassesFromCloud=manualLoadEvaluationClassesFromCloud;
+
+function autoRecoverEvaluationClassesFromCloud(){
+  if(evaluationCloudAutoLoadTried) return false;
+  if(isAdminUser()) return false;
+  if(hasAnyTeacherDataForEvaluation()) return false;
+  if(typeof loadFromCloud!=='function') return false;
+
+  evaluationCloudAutoLoadTried=true;
+
+  const list=document.getElementById('evalClassList');
+  const main=document.getElementById('evalMain');
+
+  if(list){
+    list.innerHTML='<div class="hint">A carregar turmas da cloud automaticamente...</div>';
+  }
+  if(main){
+    main.innerHTML='<div class="eval-hero"><h2>Avaliação</h2><p>O ficheiro local está vazio. Vou tentar carregar os dados da cloud.</p></div>';
+  }
+
+  Promise.resolve(loadFromCloud(true))
+    .then(()=>{
+      syncClasses();
+      resetEvaluationDayFilters();
+      renderEvaluationPage();
+    })
+    .catch(err=>{
+      console.error('Auto cloud load failed',err);
+      if(main){
+        main.innerHTML='<div class="eval-hero"><h2>Avaliação</h2><p>Não consegui carregar automaticamente. Carrega em “Carregar cloud” no topo.</p></div>';
+      }
+    });
+
+  return true;
+}
+
 function renderEvaluationPage(){
   if(isAdminUser()){
     renderAdminEvaluationPage();
@@ -8591,24 +9046,47 @@ function renderEvaluationPage(){
   }
 
   syncClasses();
+
+  if(autoRecoverEvaluationClassesFromCloud()){
+    return;
+  }
+
   const allSelected=selectedClasses();
-  const selected=allSelected.filter(c=>{
+  let selected=allSelected.filter(c=>{
     const day=(c.blocks?.[0]?.day)||'';
     return evaluationDayFilters.has(day);
   });
+
+  // Safety: never let Avaliação appear empty just because filters got stale.
+  // If there are classes saved in Horário, but the active day filters hide them all,
+  // reset filters to the days that actually exist.
+  if(allSelected.length && !selected.length){
+    evaluationDayFilters = new Set(allSelected.map(c=>c.blocks?.[0]?.day).filter(Boolean));
+    selected=allSelected.filter(c=>{
+      const day=(c.blocks?.[0]?.day)||'';
+      return evaluationDayFilters.has(day);
+    });
+  }
+
   const list=document.getElementById('evalClassList');
+  if(!list) return;
   list.innerHTML='';
 
-  if(selected.length && (!activeEvalId || !selected.find(c=>c.id===activeEvalId))) activeEvalId=selected[0].id;
+  if(pendingEvaluationOpenClassId && selected.find(c=>c.id===pendingEvaluationOpenClassId)){
+    activeEvalId=pendingEvaluationOpenClassId;
+    pendingEvaluationOpenClassId=null;
+  }else if(selected.length && (!activeEvalId || !selected.find(c=>c.id===activeEvalId))){
+    activeEvalId=selected[0].id;
+  }
 
   if(!selected.length){
     activeEvalId=null;
     list.innerHTML = allSelected.length
-      ? '<div class="hint">Nenhuma turma visível com os filtros ativos.</div>'
+      ? '<div class="hint">Nenhuma turma visível. <button type="button" class="btn small ghost" onclick="resetEvaluationDayFilters()">Mostrar todas</button></div>'
       : '<div class="hint">Sem turmas guardadas.</div>';
     document.getElementById('evalMain').innerHTML = allSelected.length
-      ? '<div class="eval-hero"><h2>Avaliação</h2><p>Ativa mais dias nos filtros para veres as turmas.</p></div>'
-      : '<div class="eval-hero"><h2>Avaliação</h2><p>Vai primeiro ao Horário e guarda as turmas.</p></div>';
+      ? '<div class="eval-hero"><h2>Avaliação</h2><p>Carrega em “Mostrar todas” para repor os filtros.</p></div>'
+      : '<div class="eval-hero"><h2>Avaliação</h2><p>Não encontrei turmas guardadas neste ficheiro/local.</p><button type="button" class="btn primary" onclick="manualLoadEvaluationClassesFromCloud()">Carregar turmas da cloud</button></div>';
     return;
   }
   selected.forEach(c=>{
@@ -8617,13 +9095,14 @@ function renderEvaluationPage(){
     const isOpen=c.id===activeEvalId;
     const btn=document.createElement('button');
     btn.className='eval-class-btn eval-class-collapse '+(isOpen?'active open':'collapsed');
+    btn.dataset.evalOpenClass=c.id;
 
     const blockLines = c.blocks
       .map(b=>`${safe(c.className)} - ${safe(formatDayForClassBlock(b.day))} - ${safe(b.time)}`)
       .join('<br>');
 
     const studentLinks = (data.students||[])
-      .map((s,i)=>`<div class="eval-student-row">
+      .map((s,i)=>`<div class="eval-student-row" id="eval-sidebar-student-${safe(c.id)}-${i}">
         <button type="button" class="eval-student-jump" data-jump-class="${safe(c.id)}" data-jump-index="${i}">${safe(studentDisplayName(s,i))}</button>
         <button type="button" class="eval-student-copy" data-copy-class="${safe(c.id)}" data-copy-index="${i}">COPY</button>
         <button type="button" class="eval-student-remove" data-remove-class="${safe(c.id)}" data-remove-index="${i}">REMOVE</button>
@@ -9661,6 +10140,19 @@ function renderTeacherAlerts(summaries, metrics){
   `).join('');
 }
 
+
+function bindTeacherDashboardSearch(){
+  const input=document.getElementById('teacherStudentSearch');
+  if(!input) return;
+
+  if(!input.dataset.searchBound){
+    input.dataset.searchBound='true';
+    input.addEventListener('input',renderTeacherSearchResults);
+    input.addEventListener('keyup',renderTeacherSearchResults);
+    input.addEventListener('search',renderTeacherSearchResults);
+  }
+}
+
 function renderTeacherDashboard(){
   const metricsGrid=document.getElementById('teacherMetricsGrid');
   const searchResults=document.getElementById('teacherSearchResults');
@@ -9701,40 +10193,129 @@ function renderTeacherDashboard(){
   metricsGrid.innerHTML=metricCards.map(([label,value,sub])=>`<div class="teacher-metric-card"><div class="teacher-metric-label">${safe(label)}</div><div class="teacher-metric-value">${safe(value)}</div><div class="teacher-metric-sub">${safe(sub)}</div></div>`).join('');
 
   renderTeacherAlerts(summaries, metrics);
+  bindTeacherDashboardSearch();
   renderTeacherSearchResults();
   renderTeacherClassList(summaries);
   renderTeacherObjectiveInsights(summaries);
 }
 
-function renderTeacherSearchResults(){
-  const box=document.getElementById('teacherSearchResults');
-  const input=document.getElementById('teacherStudentSearch');
-  if(!box || !input) return;
 
-  const query=String(input.value||'').trim().toLowerCase();
+
+function openStudentEvaluationFromSearch(classId, studentIndex){
+  const targetClassId=String(classId||'');
+  if(!targetClassId) return false;
+
+  syncClasses();
+
+  const targetClass=selectedClasses().find(c=>String(c.id)===targetClassId);
+  if(!targetClass){
+    alert('Não consegui encontrar esta turma. Atualiza o dashboard e tenta novamente.');
+    return false;
+  }
+
+  const targetDay=targetClass.blocks?.[0]?.day || '';
+
+  // Make sure the class is not hidden by the day filter.
+  if(targetDay){
+    evaluationDayFilters=new Set([targetDay]);
+  }
+
+  activeEvalId=targetClassId;
+  pendingEvaluationOpenClassId=targetClassId;
+  pendingEvaluationStudentFocus=Number(studentIndex);
+
+  // Switch to evaluation and force the target class again after each render step.
+  switchView('evaluationView');
+
+  setTimeout(()=>{
+    activeEvalId=targetClassId;
+    pendingEvaluationOpenClassId=targetClassId;
+    renderEvaluationPage();
+
+    setTimeout(()=>{
+      activeEvalId=targetClassId;
+      renderActiveEvaluation();
+      focusStudentInEvaluation(pendingEvaluationStudentFocus);
+    },120);
+  },120);
+
+  return false;
+}
+
+window.openStudentEvaluationFromSearch=openStudentEvaluationFromSearch;
+
+function focusStudentInEvaluation(studentIndex){
+  const index=Number(studentIndex);
+  if(Number.isNaN(index)) return;
+
+  const classId=activeEvalId;
+  let target=null;
+
+  if(classId){
+    target=document.getElementById(`eval-student-${classId}-${index}`);
+  }
+
+  const evalMain=document.getElementById('evalMain');
+  if(!target && evalMain){
+    const selectors=[
+      `[data-student-index="${index}"]`,
+      `[data-eval-student-index="${index}"]`,
+      `[data-student-card="${index}"]`,
+      `[data-student="${index}"]`
+    ];
+
+    for(const selector of selectors){
+      target=evalMain.querySelector(selector) || document.querySelector(selector);
+      if(target) break;
+    }
+  }
+
+  // Fallback: find the matching jump button in the sidebar and use it as orientation.
+  if(!target && classId){
+    target=document.querySelector(`[data-jump-class="${CSS.escape(classId)}"][data-jump-index="${index}"]`);
+  }
+
+  if(target){
+    target.classList.add('evaluation-student-focus');
+    try{ target.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+    setTimeout(()=>target.classList.remove('evaluation-student-focus'),3500);
+  }else{
+    try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){}
+  }
+}
+
+
+function renderTeacherSearchResults(){
+  const lowerBox=document.getElementById('teacherSearchResults');
+  const quickBox=document.getElementById('teacherSearchQuickResults');
+  const input=document.getElementById('teacherStudentSearch');
+  if(!input) return;
+
+  const query=String(input.value||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const summaries=allTeacherClassSummaries();
   const matches=[];
 
   summaries.forEach(summary=>{
-    summary.rows.forEach(row=>{
-      if(!query || row.name.toLowerCase().includes(query)){
-        matches.push({summary,row});
+    summary.rows.forEach((row,rowIndex)=>{
+      const searchable=String(row.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if(query && searchable.includes(query)){
+        matches.push({summary,row:{...row,index:(row.index ?? row.studentIndex ?? rowIndex)}});
       }
     });
   });
 
-  if(!query){
-    box.innerHTML='<div class="teacher-empty">Escreve o nome de um aluno para pesquisar.</div>';
+  const emptyMessage = !query
+    ? '<div class="teacher-empty">Escreve o nome de um aluno para pesquisar.</div>'
+    : '<div class="teacher-empty">Nenhum aluno encontrado.</div>';
+
+  if(!query || !matches.length){
+    if(lowerBox) lowerBox.innerHTML=emptyMessage;
+    if(quickBox) quickBox.innerHTML=query ? emptyMessage : '';
     return;
   }
 
-  if(!matches.length){
-    box.innerHTML='<div class="teacher-empty">Nenhum aluno encontrado.</div>';
-    return;
-  }
-
-  box.innerHTML=matches.map(({summary,row})=>`
-    <article class="teacher-result-card">
+  const html=matches.map(({summary,row})=>`
+    <article class="teacher-result-card clickable" role="button" tabindex="0" data-search-open-class="${safe(summary.classInfo.id)}" data-search-open-index="${safe(row.index ?? row.studentIndex ?? 0)}" onclick="return openStudentEvaluationFromSearchHard(this.dataset.searchOpenClass,this.dataset.searchOpenIndex)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();return openStudentEvaluationFromSearch(this.dataset.searchOpenClass,this.dataset.searchOpenIndex)}">
       <div class="teacher-result-top">
         <div>
           <div class="teacher-result-name">${safe(row.name)}</div>
@@ -9747,10 +10328,18 @@ function renderTeacherSearchResults(){
       <div class="teacher-stage-line">
         ${row.stages.map(st=>`<span class="teacher-stage-badge">${safe(st.label)}: ${st.ok}/${st.total}</span>`).join('')}
       </div>
+      <button class="teacher-result-action btn small ghost" type="button" data-search-open-class="${safe(summary.classInfo.id)}" data-search-open-index="${safe(row.index ?? row.studentIndex ?? 0)}" onclick="event.stopPropagation();return openStudentEvaluationFromSearchHard(this.dataset.searchOpenClass,this.dataset.searchOpenIndex)">Abrir avaliação desta turma →</button>
     </article>
   `).join('');
-}
 
+  if(lowerBox) lowerBox.innerHTML=html;
+  if(quickBox) quickBox.innerHTML=html;
+
+  // Bring the immediate result area into view naturally, without forcing the user down the page.
+  if(quickBox){
+    quickBox.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
 
 function renderAdminClassNavigator(summaries, box){
   const grouped=new Map();
@@ -10968,6 +11557,139 @@ renderSchedule();
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindLogin);
   else bindLogin();
+})();
+</script>
+
+
+<script>
+/* Final search-result click guard: always active, even after saved-session login. */
+(function(){
+  function openFromCard(card, event){
+    if(!card) return false;
+    if(event){
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const classId=card.getAttribute('data-search-open-class');
+    const index=card.getAttribute('data-search-open-index') || '0';
+    if(typeof window.openStudentEvaluationFromSearch==='function'){
+      return window.openStudentEvaluationFromSearch(classId,index);
+    }
+    return false;
+  }
+
+  document.addEventListener('click',function(event){
+    const card=event.target.closest && event.target.closest('[data-search-open-class]');
+    if(card) openFromCard(card,event);
+  },true);
+
+  document.addEventListener('keydown',function(event){
+    const card=event.target.closest && event.target.closest('[data-search-open-class]');
+    if(card && (event.key==='Enter' || event.key===' ')) openFromCard(card,event);
+  },true);
+})();
+</script>
+
+
+<script>
+/* Search-to-evaluation hard fix */
+(function(){
+  function showSearchOpenStatus(message){
+    let box=document.getElementById('teacherSearchOpenStatus');
+    if(!box){
+      const quick=document.getElementById('teacherSearchQuickResults');
+      if(quick){
+        box=document.createElement('div');
+        box.id='teacherSearchOpenStatus';
+        box.className='teacher-empty';
+        quick.parentNode.insertBefore(box, quick);
+      }
+    }
+    if(box) box.textContent=message;
+  }
+
+  window.openStudentEvaluationFromSearchHard=function(classId,index){
+    classId=String(classId||'');
+    index=String(index||'0');
+    if(!classId){
+      showSearchOpenStatus('Erro: turma não encontrada no resultado.');
+      return false;
+    }
+
+    try{
+      sessionStorage.setItem('pending_eval_class_id',classId);
+      sessionStorage.setItem('pending_eval_student_index',index);
+    }catch(e){}
+
+    // Set globals when available.
+    try{ window.activeEvalId=classId; }catch(e){}
+    try{ window.pendingEvaluationOpenClassId=classId; }catch(e){}
+    try{ window.pendingEvaluationStudentFocus=Number(index); }catch(e){}
+
+    // Find class/day from current selectedClasses if possible and activate its day filter.
+    try{
+      if(typeof window.syncClasses==='function') window.syncClasses();
+      if(typeof window.selectedClasses==='function'){
+        const cls=window.selectedClasses().find(c=>String(c.id)===classId);
+        const day=cls && cls.blocks && cls.blocks[0] && cls.blocks[0].day;
+        if(day && window.evaluationDayFilters){
+          window.evaluationDayFilters = new Set([day]);
+        }
+      }
+    }catch(e){}
+
+    // Switch view using the real app function if possible.
+    let switched=false;
+    try{
+      if(typeof window.switchView==='function'){
+        window.switchView('evaluationView');
+        switched=true;
+      }
+    }catch(e){}
+
+    // DOM fallback: manually activate evaluation page and tab.
+    if(!switched){
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      const view=document.getElementById('evaluationView');
+      if(view) view.classList.add('active');
+      document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view==='evaluationView'));
+    }
+
+    // Render again and force class after page opens.
+    setTimeout(function(){
+      try{ window.activeEvalId=classId; }catch(e){}
+      try{ window.pendingEvaluationOpenClassId=classId; }catch(e){}
+      try{ if(typeof window.renderEvaluationPage==='function') window.renderEvaluationPage(); }catch(e){}
+
+      setTimeout(function(){
+        try{ window.activeEvalId=classId; }catch(e){}
+        try{ if(typeof window.renderActiveEvaluation==='function') window.renderActiveEvaluation(); }catch(e){}
+
+        const target=document.getElementById('eval-student-'+classId+'-'+index) ||
+          document.querySelector('[data-jump-class="'+CSS.escape(classId)+'"][data-jump-index="'+CSS.escape(index)+'"]');
+
+        if(target){
+          try{ target.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+          target.classList.add('evaluation-student-focus');
+          setTimeout(()=>target.classList.remove('evaluation-student-focus'),2500);
+        }else{
+          const evalView=document.getElementById('evaluationView');
+          if(evalView) try{ evalView.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+        }
+      },200);
+    },120);
+
+    return false;
+  };
+
+  document.addEventListener('click',function(event){
+    const el=event.target.closest && event.target.closest('[data-search-open-class]');
+    if(el){
+      event.preventDefault();
+      event.stopPropagation();
+      return window.openStudentEvaluationFromSearchHard(el.getAttribute('data-search-open-class'),el.getAttribute('data-search-open-index'));
+    }
+  },true);
 })();
 </script>
 
