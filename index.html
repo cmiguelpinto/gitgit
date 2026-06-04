@@ -5725,6 +5725,151 @@ function adminCentralRows(){
   });
 }
 
+
+function openAdminGeneratedDocumentWindow(title, contentHtml, printClass){
+  const styles=[...document.querySelectorAll('style')].map(s=>s.innerHTML).join('\n');
+  const popup=window.open('', '_blank');
+
+  const html=`<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${safe(title)}</title>
+<style>
+${styles}
+body{
+  background:#f3f4f6;
+  padding:24px;
+}
+.admin-generated-doc-actions{
+  position:sticky;
+  top:0;
+  z-index:50;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin:0 auto 14px;
+  max-width:1180px;
+}
+.admin-generated-doc-actions button{
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
+}
+.admin-generated-doc-actions .primary{
+  background:#d0001b;
+  color:#fff;
+}
+.admin-generated-doc-actions .secondary{
+  background:#111827;
+  color:#fff;
+}
+@media print{
+  body{background:#fff!important;padding:0!important}
+  .admin-generated-doc-actions{display:none!important}
+}
+</style>
+</head>
+<body class="${safe(printClass||'')}">
+  <div class="admin-generated-doc-actions">
+    <button class="secondary" onclick="window.close()">Fechar</button>
+    <button class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+  <main class="admin-generated-doc-content">
+    ${contentHtml}
+  </main>
+</body>
+</html>`;
+
+  if(popup){
+    popup.document.open();
+    popup.document.write(html);
+    popup.document.close();
+    popup.focus();
+  }else{
+    openAdminDrawer('Documento',title,`
+      <div class="admin-detail-card">
+        <div class="admin-detail-label">Pop-up bloqueado</div>
+        <div class="admin-detail-note">O navegador bloqueou a nova janela. Permite pop-ups para abrir o documento completo.</div>
+      </div>
+      <div>${contentHtml}</div>
+    `);
+  }
+}
+
+function captureAdminTeacherDocument(username,classId,type){
+  const teacher=(adminTeacherStates||[]).find(t=>t.username===username);
+  if(!teacher){
+    alert('Não encontrei os dados deste professor. Carrega a cloud primeiro.');
+    return;
+  }
+
+  const originalState=state;
+  const originalProfessorName=professorName;
+  const originalDocClass=documentClassFilterId;
+  const originalInternalClass=internalDocumentClassId;
+  const originalSaveState=saveState;
+
+  const previewId=type==='internal' ? 'internalDocumentPreview' : 'documentPreview';
+  const realPreview=document.getElementById(previewId);
+  const tempPreview=document.createElement('div');
+  tempPreview.id=previewId;
+  tempPreview.style.display='none';
+
+  try{
+    // Prevent accidental Admin local saves while rendering a teacher document.
+    saveState=function(){};
+
+    state=teacher.state;
+    professorName=teacher.name || teacher.professorName || username;
+
+    if(type==='internal'){
+      internalDocumentClassId=classId;
+    }else{
+      documentClassFilterId=classId;
+    }
+
+    if(realPreview) realPreview.id=`${previewId}_real_backup`;
+    document.body.appendChild(tempPreview);
+
+    if(type==='internal'){
+      renderInternalDocument();
+    }else{
+      renderDocument();
+    }
+
+    const content=tempPreview.innerHTML || '<div class="panel">Sem conteúdo para mostrar.</div>';
+    const title=type==='internal'
+      ? `Documento Interno · ${professorName}`
+      : `Relatório Evolução Época · ${professorName}`;
+
+    openAdminGeneratedDocumentWindow(title, content, type==='internal' ? 'print-internal' : 'print-final');
+  }catch(err){
+    console.error(err);
+    alert('Erro ao gerar documento Admin: '+(err.message || err));
+  }finally{
+    try{ tempPreview.remove(); }catch(e){}
+    if(realPreview) realPreview.id=previewId;
+
+    state=originalState;
+    professorName=originalProfessorName;
+    documentClassFilterId=originalDocClass;
+    internalDocumentClassId=originalInternalClass;
+    saveState=originalSaveState;
+  }
+}
+
+function openAdminTeacherEvolutionReport(username,classId){
+  captureAdminTeacherDocument(username,classId,'evolution');
+}
+
+function openAdminTeacherInternalDocument(username,classId){
+  captureAdminTeacherDocument(username,classId,'internal');
+}
+
 function renderAdminCentral(){
   const filtersBox=document.getElementById('adminCentralFilters');
   const summaryBox=document.getElementById('adminCentralSummary');
@@ -5849,6 +5994,8 @@ function renderAdminCentral(){
       <div class="admin-central-actions">
         <button class="btn small primary" type="button" onclick="openAdminClassWindow('${safe(r.username)}','${safe(r.className)}','${safe(days)}','${safe(time)}')">${safe(mainAction)}</button>
         <button class="btn small secondary" type="button" onclick="openAdminClassWindow('${safe(r.username)}','${safe(r.className)}','${safe(days)}','${safe(time)}')">Ficha completa</button>
+        <button class="btn small ghost" type="button" onclick="openAdminTeacherEvolutionReport('${safe(r.username)}','${safe(r.classInfo.id)}')">Relatório Evolução</button>
+        <button class="btn small ghost" type="button" onclick="openAdminTeacherInternalDocument('${safe(r.username)}','${safe(r.classInfo.id)}')">Documento Interno</button>
       </div>
     </article>`;
   }).join('') : '<div class="teacher-empty">Nenhuma turma corresponde aos filtros.</div>';
@@ -6051,6 +6198,8 @@ function getAdminClassDetails(username,className,daysString,time){
   const attendancePresent=records.reduce((acc,r)=>acc+(r.attendanceStats?.present||0),0);
   const attendancePercent=attendancePossible?Math.round((attendancePresent/attendancePossible)*100):0;
   const evaluationPercent=totalRows?Math.round((evaluated/totalRows)*100):0;
+
+  if(teacher && !teacher.username && username) teacher.username=username;
 
   return {
     teacher,
@@ -6392,6 +6541,8 @@ function adminClassDetailsDocumentHtml(details){
     <section class="body">
       <div class="actions">
         <button class="secondary" onclick="window.close()">Fechar</button>
+        <button class="secondary" onclick="window.opener && window.opener.openAdminTeacherEvolutionReport('${safe(details.teacher.username || details.teacher.user || details.teacher.name)}','${safe(details.records?.[0]?.id || '')}')">Relatório Evolução</button>
+        <button class="secondary" onclick="window.opener && window.opener.openAdminTeacherInternalDocument('${safe(details.teacher.username || details.teacher.user || details.teacher.name)}','${safe(details.records?.[0]?.id || '')}')">Documento Interno</button>
         <button class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
       </div>
 
