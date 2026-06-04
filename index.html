@@ -5633,6 +5633,219 @@ function openAdminTeacherDetails(username){
   `);
 }
 
+
+function getAdminClassStudentRows(details){
+  const map=new Map();
+
+  (details.records||[]).forEach(record=>{
+    (record.rows||[]).forEach(row=>{
+      const student=row.student || {};
+      const key=String(student.studentNumber || student.number || row.name || row.index).toLowerCase();
+
+      if(!map.has(key)){
+        map.set(key,{
+          name:row.name,
+          studentNumber:student.studentNumber || student.number || '',
+          statusText:row.statusText || 'Sem avaliação',
+          status:row.status || 'none',
+          percent:row.percent || 0,
+          stages:row.stages || [],
+          attendancePresent:0,
+          attendanceTotal:0,
+          attendancePercent:0,
+          records:[]
+        });
+      }
+
+      const item=map.get(key);
+      item.records.push({day:record.day,row});
+      item.attendancePresent += row.attendance?.present || 0;
+      item.attendanceTotal += row.attendance?.total || 0;
+
+      // Prefer the most advanced evaluation status if available.
+      if((row.percent||0) > (item.percent||0)){
+        item.statusText=row.statusText || item.statusText;
+        item.status=row.status || item.status;
+        item.percent=row.percent || item.percent;
+        item.stages=row.stages || item.stages;
+      }
+    });
+  });
+
+  return [...map.values()].map(item=>({
+    ...item,
+    attendancePercent:item.attendanceTotal ? Math.round((item.attendancePresent/item.attendanceTotal)*100) : 0
+  }));
+}
+
+function adminClassDetailsDocumentHtml(details){
+  const period=currentAttendancePeriod();
+  const monthName=new Date(period.year, period.monthIndex, 1).toLocaleDateString('pt-PT',{month:'long',year:'numeric'});
+  const dayLabel=details.days.map(d=>formatDayForClassBlock ? formatDayForClassBlock(d) : d).join(' + ');
+  const rows=getAdminClassStudentRows(details);
+
+  const studentsHtml=rows.map(student=>{
+    const statusClass=student.status==='transita'?'ok':student.status==='fica'?'warn':student.status==='none'?'none':'progress';
+    const stages=(student.stages||[]).map(stage=>`
+      <span class="stage-pill">${safe(stage.label)} ${stage.ok}/${stage.total}</span>
+    `).join('');
+
+    return `<tr>
+      <td>
+        <strong>${safe(student.name)}</strong>
+        ${student.studentNumber?`<div class="muted">Nº ${safe(student.studentNumber)}</div>`:''}
+      </td>
+      <td>
+        <span class="status ${statusClass}">${safe(student.statusText)}</span>
+      </td>
+      <td>
+        <strong>${student.percent}%</strong>
+        <div class="bar"><span style="width:${Math.max(0,Math.min(100,student.percent))}%"></span></div>
+      </td>
+      <td>
+        <strong>${student.attendancePresent}/${student.attendanceTotal}</strong>
+        <div class="muted">${student.attendancePercent}% em ${safe(monthName)}</div>
+      </td>
+      <td>${stages || '<span class="muted">Sem etapas preenchidas</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  const capacityClass=details.totalStudents>CLASS_CAPACITY_REFERENCE?'danger':'';
+  const html=`<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${safe(details.className)} · ${safe(dayLabel)} · ${safe(details.time)}</title>
+<style>
+  :root{--red:#d0001b;--dark:#111827;--muted:#6b7280;--line:#e5e7eb}
+  *{box-sizing:border-box}
+  body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;color:var(--dark);margin:0;padding:24px}
+  .page{max-width:1200px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 18px 46px rgba(15,23,42,.12)}
+  .banner{background:linear-gradient(135deg,#b40018,var(--red));color:#fff;padding:24px 28px;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+  .kicker{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:7px 11px;display:inline-block}
+  h1{margin:12px 0 0;font-size:30px;letter-spacing:-.04em;line-height:1}
+  .sub{margin-top:8px;font-size:14px;opacity:.92;line-height:1.35}
+  .logo{min-width:150px;display:flex;justify-content:flex-end;align-items:flex-start}
+  .logo img{width:150px;max-height:96px;object-fit:contain;display:block}
+  .body{padding:24px 28px 30px}
+  .actions{display:flex;gap:8px;justify-content:flex-end;margin-bottom:14px;flex-wrap:wrap}
+  button{border:0;border-radius:999px;padding:10px 14px;font-weight:900;cursor:pointer}
+  .primary{background:var(--red);color:#fff}
+  .secondary{background:#111827;color:#fff}
+  .meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+  .card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:13px 14px}
+  .label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .value{margin-top:5px;font-size:22px;font-weight:950;color:var(--dark)}
+  .value.danger{color:#991b1b}
+  .note{margin:12px 0;color:var(--muted);font-size:12px;font-weight:750;line-height:1.45}
+  table{width:100%;border-collapse:collapse;border:1px solid var(--line)}
+  th,td{border:1px solid var(--line);padding:10px 9px;font-size:12px;vertical-align:top;text-align:left}
+  th{background:#f9fafb;font-weight:950;color:#374151}
+  .muted{color:var(--muted);font-size:11px;font-weight:800;margin-top:3px}
+  .status{display:inline-flex;border-radius:999px;padding:6px 8px;font-size:10px;font-weight:950;border:1px solid var(--line);background:#f9fafb}
+  .status.ok{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+  .status.warn{background:#fef3c7;color:#92400e;border-color:#fde68a}
+  .status.none{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+  .status.progress{background:#e0f2fe;color:#075985;border-color:#bae6fd}
+  .bar{height:8px;background:#edf0f3;border-radius:999px;margin-top:7px;overflow:hidden}
+  .bar span{display:block;height:100%;background:linear-gradient(90deg,#d0001b,#f43f5e);border-radius:999px}
+  .stage-pill{display:inline-flex;margin:2px;border-radius:999px;padding:5px 7px;background:#f9fafb;border:1px solid #edf0f3;font-size:10px;font-weight:900;color:#374151}
+  @media(max-width:900px){body{padding:12px}.banner{display:block}.logo{justify-content:flex-start;margin-top:15px}.meta{grid-template-columns:1fr 1fr}.page{border-radius:16px;overflow:auto}table{min-width:900px}}
+  @media print{@page{size:A4 landscape;margin:10mm}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.actions{display:none!important}body{background:#fff;padding:0}.page{box-shadow:none;border:0;border-radius:0}.banner{break-inside:avoid}}
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="banner">
+      <div>
+        <div class="kicker">Ficha de Turma · Admin</div>
+        <h1>${safe(details.className)}</h1>
+        <div class="sub">${safe(dayLabel)} · ${safe(details.time)}<br>Professor: ${safe(details.teacher.name)} · Atualizado: ${safe(new Date().toLocaleString('pt-PT'))}</div>
+      </div>
+      <div class="logo"><img src="${reportLogoDataUrl}" alt="Complexo de Piscinas"></div>
+    </section>
+    <section class="body">
+      <div class="actions">
+        <button class="secondary" onclick="window.close()">Fechar</button>
+        <button class="primary" onclick="window.print()">Imprimir / Guardar PDF</button>
+      </div>
+
+      <div class="meta">
+        <div class="card"><div class="label">Alunos</div><div class="value ${capacityClass}">${details.totalStudents}/${CLASS_CAPACITY_REFERENCE}</div></div>
+        <div class="card"><div class="label">Avaliação</div><div class="value">${details.evaluationPercent}%</div></div>
+        <div class="card"><div class="label">Presenças mês</div><div class="value">${details.attendancePercent}%</div></div>
+        <div class="card"><div class="label">Registos</div><div class="value">${details.attendancePresent}/${details.attendancePossible}</div></div>
+      </div>
+
+      <div class="note">
+        Esta ficha junta os dados da turma selecionada no Horário do Admin. Se a turma estiver em par semanal, mostra os dados dos dias presentes no bloco selecionado.
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Estado da avaliação</th>
+            <th>% Avaliação</th>
+            <th>Presenças</th>
+            <th>Etapas</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${studentsHtml || '<tr><td colspan="5">Sem alunos definidos nesta turma.</td></tr>'}
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>`;
+
+  return html;
+}
+
+function openAdminClassWindow(username,className,daysString,time){
+  const details=getAdminClassDetails(username,className,daysString,time);
+  if(!details) return;
+
+  const html=adminClassDetailsDocumentHtml(details);
+  const popup=window.open('', '_blank');
+
+  if(popup){
+    popup.document.open();
+    popup.document.write(html);
+    popup.document.close();
+    popup.focus();
+    return;
+  }
+
+  // Fallback: if popups are blocked, show inside the existing drawer.
+  const rows=getAdminClassStudentRows(details);
+  const rowsHtml=rows.map(s=>`
+    <div class="admin-student-item">
+      <span>${safe(s.name)}<br><small>${safe(s.statusText)} · Aval. ${s.percent}% · Pres. ${s.attendancePresent}/${s.attendanceTotal}</small></span>
+      <strong>${s.attendancePercent}%</strong>
+    </div>
+  `).join('');
+
+  openAdminDrawer('Turma',`${details.className} · ${details.time}`,`
+    <div class="admin-detail-card">
+      <div class="admin-detail-label">Pop-up bloqueado</div>
+      <div class="admin-detail-note">O navegador bloqueou a nova janela. Permite pop-ups para abrir a ficha completa.</div>
+    </div>
+    <div class="admin-detail-grid">
+      <div class="admin-detail-card"><div class="admin-detail-label">Alunos</div><div class="admin-detail-value">${details.totalStudents}/${CLASS_CAPACITY_REFERENCE}</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Avaliação</div><div class="admin-detail-value">${details.evaluationPercent}%</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Presenças</div><div class="admin-detail-value">${details.attendancePercent}%</div></div>
+      <div class="admin-detail-card"><div class="admin-detail-label">Registos</div><div class="admin-detail-value">${details.attendancePresent}/${details.attendancePossible}</div></div>
+    </div>
+    <div class="admin-detail-card">
+      <div class="admin-detail-label">Alunos</div>
+      <div class="admin-student-list" style="margin-top:10px">${rowsHtml || '<div class="admin-detail-note">Sem alunos definidos.</div>'}</div>
+    </div>
+  `);
+}
+
 function openAdminClassDetails(username,className,daysString,time){
   const details=getAdminClassDetails(username,className,daysString,time);
   if(!details) return;
@@ -5685,7 +5898,7 @@ function bindAdminScheduleDetails(){
     btn.dataset.detailBound='true';
     btn.addEventListener('click',event=>{
       event.stopPropagation();
-      openAdminClassDetails(btn.dataset.adminTeacher,btn.dataset.adminClass,btn.dataset.adminDays,btn.dataset.adminTime);
+      openAdminClassWindow(btn.dataset.adminTeacher,btn.dataset.adminClass,btn.dataset.adminDays,btn.dataset.adminTime);
     });
   });
 
