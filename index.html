@@ -3777,6 +3777,13 @@
       .admin-central-filters{grid-template-columns:1fr;}
     }
 
+
+    /* Admin-only tab visibility */
+    body.admin-user .tabs .tab[data-view="studentsView"],
+    body.admin-user .tabs .tab[data-view="attendanceView"]{
+      display:none!important;
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -4077,7 +4084,7 @@
           <div class="hint">Documento de trabalho para avaliação interna da turma selecionada.</div>
         </div>
         <div class="toolbar-actions">
-          <button class="btn primary" id="printInternalDocBtn">Imprimir / Guardar PDF</button>
+          <button class="btn primary" id="printInternalDocBtn" type="button" onclick="openTeacherGeneratedDocumentWindow('internal')">Imprimir / Guardar PDF</button>
           <button class="btn ghost" id="refreshInternalDocBtn">Atualizar documento</button>
         </div>
       </div>
@@ -4085,7 +4092,7 @@
     </section>
 
     <section id="documentView" class="view">
-      <div class="panel toolbar"><div><div class="section-label">Documento / prévia rudimentar</div><div class="hint">Ainda é uma versão simples para validarmos a lógica antes de desenhar o documento final.</div></div><div class="toolbar-actions"><button class="btn primary" id="printPdfBtn">Imprimir / Guardar PDF</button><button class="btn ghost" id="refreshDocBtn">Atualizar prévia</button><button class="btn ghost" id="showAllReportsBtn">Mostrar todas as turmas</button><span class="hint">Na janela de impressão, escolhe “Guardar como PDF” em A4 vertical.</span></div></div>
+      <div class="panel toolbar"><div><div class="section-label">Documento / prévia rudimentar</div><div class="hint">Ainda é uma versão simples para validarmos a lógica antes de desenhar o documento final.</div></div><div class="toolbar-actions"><button class="btn primary" id="printPdfBtn" type="button" onclick="openTeacherGeneratedDocumentWindow('final')">Imprimir / Guardar PDF</button><button class="btn ghost" id="refreshDocBtn">Atualizar prévia</button><button class="btn ghost" id="showAllReportsBtn">Mostrar todas as turmas</button><span class="hint">Na janela de impressão, escolhe “Guardar como PDF” em A4 vertical.</span></div></div>
       <article class="doc-card" id="documentPreview"></article>
     </section>
 
@@ -4302,6 +4309,13 @@ function updateCurrentUserBadge(){
   if(badge){ const u=currentLoggedUser?.(); badge.textContent=(u?.role==='admin') ? 'Admin' : `Professor: ${professorName}`; }
 }
 
+
+function updateRoleVisibility(){
+  const user=currentLoggedUser?.();
+  document.body.classList.toggle('admin-user', user?.role==='admin');
+  document.body.classList.toggle('teacher-user', !!user && user.role!=='admin');
+}
+
 function setLoginVisible(isVisible){
   const loginScreen=document.getElementById('loginScreen');
   if(loginScreen){
@@ -4311,6 +4325,7 @@ function setLoginVisible(isVisible){
   }
   document.body.classList.toggle('login-locked', isVisible);
   updateCurrentUserBadge();
+  updateRoleVisibility();
 }
 
 function checkLoginSession(){
@@ -6042,6 +6057,11 @@ function bindAdminCentralControls(){
 }
 
 function switchView(id){
+  const currentUser=currentLoggedUser?.();
+  if(currentUser?.role==='admin' && (id==='studentsView' || id==='attendanceView')){
+    id='adminCentralView';
+  }
+
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const view=document.getElementById(id);
   if(view) view.classList.add('active');
@@ -9482,6 +9502,144 @@ if(showAllReportsBtn){
 }
 
 
+
+function openTeacherGeneratedDocumentWindow(type){
+  try{
+    const isInternal = type === 'internal';
+    const previewId = isInternal ? 'internalDocumentPreview' : 'documentPreview';
+    const title = isInternal ? 'Documento Interno' : 'Relatório Evolução Época';
+    const bodyClass = isInternal ? 'print-internal' : 'print-final';
+
+    if(isInternal){
+      renderInternalDocument();
+    }else{
+      renderDocument();
+    }
+
+    const preview=document.getElementById(previewId);
+    const content=preview?.innerHTML || '';
+
+    if(!content.trim()){
+      alert('Ainda não existe documento para imprimir. Atualiza o documento primeiro.');
+      return;
+    }
+
+    const styles=[...document.querySelectorAll('style')].map(s=>s.innerHTML).join('\n');
+    const popup=window.open('', '_blank');
+
+    const html=`<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${safe(title)}</title>
+<style>
+${styles}
+body{
+  background:#f3f4f6;
+  padding:24px;
+}
+.teacher-print-actions{
+  position:sticky;
+  top:0;
+  z-index:9999;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  max-width:1180px;
+  margin:0 auto 14px;
+}
+.teacher-print-actions button{
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
+  font-family:Arial,Helvetica,sans-serif;
+}
+.teacher-print-actions .primary{
+  background:#d0001b;
+  color:#fff;
+}
+.teacher-print-actions .secondary{
+  background:#111827;
+  color:#fff;
+}
+.teacher-print-content{
+  max-width:1180px;
+  margin:0 auto;
+}
+.teacher-print-content .doc-card{
+  box-shadow:none;
+}
+@media print{
+  @page{size:A4 portrait;margin:8mm}
+  body{
+    background:#fff!important;
+    padding:0!important;
+    margin:0!important;
+  }
+  .teacher-print-actions{
+    display:none!important;
+  }
+  .teacher-print-content{
+    max-width:none!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  .final-doc-page,
+  .internal-doc-page{
+    box-shadow:none!important;
+    page-break-after:always;
+    break-after:page;
+  }
+  .final-doc-page:last-child,
+  .internal-doc-page:last-child{
+    page-break-after:auto;
+    break-after:auto;
+  }
+}
+</style>
+</head>
+<body class="${safe(bodyClass)}">
+  <div class="teacher-print-actions">
+    <button class="secondary" onclick="window.close()">Fechar</button>
+    <button class="primary" onclick="printTeacherDocumentStable()">Imprimir / Guardar PDF</button>
+  </div>
+  <main class="teacher-print-content">
+    ${content}
+  </main>
+<script>
+function printTeacherDocumentStable(){
+  const imgs=[...document.images];
+  Promise.all(imgs.map(img=>{
+    if(img.complete) return Promise.resolve();
+    return new Promise(resolve=>{
+      img.onload=resolve;
+      img.onerror=resolve;
+    });
+  })).then(()=>setTimeout(()=>window.print(),150));
+}
+<\/script>
+</body>
+</html>`;
+
+    if(popup){
+      popup.document.open();
+      popup.document.write(html);
+      popup.document.close();
+      popup.focus();
+      return;
+    }
+
+    // Fallback if pop-up is blocked.
+    printWithMode(isInternal ? 'print-internal' : 'print-final');
+  }catch(err){
+    console.error(err);
+    alert('Erro ao gerar PDF: '+(err.message || err));
+  }
+}
+
 function clearPrintMode(){
   document.body.classList.remove('print-final','print-internal');
 }
@@ -9494,10 +9652,9 @@ window.addEventListener('afterprint',clearPrintMode);
 
 const printPdfBtn=document.getElementById('printPdfBtn');
 if(printPdfBtn){
-  printPdfBtn.addEventListener('click',()=>{
-    renderDocument();
-    switchView('documentView');
-    printWithMode('print-final');
+  printPdfBtn.addEventListener('click',(event)=>{
+    event.preventDefault();
+    openTeacherGeneratedDocumentWindow('final');
   });
 }
 
@@ -9536,10 +9693,9 @@ if(refreshInternalDocBtn){
 
 const printInternalDocBtn=document.getElementById('printInternalDocBtn');
 if(printInternalDocBtn){
-  printInternalDocBtn.addEventListener('click',()=>{
-    renderInternalDocument();
-    switchView('internalDocumentView');
-    printWithMode('print-internal');
+  printInternalDocBtn.addEventListener('click',(event)=>{
+    event.preventDefault();
+    openTeacherGeneratedDocumentWindow('internal');
   });
 }
 
