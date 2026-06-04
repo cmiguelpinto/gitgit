@@ -4103,6 +4103,62 @@
       font-family:inherit;
     }
 
+
+    /* Floating circular button only for Avaliação */
+    .evaluation-back-top{
+      position:fixed;
+      left:24px;
+      bottom:24px;
+      z-index:99999;
+      width:54px;
+      height:54px;
+      border:0;
+      border-radius:999px;
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:#fff;
+      font-family:inherit;
+      font-size:28px;
+      line-height:1;
+      font-weight:950;
+      box-shadow:0 18px 38px rgba(208,0,27,.34);
+      cursor:pointer;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      opacity:.96;
+      transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+    .evaluation-back-top.visible{
+      display:flex!important;
+    }
+    .evaluation-back-top:hover{
+      transform:translateY(-3px);
+      opacity:1;
+      box-shadow:0 22px 44px rgba(208,0,27,.42);
+    }
+    @media(max-width:700px){
+      .evaluation-back-top{
+        left:16px;
+        bottom:16px;
+        width:50px;
+        height:50px;
+        font-size:26px;
+      }
+    }
+
+
+    .evaluation-back-top{
+      left:24px!important;
+      right:auto!important;
+    }
+    @media(max-width:700px){
+      .evaluation-back-top{
+        left:16px!important;
+        right:auto!important;
+      }
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -4470,6 +4526,8 @@ document.documentElement.classList.add('teacher-user');
 
 </main>
 
+<button id="evaluationBackTopBtn" class="evaluation-back-top" type="button" aria-label="Voltar ao topo da avaliação" title="Voltar ao topo" onclick="scrollEvaluationToTop()">↑</button>
+
 <script>
 const days = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 const weekdayTimes = ['16:45 - 17:30','17:30 - 18:15','18:15 - 19:00','19:00 - 19:45','19:45 - 20:30'];
@@ -4805,7 +4863,25 @@ function attemptLogin(){
 
     setTimeout(()=>{
       try{
-        setupCloudButtons();
+        
+const evaluationBackTopBtn=document.getElementById('evaluationBackTopBtn');
+if(evaluationBackTopBtn){
+  evaluationBackTopBtn.addEventListener('click',scrollEvaluationToTop);
+}
+window.addEventListener('scroll',updateEvaluationBackTopButton,{passive:true});
+window.addEventListener('resize',updateEvaluationBackTopButton);
+
+
+document.addEventListener('click',function(event){
+  const btn=event.target.closest?.('#evaluationBackTopBtn');
+  if(btn){
+    event.preventDefault();
+    event.stopPropagation();
+    scrollEvaluationToTop();
+  }
+},true);
+
+setupCloudButtons();
         if(found.role==='admin'){
           switchView('teacherDashboardView');
           loadFromCloud(false).catch(err=>console.error('Admin cloud load failed', err));
@@ -6474,6 +6550,72 @@ function forceCloseAdminDrawerForTeachers(){
   if(body) body.innerHTML='';
 }
 
+
+function updateEvaluationBackTopButton(){
+  const btn=document.getElementById('evaluationBackTopBtn');
+  const evaluationView=document.getElementById('evaluationView');
+  if(!btn || !evaluationView) return;
+
+  const isEvaluationActive=evaluationView.classList.contains('active');
+  btn.classList.toggle('visible', isEvaluationActive);
+  btn.style.display=isEvaluationActive ? 'flex' : 'none';
+}
+
+function scrollEvaluationToTop(){
+  const evaluationView=document.getElementById('evaluationView');
+  const targets=[
+    window,
+    document.documentElement,
+    document.body,
+    evaluationView,
+    document.getElementById('evalMain'),
+    document.querySelector('#evaluationView .evaluation-shell'),
+    document.querySelector('#evaluationView .eval-main'),
+    document.querySelector('#evaluationView .eval-card')
+  ].filter(Boolean);
+
+  // Add every scrollable element inside evaluation view.
+  if(evaluationView){
+    evaluationView.querySelectorAll('*').forEach(el=>{
+      try{
+        const style=window.getComputedStyle(el);
+        const canScroll=(el.scrollHeight > el.clientHeight + 8) &&
+          ['auto','scroll','overlay'].includes(style.overflowY);
+        if(canScroll) targets.push(el);
+      }catch(e){}
+    });
+  }
+
+  // Scroll all possible containers. This is intentional because different browsers/layouts
+  // may use the body, page, evalMain, or an internal panel as the scroll container.
+  [...new Set(targets)].forEach(target=>{
+    try{
+      if(target===window){
+        target.scrollTo({top:0,left:0,behavior:'smooth'});
+      }else if(typeof target.scrollTo==='function'){
+        target.scrollTo({top:0,left:0,behavior:'smooth'});
+        target.scrollTop=0;
+      }else{
+        target.scrollTop=0;
+      }
+    }catch(e){
+      try{ target.scrollTop=0; }catch(_e){}
+    }
+  });
+
+  // Fallback with anchor-like jump after smooth scroll starts.
+  setTimeout(()=>{
+    try{ window.scrollTo(0,0); }catch(e){}
+    try{ document.documentElement.scrollTop=0; }catch(e){}
+    try{ document.body.scrollTop=0; }catch(e){}
+    [...new Set(targets)].forEach(target=>{
+      try{ if(target!==window) target.scrollTop=0; }catch(e){}
+    });
+  },80);
+
+  setTimeout(updateEvaluationBackTopButton,250);
+}
+
 function switchView(id){
   const currentUser=currentLoggedUser?.();
   if(currentUser?.role==='admin' && (id==='studentsView' || id==='attendanceView')){
@@ -6497,6 +6639,7 @@ function switchView(id){
   if(id==='internalDocumentView') renderInternalDocument();
   if(id==='teacherDashboardView') renderTeacherDashboard();
   if(id==='adminCentralView') renderAdminCentral();
+  setTimeout(updateEvaluationBackTopButton, 50);
 }
 document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
   if(btn.dataset.view==='documentView') documentClassFilterId=null;
