@@ -9209,27 +9209,33 @@ function deleteTeacherNotice(noticeId){
   showTeacherNoticeStatus('Aviso apagado.', 'ok');
 }
 
-function publishTeacherNotice(){
+function publishTeacherNotice(sourceButton=null){
   if(!isAdminUser()){
     showTeacherNoticeStatus('Apenas o Admin pode publicar avisos.', 'err');
-    return;
+    return false;
   }
 
-  const root=activeNewsContainer();
-  const title=root.querySelector('#noticeTitle')?.value.trim();
-  const category=root.querySelector('#noticeCategory')?.value || 'Geral';
-  const priority=root.querySelector('#noticePriority')?.value || 'normal';
-  const date=root.querySelector('#noticeDate')?.value || '';
-  const message=root.querySelector('#noticeMessage')?.value.trim();
+  const form=sourceButton?.closest?.('.teacher-news-form') || activeNewsContainer()?.querySelector('.teacher-news-form') || document.querySelector('.teacher-news-form');
+
+  if(!form){
+    alert('Não encontrei o formulário de aviso. Atualiza a página e tenta novamente.');
+    return false;
+  }
+
+  const title=form.querySelector('#noticeTitle, [name="noticeTitle"]')?.value.trim();
+  const category=form.querySelector('#noticeCategory, [name="noticeCategory"]')?.value || 'Geral';
+  const priority=form.querySelector('#noticePriority, [name="noticePriority"]')?.value || 'normal';
+  const date=form.querySelector('#noticeDate, [name="noticeDate"]')?.value || '';
+  const message=form.querySelector('#noticeMessage, [name="noticeMessage"]')?.value.trim();
 
   if(!title || !message){
     showTeacherNoticeStatus('Preenche pelo menos o título e a mensagem.', 'err');
-    return;
+    return false;
   }
 
   const notices=loadTeacherNotices();
-  notices.unshift({
-    id:`notice_${Date.now()}`,
+  const newNotice={
+    id:`notice_${Date.now()}_${Math.random().toString(16).slice(2)}`,
     title,
     category,
     priority,
@@ -9237,17 +9243,25 @@ function publishTeacherNotice(){
     message,
     createdAt:new Date().toISOString(),
     author:professorName || 'Admin'
-  });
+  };
 
+  notices.unshift(newNotice);
   saveTeacherNotices(notices);
 
   ['noticeTitle','noticeDate','noticeMessage'].forEach(id=>{
-    const el=root.querySelector(`#${id}`);
+    const el=form.querySelector(`#${id}, [name="${id}"]`);
     if(el) el.value='';
   });
 
+  const cat=form.querySelector('#noticeCategory, [name="noticeCategory"]');
+  const pri=form.querySelector('#noticePriority, [name="noticePriority"]');
+  if(cat) cat.value='Geral';
+  if(pri) pri.value='normal';
+
   renderTeacherNotices();
-  showTeacherNoticeStatus('Aviso publicado. Os professores verão este aviso na Área do Professor.', 'ok');
+  showTeacherNoticeStatus(`Aviso publicado: "${title}".`, 'ok');
+
+  return false;
 }
 
 function renderTeacherNotices(){
@@ -9262,8 +9276,8 @@ function renderTeacherNotices(){
   if(isAdminUser()){
     composer.innerHTML=`
       <div class="teacher-news-form">
-        <input id="noticeTitle" type="text" placeholder="Título do aviso">
-        <select id="noticeCategory">
+        <input id="noticeTitle" name="noticeTitle" type="text" placeholder="Título do aviso">
+        <select id="noticeCategory" name="noticeCategory">
           <option>Geral</option>
           <option>Semana especial</option>
           <option>Reunião</option>
@@ -9271,15 +9285,15 @@ function renderTeacherNotices(){
           <option>Competição</option>
           <option>Formação</option>
         </select>
-        <select id="noticePriority">
+        <select id="noticePriority" name="noticePriority">
           <option value="normal">Normal</option>
           <option value="important">Importante</option>
           <option value="urgent">Urgente</option>
         </select>
-        <input id="noticeDate" type="date">
-        <textarea id="noticeMessage" placeholder="Mensagem para os professores..."></textarea>
+        <input id="noticeDate" name="noticeDate" type="date">
+        <textarea id="noticeMessage" name="noticeMessage" placeholder="Mensagem para os professores..."></textarea>
         <div class="teacher-news-form-actions">
-          <button class="btn primary" type="button" onclick="publishTeacherNotice()">Publicar aviso</button>
+          <button class="btn primary" type="button" data-publish-notice="true">Publicar aviso</button>
         </div>
         <div id="teacherNewsStatus" class="teacher-news-status"></div>
       </div>
@@ -10509,6 +10523,18 @@ function clearChecksGlobalHandler(event){
 document.addEventListener('click',clearChecksGlobalHandler);
 
 
+
+
+function teacherNoticeGlobalHandler(event){
+  const publishBtn=event.target.closest('[data-publish-notice]');
+  if(publishBtn){
+    event.preventDefault();
+    event.stopPropagation();
+    publishTeacherNotice(publishBtn);
+    return;
+  }
+}
+document.addEventListener('click', teacherNoticeGlobalHandler);
 
 const refreshTeacherNewsBtn=document.getElementById('refreshTeacherNewsBtn');
 if(refreshTeacherNewsBtn){
