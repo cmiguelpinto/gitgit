@@ -3790,7 +3790,25 @@
       display:none!important;
     }
 
+
+    /* Strong Admin Central visibility control */
+    html.teacher-user .tabs .tab[data-view="adminCentralView"],
+    body.teacher-user .tabs .tab[data-view="adminCentralView"],
+    html:not(.admin-user) .tabs .tab[data-view="adminCentralView"],
+    body:not(.admin-user) .tabs .tab[data-view="adminCentralView"]{
+      display:none!important;
+    }
+    html.admin-user .tabs .tab[data-view="adminCentralView"],
+    body.admin-user .tabs .tab[data-view="adminCentralView"]{
+      display:inline-flex!important;
+    }
+
 </style>
+<script>
+document.documentElement.classList.remove('admin-user');
+document.documentElement.classList.add('teacher-user');
+</script>
+
 </head>
 <body class="login-locked">
 
@@ -4318,8 +4336,13 @@ function updateCurrentUserBadge(){
 
 function updateRoleVisibility(){
   const user=currentLoggedUser?.();
-  document.body.classList.toggle('admin-user', user?.role==='admin');
-  document.body.classList.toggle('teacher-user', !!user && user.role!=='admin');
+  const isAdmin=user?.role==='admin';
+  const isTeacher=!!user && user.role!=='admin';
+
+  document.body.classList.toggle('admin-user', isAdmin);
+  document.body.classList.toggle('teacher-user', isTeacher);
+  document.documentElement.classList.toggle('admin-user', isAdmin);
+  document.documentElement.classList.toggle('teacher-user', isTeacher);
 }
 
 function setLoginVisible(isVisible){
