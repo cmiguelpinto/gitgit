@@ -4041,6 +4041,55 @@
       letter-spacing:.04em;
     }
 
+
+    .teacher-news-status{
+      border-radius:14px;
+      padding:9px 10px;
+      font-size:12px;
+      font-weight:900;
+      margin-top:8px;
+      display:none;
+    }
+    .teacher-news-status.ok{
+      display:block;
+      background:#dcfce7;
+      border:1px solid #bbf7d0;
+      color:#166534;
+    }
+    .teacher-news-status.err{
+      display:block;
+      background:#fee2e2;
+      border:1px solid #fecaca;
+      color:#991b1b;
+    }
+    .teacher-alert-filter-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .teacher-alert-filter-btn{
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:11px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+    }
+    .teacher-alert-filter-btn.active{
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 8px 16px rgba(208,0,27,.14);
+    }
+    .teacher-alerts-list{
+      max-height:520px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -4313,9 +4362,10 @@ document.documentElement.classList.add('teacher-user');
           <div class="teacher-news-head">
             <div>
               <div class="section-label">Alertas do Professor</div>
-              <div class="hint">Problemas e avisos rápidos: turmas acima de 10, avaliações por preencher e presenças baixas.</div>
+              <div class="hint">Filtra os alertas por avaliações em falta, turmas acima da referência e presenças baixas.</div>
             </div>
           </div>
+          <div id="teacherAlertFilters" class="teacher-alert-filter-row"></div>
           <div id="teacherAlertsList" class="teacher-alerts-list"></div>
         </section>
 
@@ -4556,6 +4606,7 @@ const TEACHER_CLOUD_USERS = [
 let adminTeacherStates = [];
 let adminCentralMode='classes';
 let adminCentralFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
+let teacherAlertFilter='all';
 
 const loginSessionKey = `${storeKey}_logged_in`;
 const currentUserKey = `${storeKey}_current_user`;
@@ -6211,18 +6262,6 @@ function renderAdminCentral(){
     return;
   }
 
-  if(!adminTeacherStates.length){
-    filtersBox.innerHTML='';
-    summaryBox.innerHTML='';
-    listBox.innerHTML=`
-      <div class="teacher-empty">
-        Ainda não existem dados carregados. Carrega em <strong>Carregar cloud</strong> para juntar as turmas dos professores.
-      </div>`;
-    bindAdminCentralControls();
-    return;
-  }
-
-
   if(adminCentralMode==='notices'){
     filtersBox.innerHTML='';
     summaryBox.innerHTML=`
@@ -6243,6 +6282,17 @@ function renderAdminCentral(){
       </section>
     `;
     renderTeacherNotices();
+    bindAdminCentralControls();
+    return;
+  }
+
+  if(!adminTeacherStates.length){
+    filtersBox.innerHTML='';
+    summaryBox.innerHTML='';
+    listBox.innerHTML=`
+      <div class="teacher-empty">
+        Ainda não existem dados carregados. Carrega em <strong>Carregar cloud</strong> para juntar as turmas dos professores.
+      </div>`;
     bindAdminCentralControls();
     return;
   }
@@ -9088,6 +9138,7 @@ let teacherClassFilters={teacher:'all',day:'all',className:'all',status:'all',qu
 let adminClassNavigatorTeacher=null;
 let adminClassNavigatorDay='all';
 
+
 const teacherNoticesKey = `${storeKey}_teacher_notices_v1`;
 
 function loadTeacherNotices(){
@@ -9112,6 +9163,37 @@ function isNoticeRead(noticeId){
   return localStorage.getItem(noticeReadKey(noticeId))==='true';
 }
 
+function activeNewsContainer(){
+  const adminView=document.getElementById('adminCentralView');
+  const teacherView=document.getElementById('teacherDashboardView');
+
+  if(adminView?.classList.contains('active') && adminCentralMode==='notices'){
+    return adminView;
+  }
+
+  if(teacherView?.classList.contains('active')){
+    return teacherView;
+  }
+
+  return adminView?.classList.contains('active') ? adminView : teacherView || document;
+}
+
+function showTeacherNoticeStatus(message,type='ok'){
+  const root=activeNewsContainer();
+  const status=root?.querySelector('#teacherNewsStatus');
+  if(status){
+    status.textContent=message;
+    status.className=`teacher-news-status ${type}`;
+    clearTimeout(showTeacherNoticeStatus._timer);
+    showTeacherNoticeStatus._timer=setTimeout(()=>{
+      status.textContent='';
+      status.className='teacher-news-status';
+    },3500);
+  }else if(type==='err'){
+    alert(message);
+  }
+}
+
 function markTeacherNoticeRead(noticeId){
   localStorage.setItem(noticeReadKey(noticeId),'true');
   renderTeacherNotices();
@@ -9124,19 +9206,24 @@ function deleteTeacherNotice(noticeId){
   const notices=loadTeacherNotices().filter(n=>n.id!==noticeId);
   saveTeacherNotices(notices);
   renderTeacherNotices();
+  showTeacherNoticeStatus('Aviso apagado.', 'ok');
 }
 
 function publishTeacherNotice(){
-  if(!isAdminUser()) return;
+  if(!isAdminUser()){
+    showTeacherNoticeStatus('Apenas o Admin pode publicar avisos.', 'err');
+    return;
+  }
 
-  const title=document.getElementById('noticeTitle')?.value.trim();
-  const category=document.getElementById('noticeCategory')?.value || 'Geral';
-  const priority=document.getElementById('noticePriority')?.value || 'normal';
-  const date=document.getElementById('noticeDate')?.value || '';
-  const message=document.getElementById('noticeMessage')?.value.trim();
+  const root=activeNewsContainer();
+  const title=root.querySelector('#noticeTitle')?.value.trim();
+  const category=root.querySelector('#noticeCategory')?.value || 'Geral';
+  const priority=root.querySelector('#noticePriority')?.value || 'normal';
+  const date=root.querySelector('#noticeDate')?.value || '';
+  const message=root.querySelector('#noticeMessage')?.value.trim();
 
   if(!title || !message){
-    alert('Preenche pelo menos o título e a mensagem.');
+    showTeacherNoticeStatus('Preenche pelo menos o título e a mensagem.', 'err');
     return;
   }
 
@@ -9155,16 +9242,18 @@ function publishTeacherNotice(){
   saveTeacherNotices(notices);
 
   ['noticeTitle','noticeDate','noticeMessage'].forEach(id=>{
-    const el=document.getElementById(id);
+    const el=root.querySelector(`#${id}`);
     if(el) el.value='';
   });
 
   renderTeacherNotices();
+  showTeacherNoticeStatus('Aviso publicado. Os professores verão este aviso na Área do Professor.', 'ok');
 }
 
 function renderTeacherNotices(){
-  const composer=document.getElementById('teacherNewsComposer');
-  const list=document.getElementById('teacherNewsList');
+  const root=activeNewsContainer();
+  const composer=root?.querySelector('#teacherNewsComposer');
+  const list=root?.querySelector('#teacherNewsList');
   if(!composer || !list) return;
 
   const notices=loadTeacherNotices()
@@ -9192,6 +9281,7 @@ function renderTeacherNotices(){
         <div class="teacher-news-form-actions">
           <button class="btn primary" type="button" onclick="publishTeacherNotice()">Publicar aviso</button>
         </div>
+        <div id="teacherNewsStatus" class="teacher-news-status"></div>
       </div>
     `;
   }else{
@@ -9221,7 +9311,7 @@ function renderTeacherNotices(){
       <div class="teacher-news-actions">
         <span class="teacher-news-chip ${read?'normal':'important'}">${read?'Lido':'Por ler'}</span>
         <div style="display:flex;gap:7px;flex-wrap:wrap">
-          ${!read ? `<button class="btn small ghost" type="button" onclick="markTeacherNoticeRead('${safe(notice.id)}')">Marcar como lido</button>` : ''}
+          ${!read && !isAdminUser() ? `<button class="btn small ghost" type="button" onclick="markTeacherNoticeRead('${safe(notice.id)}')">Marcar como lido</button>` : ''}
           ${isAdminUser() ? `<button class="btn small danger" type="button" onclick="deleteTeacherNotice('${safe(notice.id)}')">Apagar</button>` : ''}
         </div>
       </div>
@@ -9230,10 +9320,8 @@ function renderTeacherNotices(){
 }
 
 
-function renderTeacherAlerts(summaries, metrics){
-  const box=document.getElementById('teacherAlertsList');
-  if(!box) return;
 
+function buildTeacherAlerts(summaries){
   const alerts=[];
 
   (summaries||[]).forEach(summary=>{
@@ -9245,8 +9333,9 @@ function renderTeacherAlerts(summaries, metrics){
 
     if(count>CLASS_CAPACITY_REFERENCE){
       alerts.push({
+        type:'limit',
         level:'danger',
-        tag:'Acima de 10',
+        tag:'Limite',
         title:`${c.className} · ${block}`,
         text:`Turma acima da referência: ${count}/${CLASS_CAPACITY_REFERENCE} alunos. É permitido, mas deve ser acompanhado.`
       });
@@ -9254,6 +9343,7 @@ function renderTeacherAlerts(summaries, metrics){
 
     if(count===0){
       alerts.push({
+        type:'empty',
         level:'warning',
         tag:'Sem alunos',
         title:`${c.className} · ${block}`,
@@ -9263,6 +9353,7 @@ function renderTeacherAlerts(summaries, metrics){
 
     if(count>0 && evalPct<100){
       alerts.push({
+        type:'evaluation',
         level:'warning',
         tag:'Avaliação',
         title:`${c.className} · ${block}`,
@@ -9272,6 +9363,7 @@ function renderTeacherAlerts(summaries, metrics){
 
     if(summary.attendanceStats?.totalPossible>0 && attendancePct<75){
       alerts.push({
+        type:'attendance',
         level:'warning',
         tag:'Presenças',
         title:`${c.className} · ${block}`,
@@ -9279,6 +9371,52 @@ function renderTeacherAlerts(summaries, metrics){
       });
     }
   });
+
+  return alerts;
+}
+
+function setTeacherAlertFilter(filter){
+  teacherAlertFilter=filter;
+  renderTeacherDashboard();
+}
+
+function renderTeacherAlertFilters(alerts){
+  const box=document.getElementById('teacherAlertFilters');
+  if(!box) return;
+
+  const counts={
+    all:alerts.length,
+    evaluation:alerts.filter(a=>a.type==='evaluation').length,
+    limit:alerts.filter(a=>a.type==='limit').length,
+    attendance:alerts.filter(a=>a.type==='attendance').length,
+    empty:alerts.filter(a=>a.type==='empty').length
+  };
+
+  const filters=[
+    ['all','Todos'],
+    ['evaluation','Avaliações em falta'],
+    ['limit','Limite turmas'],
+    ['attendance','Presenças baixas'],
+    ['empty','Sem alunos']
+  ];
+
+  box.innerHTML=filters.map(([key,label])=>`
+    <button type="button" class="teacher-alert-filter-btn ${teacherAlertFilter===key?'active':''}" onclick="setTeacherAlertFilter('${key}')">
+      ${safe(label)} · ${counts[key] || 0}
+    </button>
+  `).join('');
+}
+
+function renderTeacherAlerts(summaries, metrics){
+  const box=document.getElementById('teacherAlertsList');
+  if(!box) return;
+
+  const alerts=buildTeacherAlerts(summaries);
+  renderTeacherAlertFilters(alerts);
+
+  const filtered=teacherAlertFilter==='all'
+    ? alerts
+    : alerts.filter(alert=>alert.type===teacherAlertFilter);
 
   if(!alerts.length){
     box.innerHTML=`<div class="teacher-alert-card ok">
@@ -9291,7 +9429,18 @@ function renderTeacherAlerts(summaries, metrics){
     return;
   }
 
-  box.innerHTML=alerts.slice(0,8).map(alert=>`
+  if(!filtered.length){
+    box.innerHTML=`<div class="teacher-alert-card ok">
+      <div>
+        <div class="teacher-alert-title">Sem alertas neste filtro</div>
+        <div class="teacher-alert-text">Não existem alertas para o filtro selecionado.</div>
+      </div>
+      <span class="teacher-alert-tag">OK</span>
+    </div>`;
+    return;
+  }
+
+  box.innerHTML=filtered.map(alert=>`
     <article class="teacher-alert-card ${safe(alert.level)}">
       <div>
         <div class="teacher-alert-title">${safe(alert.title)}</div>
@@ -9299,7 +9448,7 @@ function renderTeacherAlerts(summaries, metrics){
       </div>
       <span class="teacher-alert-tag">${safe(alert.tag)}</span>
     </article>
-  `).join('') + (alerts.length>8 ? `<div class="teacher-empty">+ ${alerts.length-8} alerta(s) adicionais.</div>` : '');
+  `).join('');
 }
 
 function renderTeacherDashboard(){
