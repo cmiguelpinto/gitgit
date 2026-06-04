@@ -3650,6 +3650,133 @@
       font-weight:950;
     }
 
+
+    /* Admin Central */
+    .admin-central-tabs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:14px 0;
+    }
+    .admin-central-tab{
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+      box-shadow:0 6px 14px rgba(15,23,42,.04);
+    }
+    .admin-central-tab.active{
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 10px 20px rgba(208,0,27,.16);
+    }
+    .admin-central-filters{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+      margin-bottom:12px;
+    }
+    .admin-central-filters label{
+      display:block;
+      margin-bottom:4px;
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:#6b7280;
+    }
+    .admin-central-filters select,
+    .admin-central-filters input{
+      width:100%;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:9px 10px;
+      font-family:inherit;
+      font-weight:850;
+      font-size:12px;
+      background:#fff;
+      color:#111827;
+    }
+    .admin-central-summary{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .admin-central-pill{
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #edf0f3;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:900;
+      color:#374151;
+    }
+    .admin-central-list{
+      display:grid;
+      gap:9px;
+    }
+    .admin-central-card{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      box-shadow:0 8px 18px rgba(15,23,42,.05);
+      display:grid;
+      gap:10px;
+    }
+    .admin-central-card-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .admin-central-title{
+      font-size:14px;
+      font-weight:950;
+      color:#111827;
+      letter-spacing:-.02em;
+    }
+    .admin-central-meta{
+      margin-top:3px;
+      font-size:11px;
+      font-weight:850;
+      color:var(--muted);
+    }
+    .admin-central-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+    .admin-central-warning{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:6px 9px;
+      border:1px solid #fecaca;
+      background:#fef2f2;
+      color:#991b1b;
+      font-size:10px;
+      font-weight:950;
+    }
+    @media(max-width:960px){
+      .admin-central-filters{grid-template-columns:1fr 1fr;}
+    }
+    @media(max-width:560px){
+      .admin-central-filters{grid-template-columns:1fr;}
+    }
+
 </style>
 </head>
 <body class="login-locked">
@@ -3696,7 +3823,7 @@
       <button class="tab" data-view="studentsView">2. Turmas / Alunos</button>
       <button class="tab" data-view="attendanceView">3. Presenças</button>
       <button class="tab" data-view="evaluationView">4. Avaliação</button>
-      <button class="tab" data-view="documentView">5. Documento</button><button class="tab" data-view="internalDocumentView">6. Documento Interno</button><button class="tab" data-view="teacherDashboardView">7. Área do Professor</button>
+      <button class="tab" data-view="documentView">5. Documento</button><button class="tab" data-view="internalDocumentView">6. Documento Interno</button><button class="tab" data-view="teacherDashboardView">7. Área do Professor</button><button class="tab" data-view="adminCentralView">8. Admin Central</button>
     </nav>
 
     <section id="scheduleView" class="view active">
@@ -3861,6 +3988,31 @@
     </section>
 
 
+
+
+    <section id="adminCentralView" class="view">
+      <div class="panel toolbar">
+        <div>
+          <div class="section-label">Admin Central</div>
+          <div class="hint">Acede às turmas, presenças, relatórios de evolução e documentos internos de todos os professores.</div>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn secondary" id="adminCentralLoadBtn" type="button">Carregar cloud</button>
+          <button class="btn ghost" id="adminCentralRefreshBtn" type="button">Atualizar</button>
+        </div>
+      </div>
+
+      <div class="admin-central-tabs">
+        <button type="button" class="admin-central-tab active" data-admin-central-mode="classes">Turmas</button>
+        <button type="button" class="admin-central-tab" data-admin-central-mode="attendance">Presenças</button>
+        <button type="button" class="admin-central-tab" data-admin-central-mode="reports">Relatórios Evolução</button>
+        <button type="button" class="admin-central-tab" data-admin-central-mode="internal">Documentos Internos</button>
+      </div>
+
+      <div id="adminCentralFilters" class="admin-central-filters"></div>
+      <div id="adminCentralSummary" class="admin-central-summary"></div>
+      <div id="adminCentralList" class="admin-central-list"></div>
+    </section>
 
     <section id="teacherDashboardView" class="view">
       <div class="panel toolbar">
@@ -4109,6 +4261,8 @@ const TEACHER_CLOUD_USERS = [
 ];
 
 let adminTeacherStates = [];
+let adminCentralMode='classes';
+let adminCentralFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
 
 const loginSessionKey = `${storeKey}_logged_in`;
 const currentUserKey = `${storeKey}_current_user`;
@@ -5172,6 +5326,133 @@ function buildSeasonAttendanceReportHtml(){
       font-weight:950;
     }
 
+
+    /* Admin Central */
+    .admin-central-tabs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:14px 0;
+    }
+    .admin-central-tab{
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+      box-shadow:0 6px 14px rgba(15,23,42,.04);
+    }
+    .admin-central-tab.active{
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 10px 20px rgba(208,0,27,.16);
+    }
+    .admin-central-filters{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+      margin-bottom:12px;
+    }
+    .admin-central-filters label{
+      display:block;
+      margin-bottom:4px;
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:#6b7280;
+    }
+    .admin-central-filters select,
+    .admin-central-filters input{
+      width:100%;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:9px 10px;
+      font-family:inherit;
+      font-weight:850;
+      font-size:12px;
+      background:#fff;
+      color:#111827;
+    }
+    .admin-central-summary{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .admin-central-pill{
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #edf0f3;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:900;
+      color:#374151;
+    }
+    .admin-central-list{
+      display:grid;
+      gap:9px;
+    }
+    .admin-central-card{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      box-shadow:0 8px 18px rgba(15,23,42,.05);
+      display:grid;
+      gap:10px;
+    }
+    .admin-central-card-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .admin-central-title{
+      font-size:14px;
+      font-weight:950;
+      color:#111827;
+      letter-spacing:-.02em;
+    }
+    .admin-central-meta{
+      margin-top:3px;
+      font-size:11px;
+      font-weight:850;
+      color:var(--muted);
+    }
+    .admin-central-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+    .admin-central-warning{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:6px 9px;
+      border:1px solid #fecaca;
+      background:#fef2f2;
+      color:#991b1b;
+      font-size:10px;
+      font-weight:950;
+    }
+    @media(max-width:960px){
+      .admin-central-filters{grid-template-columns:1fr 1fr;}
+    }
+    @media(max-width:560px){
+      .admin-central-filters{grid-template-columns:1fr;}
+    }
+
 </style>
 </head>
 <body>
@@ -5398,6 +5679,221 @@ async function saveAttendance(){
   showCloudStatus('Presenças guardadas localmente e na cloud.', 'ok');
 }
 
+
+function adminCentralTeacherUsername(teacherName){
+  const found=(adminTeacherStates||[]).find(t=>t.name===teacherName || t.professorName===teacherName);
+  return found?.username || '';
+}
+
+function adminCentralDaysString(classInfo){
+  return (classInfo.blocks||[]).map(b=>b.day).join('|');
+}
+
+function adminCentralTime(classInfo){
+  return classInfo.blocks?.[0]?.time || '';
+}
+
+function adminCentralRows(){
+  if(!isAdminUser()) return [];
+  if(!adminTeacherStates.length) return [];
+
+  return allTeacherClassSummaries().map(summary=>{
+    const c=summary.classInfo;
+    const block=(c.blocks||[]).map(b=>`${formatDayForClassBlock ? formatDayForClassBlock(b.day) : b.day} - ${b.time}`).join(' | ');
+    const count=summary.students?.length || 0;
+    const evalPct=summary.rows?.length ? Math.round((summary.evaluated/summary.rows.length)*100) : 0;
+    const attendancePct=summary.attendanceStats?.percent || 0;
+    let status='ok';
+    if(count>CLASS_CAPACITY_REFERENCE) status='over';
+    else if(!count) status='empty';
+    else if(evalPct<100) status='incomplete';
+
+    return {
+      summary,
+      teacherName:summary.teacherName,
+      username:adminCentralTeacherUsername(summary.teacherName),
+      className:c.className,
+      classInfo:c,
+      day:c.blocks?.[0]?.day || '',
+      time:c.blocks?.[0]?.time || '',
+      block,
+      count,
+      evalPct,
+      attendancePct,
+      status
+    };
+  });
+}
+
+function renderAdminCentral(){
+  const filtersBox=document.getElementById('adminCentralFilters');
+  const summaryBox=document.getElementById('adminCentralSummary');
+  const listBox=document.getElementById('adminCentralList');
+
+  if(!filtersBox || !summaryBox || !listBox) return;
+
+  if(!isAdminUser()){
+    filtersBox.innerHTML='';
+    summaryBox.innerHTML='';
+    listBox.innerHTML='<div class="teacher-empty">Esta página é exclusiva do Admin.</div>';
+    return;
+  }
+
+  if(!adminTeacherStates.length){
+    filtersBox.innerHTML='';
+    summaryBox.innerHTML='';
+    listBox.innerHTML=`
+      <div class="teacher-empty">
+        Ainda não existem dados carregados. Carrega em <strong>Carregar cloud</strong> para juntar as turmas dos professores.
+      </div>`;
+    bindAdminCentralControls();
+    return;
+  }
+
+  const rows=adminCentralRows();
+  const teacherOptions=[...new Set(rows.map(r=>r.teacherName).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+  const dayOrder={Segunda:1,Terça:2,Quarta:3,Quinta:4,Sexta:5,Sábado:6};
+  const dayOptions=[...new Set(rows.map(r=>r.day).filter(Boolean))].sort((a,b)=>(dayOrder[a]||99)-(dayOrder[b]||99));
+  const classOptions=[...new Set(rows.map(r=>r.className).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-PT'));
+
+  filtersBox.innerHTML=`
+    <div>
+      <label>Professor</label>
+      <select id="adminCentralFilterTeacher">
+        <option value="all">Todos</option>
+        ${teacherOptions.map(t=>`<option value="${safe(t)}" ${adminCentralFilters.teacher===t?'selected':''}>${safe(t)}</option>`).join('')}
+      </select>
+    </div>
+    <div>
+      <label>Dia</label>
+      <select id="adminCentralFilterDay">
+        <option value="all">Todos</option>
+        ${dayOptions.map(d=>`<option value="${safe(d)}" ${adminCentralFilters.day===d?'selected':''}>${safe(formatDayForClassBlock ? formatDayForClassBlock(d) : d)}</option>`).join('')}
+      </select>
+    </div>
+    <div>
+      <label>Turma</label>
+      <select id="adminCentralFilterClass">
+        <option value="all">Todas</option>
+        ${classOptions.map(c=>`<option value="${safe(c)}" ${adminCentralFilters.className===c?'selected':''}>${safe(c)}</option>`).join('')}
+      </select>
+    </div>
+    <div>
+      <label>Estado</label>
+      <select id="adminCentralFilterStatus">
+        <option value="all" ${adminCentralFilters.status==='all'?'selected':''}>Todas</option>
+        <option value="over" ${adminCentralFilters.status==='over'?'selected':''}>Acima de 10</option>
+        <option value="empty" ${adminCentralFilters.status==='empty'?'selected':''}>Sem alunos</option>
+        <option value="incomplete" ${adminCentralFilters.status==='incomplete'?'selected':''}>Avaliação incompleta</option>
+      </select>
+    </div>
+    <div>
+      <label>Pesquisa</label>
+      <input id="adminCentralFilterQuery" type="search" placeholder="Aluno, turma, professor..." value="${safe(adminCentralFilters.query||'')}">
+    </div>
+  `;
+
+  const query=String(adminCentralFilters.query||'').trim().toLowerCase();
+  const filtered=rows.filter(r=>{
+    const studentMatch=(r.summary.rows||[]).some(row=>row.name.toLowerCase().includes(query));
+    const searchable=`${r.teacherName} ${r.className} ${r.block}`.toLowerCase();
+
+    if(adminCentralFilters.teacher!=='all' && r.teacherName!==adminCentralFilters.teacher) return false;
+    if(adminCentralFilters.day!=='all' && r.day!==adminCentralFilters.day) return false;
+    if(adminCentralFilters.className!=='all' && r.className!==adminCentralFilters.className) return false;
+    if(adminCentralFilters.status!=='all' && r.status!==adminCentralFilters.status) return false;
+    if(query && !searchable.includes(query) && !studentMatch) return false;
+
+    return true;
+  });
+
+  const totalStudents=filtered.reduce((acc,r)=>acc+r.count,0);
+  const over=filtered.filter(r=>r.count>CLASS_CAPACITY_REFERENCE).length;
+  const avgEval=filtered.length?Math.round(filtered.reduce((acc,r)=>acc+r.evalPct,0)/filtered.length):0;
+  const avgAttendance=filtered.length?Math.round(filtered.reduce((acc,r)=>acc+r.attendancePct,0)/filtered.length):0;
+
+  const modeLabel={
+    classes:'Turmas',
+    attendance:'Presenças',
+    reports:'Relatórios Evolução',
+    internal:'Documentos Internos'
+  }[adminCentralMode] || 'Turmas';
+
+  summaryBox.innerHTML=`
+    <span class="admin-central-pill">${safe(modeLabel)}</span>
+    <span class="admin-central-pill">${filtered.length}/${rows.length} turma(s)</span>
+    <span class="admin-central-pill">${totalStudents} aluno(s)</span>
+    <span class="admin-central-pill">${avgEval}% avaliação média</span>
+    <span class="admin-central-pill">${avgAttendance}% presenças mês</span>
+    <span class="admin-central-pill">${over} acima de ${CLASS_CAPACITY_REFERENCE}</span>
+  `;
+
+  listBox.innerHTML=filtered.length ? filtered.map(r=>{
+    const warning=r.count>CLASS_CAPACITY_REFERENCE ? `<span class="admin-central-warning">⚠️ ${r.count}/${CLASS_CAPACITY_REFERENCE} alunos</span>` : '';
+    const days=adminCentralDaysString(r.classInfo);
+    const time=adminCentralTime(r.classInfo);
+
+    let mainAction='Ficha da turma';
+    if(adminCentralMode==='attendance') mainAction='Ver presenças';
+    if(adminCentralMode==='reports') mainAction='Relatórios evolução';
+    if(adminCentralMode==='internal') mainAction='Documento interno';
+
+    return `<article class="admin-central-card">
+      <div class="admin-central-card-top">
+        <div>
+          <div class="admin-central-title">${safe(r.teacherName)} · ${safe(r.className)}</div>
+          <div class="admin-central-meta">${safe(r.block)} · ${r.count} aluno(s) · Aval. ${r.evalPct}% · Pres. ${r.attendancePct}%</div>
+        </div>
+        ${warning}
+      </div>
+      <div class="admin-central-actions">
+        <button class="btn small primary" type="button" onclick="openAdminClassWindow('${safe(r.username)}','${safe(r.className)}','${safe(days)}','${safe(time)}')">${safe(mainAction)}</button>
+        <button class="btn small secondary" type="button" onclick="openAdminClassWindow('${safe(r.username)}','${safe(r.className)}','${safe(days)}','${safe(time)}')">Ficha completa</button>
+      </div>
+    </article>`;
+  }).join('') : '<div class="teacher-empty">Nenhuma turma corresponde aos filtros.</div>';
+
+  bindAdminCentralControls();
+}
+
+function bindAdminCentralControls(){
+  const load=document.getElementById('adminCentralLoadBtn');
+  const refresh=document.getElementById('adminCentralRefreshBtn');
+
+  if(load && !load.dataset.adminCentralBound){
+    load.dataset.adminCentralBound='true';
+    load.addEventListener('click',()=>loadAllTeachersFromCloud(false));
+  }
+
+  if(refresh && !refresh.dataset.adminCentralBound){
+    refresh.dataset.adminCentralBound='true';
+    refresh.addEventListener('click',renderAdminCentral);
+  }
+
+  document.querySelectorAll('[data-admin-central-mode]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.adminCentralMode===adminCentralMode);
+    if(!btn.dataset.adminCentralBound){
+      btn.dataset.adminCentralBound='true';
+      btn.addEventListener('click',()=>{
+        adminCentralMode=btn.dataset.adminCentralMode;
+        renderAdminCentral();
+      });
+    }
+  });
+
+  const teacher=document.getElementById('adminCentralFilterTeacher');
+  const day=document.getElementById('adminCentralFilterDay');
+  const cls=document.getElementById('adminCentralFilterClass');
+  const status=document.getElementById('adminCentralFilterStatus');
+  const query=document.getElementById('adminCentralFilterQuery');
+
+  if(teacher) teacher.onchange=()=>{adminCentralFilters.teacher=teacher.value; renderAdminCentral();};
+  if(day) day.onchange=()=>{adminCentralFilters.day=day.value; renderAdminCentral();};
+  if(cls) cls.onchange=()=>{adminCentralFilters.className=cls.value; renderAdminCentral();};
+  if(status) status.onchange=()=>{adminCentralFilters.status=status.value; renderAdminCentral();};
+  if(query) query.oninput=()=>{adminCentralFilters.query=query.value; renderAdminCentral();};
+}
+
 function switchView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const view=document.getElementById(id);
@@ -5410,6 +5906,7 @@ function switchView(id){
   if(id==='documentView') renderDocument();
   if(id==='internalDocumentView') renderInternalDocument();
   if(id==='teacherDashboardView') renderTeacherDashboard();
+  if(id==='adminCentralView') renderAdminCentral();
 }
 document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{
   if(btn.dataset.view==='documentView') documentClassFilterId=null;
@@ -5753,6 +6250,133 @@ function adminClassDetailsDocumentHtml(details){
   .stage-pill{display:inline-flex;margin:2px;border-radius:999px;padding:5px 7px;background:#f9fafb;border:1px solid #edf0f3;font-size:10px;font-weight:900;color:#374151}
   @media(max-width:900px){body{padding:12px}.banner{display:block}.logo{justify-content:flex-start;margin-top:15px}.meta{grid-template-columns:1fr 1fr}.page{border-radius:16px;overflow:auto}table{min-width:900px}}
   @media print{@page{size:A4 landscape;margin:10mm}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.actions{display:none!important}body{background:#fff;padding:0}.page{box-shadow:none;border:0;border-radius:0}.banner{break-inside:avoid}}
+
+    /* Admin Central */
+    .admin-central-tabs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:14px 0;
+    }
+    .admin-central-tab{
+      border:1px solid #edf0f3;
+      background:#fff;
+      color:#374151;
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+      box-shadow:0 6px 14px rgba(15,23,42,.04);
+    }
+    .admin-central-tab.active{
+      background:linear-gradient(135deg,var(--slb-red),#8f0013);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 10px 20px rgba(208,0,27,.16);
+    }
+    .admin-central-filters{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:8px;
+      padding:10px;
+      background:#f9fafb;
+      border:1px solid #edf0f3;
+      border-radius:16px;
+      margin-bottom:12px;
+    }
+    .admin-central-filters label{
+      display:block;
+      margin-bottom:4px;
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:#6b7280;
+    }
+    .admin-central-filters select,
+    .admin-central-filters input{
+      width:100%;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:9px 10px;
+      font-family:inherit;
+      font-weight:850;
+      font-size:12px;
+      background:#fff;
+      color:#111827;
+    }
+    .admin-central-summary{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .admin-central-pill{
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #edf0f3;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:900;
+      color:#374151;
+    }
+    .admin-central-list{
+      display:grid;
+      gap:9px;
+    }
+    .admin-central-card{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
+      box-shadow:0 8px 18px rgba(15,23,42,.05);
+      display:grid;
+      gap:10px;
+    }
+    .admin-central-card-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .admin-central-title{
+      font-size:14px;
+      font-weight:950;
+      color:#111827;
+      letter-spacing:-.02em;
+    }
+    .admin-central-meta{
+      margin-top:3px;
+      font-size:11px;
+      font-weight:850;
+      color:var(--muted);
+    }
+    .admin-central-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+    }
+    .admin-central-warning{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:6px 9px;
+      border:1px solid #fecaca;
+      background:#fef2f2;
+      color:#991b1b;
+      font-size:10px;
+      font-weight:950;
+    }
+    @media(max-width:960px){
+      .admin-central-filters{grid-template-columns:1fr 1fr;}
+    }
+    @media(max-width:560px){
+      .admin-central-filters{grid-template-columns:1fr;}
+    }
+
 </style>
 </head>
 <body>
