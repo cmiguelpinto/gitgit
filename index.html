@@ -4410,6 +4410,144 @@
       }
     }
 
+
+    /* Admin Central complete counting */
+    .admin-counting-panel{display:grid;gap:12px;margin:12px 0 14px}
+    .admin-counting-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .admin-counting-card,.admin-counting-section{border:1px solid var(--line);background:#fff;border-radius:20px;padding:14px;box-shadow:0 8px 18px rgba(15,23,42,.05)}
+    .admin-counting-label{font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.06em;color:#6b7280}
+    .admin-counting-value{font-size:28px;font-weight:950;color:#d0001b;letter-spacing:-.04em;margin-top:4px}
+    .admin-counting-sub{font-size:12px;font-weight:850;color:#6b7280;margin-top:3px}
+    .admin-counting-section{display:grid;gap:10px}
+    .admin-counting-list{display:grid;gap:8px;max-height:380px;overflow:auto;padding-right:4px}
+    .admin-count-row{display:grid;grid-template-columns:minmax(160px,1fr) auto auto;gap:10px;align-items:center;border:1px solid #edf0f3;background:#f9fafb;border-radius:14px;padding:10px 12px}
+    .admin-count-name{font-size:13px;font-weight:950;color:#111827;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .admin-count-pill{border-radius:999px;padding:6px 9px;background:#fff;border:1px solid #e5e7eb;color:#374151;font-size:11px;font-weight:950;white-space:nowrap}
+    .admin-count-pill.warning{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+    .admin-count-detail{display:grid;gap:6px;margin-top:8px}
+    .admin-count-detail-row{display:grid;grid-template-columns:minmax(130px,1fr) auto auto;gap:8px;align-items:center;border-top:1px dashed #e5e7eb;padding-top:6px;font-size:12px;font-weight:850;color:#374151}
+    @media(max-width:980px){.admin-counting-grid{grid-template-columns:1fr}.admin-count-row,.admin-count-detail-row{grid-template-columns:1fr;align-items:flex-start}}
+
+
+    /* Admin Central counting comfort layout */
+    .admin-counting-panel{display:grid!important;gap:12px!important;margin:12px 0 14px!important}
+    .admin-counting-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+    .admin-counting-card{border:1px solid var(--line)!important;background:#fff!important;border-radius:18px!important;padding:13px 14px!important;box-shadow:0 8px 18px rgba(15,23,42,.04)!important;min-height:92px!important}
+    .admin-counting-label{font-size:10px!important;font-weight:950!important;text-transform:uppercase!important;letter-spacing:.06em!important;color:#6b7280!important}
+    .admin-counting-value{font-size:28px!important;font-weight:950!important;color:#d0001b!important;letter-spacing:-.05em!important;line-height:1!important;margin-top:7px!important}
+    .admin-counting-sub{font-size:11px!important;font-weight:850!important;color:#6b7280!important;margin-top:5px!important;line-height:1.35!important}
+    .admin-counting-control{border:1px solid var(--line);background:#fff;border-radius:22px;padding:12px;box-shadow:0 8px 18px rgba(15,23,42,.04);display:grid;gap:10px}
+    .admin-counting-control-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+    .admin-counting-tabs{display:flex;gap:7px;flex-wrap:wrap}
+    .admin-counting-tab{border:1px solid #edf0f3;background:#fff;color:#374151;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:950;font-family:inherit;cursor:pointer}
+    .admin-counting-tab.active{border-color:transparent;background:linear-gradient(135deg,var(--slb-red),#8f0013);color:#fff;box-shadow:0 8px 16px rgba(208,0,27,.15)}
+    .admin-counting-search{width:min(100%,320px);border:1px solid #e5e7eb;border-radius:999px;padding:9px 12px;font-family:inherit;font-size:12px;font-weight:850;color:#111827;background:#f9fafb}
+    .admin-counting-list{display:grid!important;gap:7px!important;max-height:430px!important;overflow:auto!important;padding-right:4px!important}
+    .admin-count-row{display:grid!important;grid-template-columns:minmax(160px,1fr) auto auto!important;gap:8px!important;align-items:center!important;border:1px solid #edf0f3!important;background:#fbfbfc!important;border-radius:14px!important;padding:9px 11px!important;min-height:46px!important}
+    .admin-count-row.clickable{cursor:pointer!important}
+    .admin-count-row.clickable:hover{border-color:rgba(208,0,27,.22)!important;background:#fff7f8!important}
+    .admin-count-name{font-size:13px!important;font-weight:950!important;color:#111827!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+    .admin-count-pill{border-radius:999px!important;padding:5px 8px!important;background:#fff!important;border:1px solid #e5e7eb!important;color:#374151!important;font-size:10px!important;font-weight:950!important;white-space:nowrap!important}
+    .admin-count-pill.warning{background:#fef2f2!important;border-color:#fecaca!important;color:#991b1b!important}
+    .admin-count-detail{grid-column:1 / -1;display:grid!important;gap:6px!important;margin-top:4px!important;padding-top:7px!important;border-top:1px dashed #e5e7eb!important}
+    .admin-count-detail-row{display:grid!important;grid-template-columns:minmax(140px,1fr) auto auto!important;gap:8px!important;align-items:center!important;font-size:11px!important;font-weight:850!important;color:#374151!important;background:#fff!important;border:1px solid #f1f5f9!important;border-radius:12px!important;padding:7px 9px!important}
+    .admin-counting-minihint{font-size:11px;color:#6b7280;font-weight:850;line-height:1.35}
+    @media(max-width:980px){.admin-counting-grid{grid-template-columns:1fr!important}.admin-count-row{grid-template-columns:1fr!important;align-items:flex-start!important}.admin-count-detail-row{grid-template-columns:1fr!important}.admin-counting-control-head{align-items:stretch!important}.admin-counting-search{width:100%!important}}
+
+
+    /* Admin counting expanded teacher rows - no overlap */
+    .admin-count-row.teacher-expanded{
+      display:block!important;
+      overflow:visible!important;
+    }
+    .admin-count-row-inner{
+      display:grid;
+      grid-template-columns:minmax(160px,1fr) auto auto;
+      gap:8px;
+      align-items:center;
+      width:100%;
+    }
+    .admin-count-row.teacher-expanded .admin-count-detail{
+      display:grid!important;
+      grid-column:auto!important;
+      width:100%!important;
+      margin-top:10px!important;
+      padding-top:10px!important;
+      border-top:1px dashed #e5e7eb!important;
+      position:relative!important;
+      z-index:1!important;
+    }
+    .admin-count-row.teacher-expanded + .admin-count-row{
+      margin-top:4px!important;
+    }
+    @media(max-width:980px){
+      .admin-count-row-inner{
+        grid-template-columns:1fr!important;
+        align-items:flex-start!important;
+      }
+    }
+
+
+    /* Admin teacher count cards - hard no-overlap layout */
+    .admin-teacher-count-card{
+      display:block!important;
+      width:100%!important;
+      border:1px solid #edf0f3!important;
+      background:#fbfbfc!important;
+      border-radius:14px!important;
+      padding:0!important;
+      overflow:visible!important;
+      position:relative!important;
+      margin:0 0 8px 0!important;
+      clear:both!important;
+    }
+    .admin-teacher-count-head{
+      display:grid!important;
+      grid-template-columns:minmax(160px,1fr) auto auto!important;
+      gap:8px!important;
+      align-items:center!important;
+      padding:10px 12px!important;
+      min-height:48px!important;
+      cursor:pointer!important;
+    }
+    .admin-teacher-count-head:hover{
+      background:#fff7f8!important;
+      border-radius:14px!important;
+    }
+    .admin-teacher-count-detail{
+      display:grid!important;
+      width:100%!important;
+      gap:7px!important;
+      padding:10px 12px 12px!important;
+      border-top:1px dashed #e5e7eb!important;
+      background:#fff!important;
+      border-radius:0 0 14px 14px!important;
+      position:static!important;
+      transform:none!important;
+      max-height:none!important;
+      overflow:visible!important;
+    }
+    .admin-teacher-count-detail .admin-count-detail-row{
+      display:grid!important;
+      grid-template-columns:minmax(140px,1fr) auto auto!important;
+      gap:8px!important;
+      align-items:center!important;
+      position:static!important;
+      width:100%!important;
+      margin:0!important;
+      background:#fff!important;
+      border:1px solid #f1f5f9!important;
+      border-radius:12px!important;
+      padding:8px 10px!important;
+    }
+    @media(max-width:980px){
+      .admin-teacher-count-head,
+      .admin-teacher-count-detail .admin-count-detail-row{
+        grid-template-columns:1fr!important;
+        align-items:flex-start!important;
+      }
+    }
+
 </style>
 <script>
 document.documentElement.classList.remove('admin-user');
@@ -4648,6 +4786,7 @@ document.documentElement.classList.add('teacher-user');
         <button type="button" class="admin-central-tab" data-admin-central-mode="notices">Avisos</button>
       </div>
 
+      <div id="adminCentralCounting" class="admin-counting-panel"></div>
       <div id="adminCentralFilters" class="admin-central-filters"></div>
       <div id="adminCentralSummary" class="admin-central-summary"></div>
       <div id="adminCentralList" class="admin-central-list"></div>
@@ -4927,6 +5066,9 @@ let adminCentralMode='classes';
 let adminCentralFilters={teacher:'all',day:'all',className:'all',status:'all',query:''};
 let teacherAlertFilter='all';
 let teacherAlertTeacherFilter='all';
+let adminCountingMode='class';
+let adminCountingSearch='';
+let adminCountingExpandedTeacher='';
 
 const loginSessionKey = `${storeKey}_logged_in`;
 const currentUserKey = `${storeKey}_current_user`;
@@ -4945,6 +5087,7 @@ function setCurrentUser(user){
     localStorage.setItem('avaliacoes_slb_current_professor', user.name);
     professorName=user.name;
     state=loadState();
+    try{ sanitizeConflictingStudentLinks(); }catch(e){}
     activeEvalId=null;
     evaluationCloudAutoLoadTried=false;
     documentClassFilterId=null;
@@ -6616,6 +6759,150 @@ function openAdminTeacherInternalDocument(username,classId){
   captureAdminTeacherDocument(username,classId,'internal');
 }
 
+
+function adminCentralCountingData(){
+  const rows=adminCentralRows();
+  const byClass=new Map();
+  const byTeacher=new Map();
+
+  rows.forEach(row=>{
+    const className=row.className || 'Sem turma';
+    const teacherName=row.teacherName || 'Sem professor';
+    const students=row.count || 0;
+
+    if(!byClass.has(className)) byClass.set(className,{name:className,classes:0,students:0,over:0});
+    const c=byClass.get(className);
+    c.classes++;
+    c.students+=students;
+    if(students>CLASS_CAPACITY_REFERENCE) c.over++;
+
+    if(!byTeacher.has(teacherName)) byTeacher.set(teacherName,{name:teacherName,classes:0,students:0,over:0,classesByName:new Map()});
+    const t=byTeacher.get(teacherName);
+    t.classes++;
+    t.students+=students;
+    if(students>CLASS_CAPACITY_REFERENCE) t.over++;
+
+    if(!t.classesByName.has(className)) t.classesByName.set(className,{name:className,classes:0,students:0,over:0});
+    const tc=t.classesByName.get(className);
+    tc.classes++;
+    tc.students+=students;
+    if(students>CLASS_CAPACITY_REFERENCE) tc.over++;
+  });
+
+  return {
+    rows,
+    classTotals:[...byClass.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-PT')),
+    teacherTotals:[...byTeacher.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-PT')),
+    totalClasses:rows.length,
+    totalStudents:rows.reduce((acc,row)=>acc+(row.count||0),0),
+    totalTeachers:byTeacher.size,
+    overCapacity:rows.filter(row=>(row.count||0)>CLASS_CAPACITY_REFERENCE).length
+  };
+}
+
+function renderAdminCentralCounting(){
+  const box=document.getElementById('adminCentralCounting');
+  if(!box) return;
+  if(!isAdminUser()){box.innerHTML='';return;}
+
+  if(!adminTeacherStates.length){
+    box.innerHTML=`<section class="admin-counting-control">
+      <div class="admin-counting-control-head">
+        <div>
+          <div class="section-label">Contagem Admin</div>
+          <div class="hint">Carrega a cloud para ver a contagem completa por turma e professor.</div>
+        </div>
+      </div>
+    </section>`;
+    return;
+  }
+
+  const data=adminCentralCountingData();
+  const query=String(adminCountingSearch||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const matchText=(value)=>String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(query);
+
+  const classRows=data.classTotals
+    .filter(item=>!query || matchText(item.name))
+    .map(item=>`
+      <div class="admin-count-row">
+        <div class="admin-count-name">${safe(item.name)}</div>
+        <span class="admin-count-pill">${item.classes} turma(s)</span>
+        <span class="admin-count-pill ${item.over?'warning':''}">${item.students} aluno(s)</span>
+      </div>`).join('');
+
+  const teacherRows=data.teacherTotals
+    .filter(item=>{
+      if(!query) return true;
+      if(matchText(item.name)) return true;
+      return [...item.classesByName.values()].some(detail=>matchText(detail.name));
+    })
+    .map(item=>{
+      const expanded=adminCountingExpandedTeacher===item.name;
+      const details=[...item.classesByName.values()]
+        .sort((a,b)=>a.name.localeCompare(b.name,'pt-PT'))
+        .filter(detail=>!query || matchText(item.name) || matchText(detail.name))
+        .map(detail=>`
+          <div class="admin-count-detail-row">
+            <span>${safe(detail.name)}</span>
+            <span class="admin-count-pill">${detail.classes} turma(s)</span>
+            <span class="admin-count-pill ${detail.over?'warning':''}">${detail.students} aluno(s)</span>
+          </div>`).join('');
+
+      return `<article class="admin-teacher-count-card">
+        <div class="admin-teacher-count-head" onclick="adminCountingExpandedTeacher=adminCountingExpandedTeacher==='${safe(item.name)}'?'':'${safe(item.name)}';renderAdminCentralCounting();">
+          <div class="admin-count-name">${safe(item.name)} ${expanded?'−':'+'}</div>
+          <span class="admin-count-pill">${item.classes} turma(s)</span>
+          <span class="admin-count-pill ${item.over?'warning':''}">${item.students} aluno(s)</span>
+        </div>
+        ${expanded ? `<div class="admin-teacher-count-detail">${details || '<div class="teacher-empty">Sem detalhe.</div>'}</div>` : ''}
+      </article>`;
+    }).join('');
+
+  const activeRows=adminCountingMode==='class' ? classRows : teacherRows;
+  const activeEmpty=adminCountingMode==='class'
+    ? '<div class="teacher-empty">Sem turmas para este filtro.</div>'
+    : '<div class="teacher-empty">Sem professores para este filtro.</div>';
+
+  box.innerHTML=`
+    <div class="admin-counting-grid">
+      <div class="admin-counting-card">
+        <div class="admin-counting-label">Total de turmas</div>
+        <div class="admin-counting-value">${data.totalClasses}</div>
+        <div class="admin-counting-sub">${data.totalTeachers} professor(es) carregados</div>
+      </div>
+      <div class="admin-counting-card">
+        <div class="admin-counting-label">Total de alunos</div>
+        <div class="admin-counting-value">${data.totalStudents}</div>
+        <div class="admin-counting-sub">Soma de alunos em todas as turmas</div>
+      </div>
+      <div class="admin-counting-card">
+        <div class="admin-counting-label">Acima da referência</div>
+        <div class="admin-counting-value">${data.overCapacity}</div>
+        <div class="admin-counting-sub">Referência: ${CLASS_CAPACITY_REFERENCE} alunos</div>
+      </div>
+    </div>
+
+    <section class="admin-counting-control">
+      <div class="admin-counting-control-head">
+        <div>
+          <div class="section-label">${adminCountingMode==='class'?'Contagem por turma':'Contagem por professor'}</div>
+          <div class="admin-counting-minihint">${adminCountingMode==='class'
+            ? 'Vê quantas turmas existem por nível e quantos alunos existem nesse nível.'
+            : 'Vê quantas turmas e alunos tem cada professor. Clica no professor para abrir o detalhe.'}</div>
+        </div>
+        <input class="admin-counting-search" type="search" placeholder="Pesquisar turma ou professor..." value="${safe(adminCountingSearch)}" oninput="adminCountingSearch=this.value;renderAdminCentralCounting();">
+      </div>
+
+      <div class="admin-counting-tabs">
+        <button type="button" class="admin-counting-tab ${adminCountingMode==='class'?'active':''}" onclick="adminCountingMode='class';adminCountingExpandedTeacher='';renderAdminCentralCounting();">Por turma</button>
+        <button type="button" class="admin-counting-tab ${adminCountingMode==='teacher'?'active':''}" onclick="adminCountingMode='teacher';renderAdminCentralCounting();">Por professor</button>
+      </div>
+
+      <div class="admin-counting-list">
+        ${activeRows || activeEmpty}
+      </div>
+    </section>`;
+}
 function renderAdminCentral(){
   const filtersBox=document.getElementById('adminCentralFilters');
   const summaryBox=document.getElementById('adminCentralSummary');
@@ -6627,8 +6914,11 @@ function renderAdminCentral(){
     filtersBox.innerHTML='';
     summaryBox.innerHTML='';
     listBox.innerHTML='<div class="teacher-empty">Esta página é exclusiva do Admin.</div>';
+    renderAdminCentralCounting();
     return;
   }
+
+  renderAdminCentralCounting();
 
   if(adminCentralMode==='notices'){
     filtersBox.innerHTML='';
@@ -8214,15 +8504,53 @@ function renderStudentInputs(id){
 function saveStudentsFromDom(){
   document.querySelectorAll('[data-full-name]').forEach(inp=>{
     const d=state.classes[inp.dataset.fullName];
-    const student=d?.students[inp.dataset.index];
+    const index=Number(inp.dataset.index);
+    const student=d?.students?.[index];
     if(student){
-      student.fullName=inp.value.trim();
+      const oldName=normalizeStudentIdentityName(student,index);
+      const newFullName=String(inp.value||'').trim();
+      const newName=String(newFullName||`Aluno ${index+1}`)
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g,'')
+        .replace(/\s+/g,' ');
+
+      if(oldName && newName && oldName!==newName){
+        delete student.linkId;
+      }
+
+      student.fullName=newFullName;
       student.firstName='';
       student.lastName='';
     }
   });
-  document.querySelectorAll('[data-first]').forEach(inp=>{const d=state.classes[inp.dataset.first]; if(d?.students[inp.dataset.index]) d.students[inp.dataset.index].firstName=inp.value.trim();});
-  document.querySelectorAll('[data-last]').forEach(inp=>{const d=state.classes[inp.dataset.last]; if(d?.students[inp.dataset.index]) d.students[inp.dataset.index].lastName=inp.value.trim();});
+
+  document.querySelectorAll('[data-first]').forEach(inp=>{
+    const d=state.classes[inp.dataset.first];
+    const index=Number(inp.dataset.index);
+    const student=d?.students?.[index];
+    if(student){
+      const oldName=normalizeStudentIdentityName(student,index);
+      student.firstName=inp.value.trim();
+      const newName=normalizeStudentIdentityName(student,index);
+      if(oldName && newName && oldName!==newName) delete student.linkId;
+    }
+  });
+
+  document.querySelectorAll('[data-last]').forEach(inp=>{
+    const d=state.classes[inp.dataset.last];
+    const index=Number(inp.dataset.index);
+    const student=d?.students?.[index];
+    if(student){
+      const oldName=normalizeStudentIdentityName(student,index);
+      student.lastName=inp.value.trim();
+      const newName=normalizeStudentIdentityName(student,index);
+      if(oldName && newName && oldName!==newName) delete student.linkId;
+    }
+  });
+
+  sanitizeConflictingStudentLinks();
   saveState();
 }
 document.getElementById('saveStudentsBtn').addEventListener('click',async()=>{
@@ -8478,6 +8806,94 @@ function flattenObjectives(className){return getObjectivesForClass(className).fl
 function okCount(id,i,className){const ev=evalData(id); return flattenObjectives(className).reduce((sum,obj)=>sum+(ev.checks[`${i}-${obj.key}`]?1:0),0)}
 
 
+
+function normalizeStudentIdentityName(student, fallbackIndex=0){
+  return String(studentDisplayName(student,fallbackIndex)||'')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ');
+}
+
+function sanitizeConflictingStudentLinks(){
+  const byLink={};
+
+  Object.entries(state.classes||{}).forEach(([classId,classData])=>{
+    (classData.students||[]).forEach((student,index)=>{
+      const linkId=String(student?.linkId||'').trim();
+      if(!linkId) return;
+      if(!byLink[linkId]) byLink[linkId]=[];
+      byLink[linkId].push({classId,index,student,name:normalizeStudentIdentityName(student,index)});
+    });
+  });
+
+  let changed=false;
+
+  Object.values(byLink).forEach(group=>{
+    const distinctNames=[...new Set(group.map(item=>item.name).filter(Boolean))];
+    if(distinctNames.length>1){
+      group.forEach(item=>{
+        if(state.classes?.[item.classId]?.students?.[item.index]?.linkId){
+          delete state.classes[item.classId].students[item.index].linkId;
+          changed=true;
+        }
+      });
+    }
+  });
+
+  return changed;
+}
+
+function studentLooksSame(a,b,ia=0,ib=0){
+  const an=normalizeStudentIdentityName(a,ia);
+  const bn=normalizeStudentIdentityName(b,ib);
+  return !!an && !!bn && an===bn;
+}
+
+function findMatchingStudentIndexInClass(sourceStudent, sourceIndex, targetStudents){
+  const sourceLink=String(sourceStudent?.linkId||'').trim();
+  const sourceName=normalizeStudentIdentityName(sourceStudent,sourceIndex);
+
+  if(sourceLink && sourceName){
+    const linkMatch=(targetStudents||[]).findIndex((targetStudent,targetIndex)=>{
+      return String(targetStudent?.linkId||'').trim()===sourceLink &&
+        normalizeStudentIdentityName(targetStudent,targetIndex)===sourceName;
+    });
+    if(linkMatch>=0) return linkMatch;
+  }
+
+  if(sourceName){
+    const nameMatch=(targetStudents||[]).findIndex((targetStudent,targetIndex)=>{
+      return normalizeStudentIdentityName(targetStudent,targetIndex)===sourceName;
+    });
+    if(nameMatch>=0) return nameMatch;
+  }
+
+  return -1;
+}
+
+function copyEvaluationOnlyForMatchingStudents(sourceClassId,targetClassId){
+  const sourceClass=state.classes?.[sourceClassId];
+  const targetClass=state.classes?.[targetClassId];
+
+  if(!sourceClass || !targetClass) return {copied:0,reason:'missing-class'};
+  const sourceStudents=sourceClass.students||[];
+  const targetStudents=targetClass.students||[];
+
+  let copied=0;
+
+  sourceStudents.forEach((sourceStudent,sourceIndex)=>{
+    const targetIndex=findMatchingStudentIndexInClass(sourceStudent,sourceIndex,targetStudents);
+    if(targetIndex>=0){
+      copyEvaluationBetweenStudents(sourceClassId,sourceIndex,targetClassId,targetIndex);
+      copied++;
+    }
+  });
+
+  return {copied,reason:'ok'};
+}
+
 function makeStudentLinkId(student, fallbackIndex=0){
   const base=(studentDisplayName(student,fallbackIndex)||`aluno_${fallbackIndex}`).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
   return `linked_${base || fallbackIndex}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`;
@@ -8535,10 +8951,19 @@ function copyEvaluationBetweenStudents(sourceClassId, sourceIndex, targetClassId
 function syncLinkedStudentEvaluation(sourceClassId, sourceIndex){
   const sourceStudent=state.classes?.[sourceClassId]?.students?.[sourceIndex];
   if(!sourceStudent) return 0;
-  const linkId=ensureStudentLink(sourceClassId, sourceIndex);
+
+  sanitizeConflictingStudentLinks();
+
+  const linkId=String(sourceStudent.linkId||'').trim();
+  if(!linkId) return 0;
+
   let updated=0;
   linkedStudentLocations(linkId).forEach(loc=>{
     if(loc.classId===sourceClassId && loc.index===Number(sourceIndex)) return;
+
+    const targetStudent=state.classes?.[loc.classId]?.students?.[loc.index];
+    if(!studentLooksSame(sourceStudent,targetStudent,Number(sourceIndex),loc.index)) return;
+
     copyEvaluationBetweenStudents(sourceClassId, Number(sourceIndex), loc.classId, loc.index);
     updated++;
   });
@@ -9391,44 +9816,39 @@ function getClassMetaById(classIdValue){
 
 function syncEvaluationToPairedDay(sourceClassId){
   const sourceMeta=getClassMetaById(sourceClassId);
-  if(!sourceMeta) return {copied:false,targetId:'',reason:'source-not-found'};
+  if(!sourceMeta) return {copied:false,targetId:'',reason:'source-not-found',matched:0};
 
   const block=sourceMeta.blocks?.[0];
-  if(!block) return {copied:false,targetId:'',reason:'no-block'};
+  if(!block) return {copied:false,targetId:'',reason:'no-block',matched:0};
 
   const pairDay=pairedDayForEvaluation(block.day);
-  if(!pairDay) return {copied:false,targetId:'',reason:'no-pair'};
+  if(!pairDay) return {copied:false,targetId:'',reason:'no-pair',matched:0};
 
   const targetId=classRecordIdFor(sourceMeta.className,pairDay,block.time);
-
-  // The pair can exist either as an active schedule class or already in saved classes.
   const targetInSchedule=selectedClasses().some(c=>c.id===targetId);
   const targetInData=!!state.classes?.[targetId];
 
   if(!targetInSchedule && !targetInData){
-    return {copied:false,targetId,reason:'target-not-found'};
+    return {copied:false,targetId,reason:'target-not-found',matched:0};
   }
 
-  state.evaluations[targetId]=normalizeEvaluationRecordForPair(state.evaluations[sourceClassId] || evalData(sourceClassId));
+  sanitizeConflictingStudentLinks();
 
-  // If the paired class exists but has no students yet, copy students too.
-  if(state.classes[sourceClassId]){
-    const sourceStudents=state.classes[sourceClassId].students || [];
-    const targetStudents=state.classes[targetId]?.students || [];
-
-    if(!state.classes[targetId]){
-      state.classes[targetId]={total:0,students:[]};
-    }
-
-    if(!targetStudents.length && sourceStudents.length){
-      state.classes[targetId]={
-        total:Number(state.classes[sourceClassId].total || sourceStudents.length || 0),
-        students:JSON.parse(JSON.stringify(sourceStudents))
-      };
-    }
+  // Important:
+  // Do NOT copy the whole evaluation object by index.
+  // Monday position 4 and Wednesday position 4 can be different students.
+  // Only copy evaluation to the same student, matched by safe link+name or exact name.
+  if(!state.classes?.[targetId]){
+    state.classes[targetId]={total:0,students:[]};
   }
 
-  return {copied:true,targetId,reason:'ok'};
+  const result=copyEvaluationOnlyForMatchingStudents(sourceClassId,targetId);
+  return {
+    copied:result.copied>0,
+    targetId,
+    reason:result.copied>0?'ok':'no-matching-students',
+    matched:result.copied
+  };
 }
 
 async function saveCurrentEvaluation(){
@@ -9443,7 +9863,7 @@ async function saveCurrentEvaluation(){
   saveState();
   renderEvaluationPage();
   await saveToCloud();
-  showCloudStatus(pairSync.copied ? 'Avaliação guardada e sincronizada nos dois dias do par.' : `Avaliação guardada. Não encontrei par ativo para sincronizar (${pairSync.reason || 'sem par'}).`, pairSync.copied ? 'ok' : 'ok');
+  showCloudStatus(pairSync.copied ? `Avaliação guardada e sincronizada para ${pairSync.matched||0} aluno(s) correspondente(s) no par.` : `Avaliação guardada. Sem aluno correspondente para sincronizar no par (${pairSync.reason || 'sem par'}).`, 'ok');
 }
 document.getElementById('saveEvaluationPageBtn').addEventListener('click',saveCurrentEvaluation);
 
